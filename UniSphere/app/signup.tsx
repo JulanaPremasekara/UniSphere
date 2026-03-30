@@ -65,7 +65,6 @@ export default function SignUp() {
           <View>
             <SignUpForm formData={formData} setFormData={setFormData} showError={showError} />
           </View>
-            <br />
           {/* SPACING FIX: 
              mt-20 adds significant space between the "Confirm Password" and "Create Account" 
           */}
