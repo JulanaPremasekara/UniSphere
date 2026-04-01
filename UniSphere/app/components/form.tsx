@@ -15,14 +15,16 @@ interface LoginFormProps {
   setEmail: (val: string) => void;
   password: string;
   setPassword: (val: string) => void;
-  showError: boolean;
+  //showError: boolean;
+  errorMessage: string | null;
+  
 }
 
-export function LoginForm({ email, setEmail, password, setPassword, showError }: LoginFormProps) {
+export function LoginForm({ email, setEmail, password, setPassword, errorMessage }: LoginFormProps) {
   return (
     <VStack space="xl">
       {/* Email Field */}
-      <FormControl isInvalid={showError} size="md">
+      <FormControl isInvalid={!!errorMessage} size="md">
         <FormControlLabel>
           <FormControlLabelText className="text-gray-700 font-semibold mb-1">Email Address</FormControlLabelText>
         </FormControlLabel>
@@ -37,7 +39,7 @@ export function LoginForm({ email, setEmail, password, setPassword, showError }:
       </FormControl>
 
       {/* Password Field */}
-      <FormControl isInvalid={showError} size="md">
+      <FormControl isInvalid={!!errorMessage} size="md">
         <FormControlLabel>
           <FormControlLabelText className="text-gray-700 font-semibold mb-1">Password</FormControlLabelText>
         </FormControlLabel>
@@ -51,11 +53,11 @@ export function LoginForm({ email, setEmail, password, setPassword, showError }:
           />
         </Input>
         
-        {showError ? (
+        {errorMessage ? (
           <FormControlError className="mt-2">
             <FormControlErrorIcon as={AlertCircleIcon} />
             <FormControlErrorText>
-              Invalid email or password (min. 6 chars).
+              {errorMessage}
             </FormControlErrorText>
           </FormControlError>
         ) : (

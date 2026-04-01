@@ -8,7 +8,6 @@ import Footer from '../components/Footer';
 
 export default function CreateEvent() {
   const router = useRouter();
-  
   // Tag Logic State
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState(['Limited Seats', 'Certificate Provided']);
@@ -22,11 +21,6 @@ export default function CreateEvent() {
 
   const removeTag = (index: number) => {
     setTags(tags.filter((_, i) => i !== index));
-  };
-
-  const handleBack = () => {
-    if (router.canGoBack()) router.back();
-    else router.replace('/');
   };
 
   return (
@@ -47,7 +41,7 @@ export default function CreateEvent() {
           {/* Header */}
           <View className="flex-row justify-between items-start mb-2">
             <Text className="text-4xl font-black text-gray-900 leading-tight flex-1">New Event</Text>
-            <TouchableOpacity onPress={handleBack} className="bg-gray-100 p-3 rounded-full ml-4">
+            <TouchableOpacity onPress={()=> router.back()} className="bg-gray-100 p-3 rounded-full ml-4">
               <X size={24} color="#1F2937" strokeWidth={2.5} />
             </TouchableOpacity>
           </View>

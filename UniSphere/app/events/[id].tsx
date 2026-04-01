@@ -177,7 +177,6 @@ export default function EventDetail() {
             </Text>
         </TouchableOpacity>
         </View>
-
       <Footer />
     </SafeAreaView>
   );
