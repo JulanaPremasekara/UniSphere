@@ -1,5 +1,5 @@
 import { usePathname, useRouter } from "expo-router";
-import { Home, Compass, Users, Calendar, User } from "lucide-react-native";
+import { Home, Compass, Users, Calendar, User, Search, BookOpen } from "lucide-react-native";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -9,7 +9,8 @@ export default function Footer() {
 
   const tabs = [
     { name: "HOME", icon: Home, path: "/" },
-    { name: "EXPLORE", icon: Compass, path: "/explore" },
+    { name: "TUTORS", icon: BookOpen, path: "/tutors" },
+    { name: "LOST &\nFOUND", icon: Search, path: "/lost-and-found" },
     { name: "GROUPS", icon: Users, path: "/groups" },
     { name: "EVENTS", icon: Calendar, path: "/events" },
     { name: "PROFILE", icon: User, path: "/profile" },
@@ -30,30 +31,32 @@ export default function Footer() {
         
         return (
           <TouchableOpacity
-            key={tab.name}
-            onPress={() => router.push(tab.path as any)}
-            activeOpacity={0.7}
-            className="items-center justify-center"
-          >
-            <View 
-              className={`items-center justify-center px-4 py-2 rounded-[20px] ${
-                active ? "bg-indigo-50" : "bg-transparent"
-              }`}
+              key={tab.name}
+              onPress={() => router.push(tab.path as any)}
+              activeOpacity={0.7}
+              className="flex-1 items-center justify-center"
             >
-              <tab.icon 
-                size={22} 
-                color={active ? "#4F46E5" : "#9CA3AF"} 
-                strokeWidth={active ? 2.5 : 2}
-              />
-              <Text 
-                className={`text-[10px] mt-1 font-bold tracking-tighter ${
-                  active ? "text-indigo-600" : "text-gray-400"
+              <View 
+                className={`items-center justify-center rounded-[20px] ${
+                  active ? "bg-indigo-50 px-2 py-1" : "bg-transparent py-1"
                 }`}
               >
-                {tab.name}
-              </Text>
-            </View>
-          </TouchableOpacity>
+                <tab.icon 
+                  size={20} // Slightly smaller icon to save vertical space
+                  color={active ? "#4F46E5" : "#9CA3AF"} 
+                  strokeWidth={active ? 2.5 : 2}
+                />
+                <Text 
+                  numberOfLines={2}
+                  className={`text-[10px] font-bold text-center leading-[9px] mt-0.5 ${
+                    active ? "text-indigo-600" : "text-gray-400"
+                  }`}
+                  style={{ width: 55 }} // Constrain width to force the wrap precisely
+                >
+                  {tab.name}
+                </Text>
+              </View>
+            </TouchableOpacity>
         );
       })}
     </View>

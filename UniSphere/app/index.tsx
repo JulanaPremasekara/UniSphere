@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { Search, Bell, ShoppingBasket, Users, Calendar, GraduationCap, UtensilsCrossed, Map as MapIcon, Bookmark } from 'lucide-react-native';
+import { Search, Bell, ShoppingBasket, Users, Calendar, GraduationCap, UtensilsCrossed, Map as MapIcon, Bookmark, BookOpen, HomeIcon, HelpCircle } from 'lucide-react-native';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -8,9 +8,9 @@ const categories = [
   { name: 'Marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA' },
   { name: 'Study Groups', icon: Users, color: '#F5F3FF', iconColor: '#5B21B6' },
   { name: 'Events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1' },
-  { name: 'Courses', icon: GraduationCap, color: '#F5F3FF', iconColor: '#4338CA' },
-  { name: 'Dining', icon: UtensilsCrossed, color: '#F0F9FF', iconColor: '#0369A1' },
-  { name: 'Map', icon: MapIcon, color: '#EEF2FF', iconColor: '#4338CA' },
+  { name: 'Lost & Found', icon: HelpCircle, color: '#FFF7ED', iconColor: '#C2410C' },
+  { name: 'Housing', icon: HomeIcon, color: '#ECFDF5', iconColor: '#047857' },
+  { name: 'Tutor Profile', icon: BookOpen, color: '#FEF2F2', iconColor: '#B91C1C' },
 ];
 
 export default function Home() {

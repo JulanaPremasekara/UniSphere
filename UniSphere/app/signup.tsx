@@ -4,11 +4,14 @@ import { useRouter } from 'expo-router';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import { ChevronLeft, GraduationCap } from 'lucide-react-native';
 import { SignUpForm } from './components/SignUpForm';
+import apiClient from './services/api';
 
 export default function SignUp() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -18,18 +21,42 @@ export default function SignUp() {
     confirmPassword: ''
   });
 
-  const handleSignUp = () => {
-    if (formData.password !== formData.confirmPassword || formData.password.length < 6) {
+  const handleSignUp = async () => {
+    // 1. Local Validation Errors
+    const passwordsMatch = formData.password === formData.confirmPassword;
+    const isEmailValid = formData.email.includes('@');
+    const isPasswordValid = formData.password.length >= 6;
+
+    if (!isEmailValid || !isPasswordValid || !passwordsMatch) {
       setShowError(true);
+      setErrorMessage(null); // Clear server error if local validation fails
       return;
     }
-    
+
+    setShowError(false);
     setIsLoading(true);
-    setTimeout(() => {
+    setErrorMessage(null);
+
+    try {
+      const response = await apiClient.post('/users/signup', formData);
+      
+      if (response.status === 201) {
+        // Optionally auto-login or redirect to login page
+        router.replace('/login');
+      }
+    } catch (error: any) {
+      // 2. Capture Server-Side Error (e.g., "User already exists")
+      const msg = error.response?.data?.message || "Registration failed. Check your network.";
+      setErrorMessage(msg);
+      setShowError(false); // Don't show local red outlines for server errors
+      console.error("Signup Error:", msg);
+    } finally {
       setIsLoading(false);
-      router.replace('/');
-    }, 2000);
+    }
   };
+
+  
+
 
   return (
     // KeyboardAvoidingView ensures the keyboard doesn't cover input fields
@@ -63,7 +90,12 @@ export default function SignUp() {
 
           {/* Form Container */}
           <View>
-            <SignUpForm formData={formData} setFormData={setFormData} showError={showError} />
+            <SignUpForm 
+              formData={formData} 
+              setFormData={setFormData} 
+              showError={showError} 
+              errorMessage={errorMessage}
+            />
           </View>
           {/* SPACING FIX: 
              mt-20 adds significant space between the "Confirm Password" and "Create Account" 
