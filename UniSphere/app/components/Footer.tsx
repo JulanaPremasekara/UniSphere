@@ -23,40 +23,37 @@ export default function Footer() {
 
   return (
     <View 
-      className="flex-row justify-around items-center bg-white border-t border-gray-50 pt-3 pb-8 px-2 rounded-t-[35px] shadow-lg absolute bottom-0 w-full"
-      style={{ elevation: 20 }} // Adds shadow for Android
+      // REMOVED: absolute, bottom-0, w-full
+      // ADDED: h-24 (fixed height for consistency)
+      className="flex-row justify-around items-center bg-white border-t border-gray-100 pt-2 pb-6 px-2 rounded-t-[35px] shadow-lg h-24"
+      style={{ elevation: 20 }} 
     >
       {tabs.map((tab) => {
         const active = isActive(tab.path);
-        
         return (
           <TouchableOpacity
-              key={tab.name}
-              onPress={() => router.push(tab.path as any)}
-              activeOpacity={0.7}
-              className="flex-1 items-center justify-center"
-            >
-              <View 
-                className={`items-center justify-center rounded-[20px] ${
-                  active ? "bg-indigo-50 px-2 py-1" : "bg-transparent py-1"
+            key={tab.name}
+            onPress={() => router.push(tab.path as any)}
+            activeOpacity={0.7}
+            className="flex-1 items-center justify-center"
+          >
+            <View className={`items-center justify-center rounded-2xl ${active ? "bg-indigo-50 px-2 py-1" : ""}`}>
+              <tab.icon 
+                size={20} 
+                color={active ? "#4F46E5" : "#9CA3AF"} 
+                strokeWidth={active ? 2.5 : 2}
+              />
+              <Text 
+                numberOfLines={2}
+                className={`text-[9px] font-bold text-center leading-[10px] mt-1 ${
+                  active ? "text-indigo-600" : "text-gray-400"
                 }`}
+                style={{ width: 50 }}
               >
-                <tab.icon 
-                  size={20} // Slightly smaller icon to save vertical space
-                  color={active ? "#4F46E5" : "#9CA3AF"} 
-                  strokeWidth={active ? 2.5 : 2}
-                />
-                <Text 
-                  numberOfLines={2}
-                  className={`text-[10px] font-bold text-center leading-[9px] mt-0.5 ${
-                    active ? "text-indigo-600" : "text-gray-400"
-                  }`}
-                  style={{ width: 55 }} // Constrain width to force the wrap precisely
-                >
-                  {tab.name}
-                </Text>
-              </View>
-            </TouchableOpacity>
+                {tab.name}
+              </Text>
+            </View>
+          </TouchableOpacity>
         );
       })}
     </View>
