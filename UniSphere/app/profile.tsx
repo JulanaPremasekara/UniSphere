@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Platform, ActivityIndicator } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { 
-  Settings, ChevronRight, Bell, ShieldCheck, LogOut, GraduationCap,Mail,CircleUserRound,ChevronLeft, Calendar} from 'lucide-react-native';
+import { Settings, ChevronRight, Bell, ShieldCheck, LogOut, GraduationCap,Mail,CircleUserRound,ChevronLeft, Calendar} from 'lucide-react-native';
 import { VStack } from '@/components/ui/vstack';
 import { Box } from '@/components/ui/box';
 import Footer from './components/Footer';
@@ -59,7 +58,6 @@ export default function Profile() {
     );
   }
 
-  // If user is not logged in, show the "Please Login" state
     if (!user) {
   return (
       <View style={{ flex: 1, backgroundColor: 'white' }}>

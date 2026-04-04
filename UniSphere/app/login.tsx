@@ -1,4 +1,3 @@
-// app/login.tsx
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -9,7 +8,7 @@ import { ChevronLeftIcon, Icon } from '@/components/ui/icon';
 // Import the component (Make sure the path matches your folder structure)
 import { LoginForm } from './components/form'; 
 import { GraduationCap, Sparkles } from 'lucide-react-native';
-import apiClient from './services/api'; // Import from your new services folder
+import apiClient from './services/api';
 import { AppStorage } from './services/storage';
 
 export default function Login() {
@@ -59,7 +58,7 @@ export default function Login() {
         {/* Fixed Back Button */}
         <TouchableOpacity 
           onPress={() => router.back()} 
-          className="mb-8 p-2 -ml-2 w-12" // Increased touch area
+          className="mb-8 p-2 -ml-2 w-12"
           activeOpacity={0.7}
         >
           <Icon as={ChevronLeftIcon} size="xl" className="text-gray-900" />
