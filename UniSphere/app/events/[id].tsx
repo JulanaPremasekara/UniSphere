@@ -2,10 +2,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, Calendar, Clock, MapPin, MoreVertical, ExternalLink, CheckCheckIcon, VerifiedIcon, CheckCircle2 } from 'lucide-react-native';
 import { Modal } from 'react-native';
 
-import React, { useState, useEffect } from 'react'; // Added hooks
+import React, { useState, useEffect } from 'react';
 import { Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View, Platform, ActivityIndicator, Alert } from 'react-native';
 import Footer from '../components/Footer';
-import apiClient from '../services/api'; // Import your axios client
+import apiClient from '../services/api';
 
 // Define the interface to avoid TypeScript errors
 interface EventData {

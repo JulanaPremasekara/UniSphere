@@ -314,7 +314,6 @@ export default function CreateEvent() {
             </View>
           </VStack>
 
-          {/* Action Button - Pulled away from tags with mt-16 */}
           <View className="px-0 mt-3 mb-5 bg-white">
             <TouchableOpacity 
               onPress ={handlePublish}
