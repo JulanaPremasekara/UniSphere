@@ -1,25 +1,30 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { FormControl, FormControlLabel, FormControlLabelText, FormControlError, FormControlErrorIcon, FormControlErrorText } from '@/components/ui/form-control';
-import { AlertCircleIcon, Icon } from '@/components/ui/icon';
+import { 
+  FormControl, FormControlLabel, FormControlLabelText, 
+  FormControlError, FormControlErrorIcon, FormControlErrorText 
+} from '@/components/ui/form-control';
+import { 
+  AlertCircleIcon, 
+  Icon 
+} from '@/components/ui/icon';
 import { Input, InputField } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 
-interface SignUpFormProps {
+interface UpdateProfileFormProps {
   formData: any;
   setFormData: (data: any) => void;
   showError: boolean;
   errorMessage: string | null;
 }
 
-export function SignUpForm({ formData, setFormData, showError, errorMessage }: SignUpFormProps) {
+export function UpdateProfileForm({ formData, setFormData, showError, errorMessage }: UpdateProfileFormProps) {
   const updateField = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
   };
 
   const passwordsMatch = formData.password === formData.confirmPassword;
-  const isEmailValid = formData.email.includes('@');
-  const isPasswordValid = formData.password.length >= 6;
+  const isPasswordValid = !formData.password || formData.password.length >= 6;
 
   return (
     <VStack space="lg">
@@ -44,23 +49,17 @@ export function SignUpForm({ formData, setFormData, showError, errorMessage }: S
         </Input>
       </FormControl>
 
-      {/* University Email */}
-      <FormControl isInvalid={showError && !isEmailValid}>
-        <FormControlLabel><FormControlLabelText className="text-gray-700 font-semibold">University Email</FormControlLabelText></FormControlLabel>
-        <Input className="h-14 rounded-[20px] bg-gray-50 border-transparent px-2">
+      {/* University Email (Read-Only) */}
+      <FormControl>
+        <FormControlLabel><FormControlLabelText className="text-gray-700 font-semibold">University Email (Cannot be changed)</FormControlLabelText></FormControlLabel>
+        <Input className="h-14 rounded-[20px] bg-gray-100 border-transparent px-2">
           <InputField 
             placeholder="University Email" 
             value={formData.email} 
-            onChangeText={(v) => updateField('email', v)} 
-            className="text-gray-800"
+            editable={false}
+            className="text-gray-400"
           />
         </Input>
-        {showError && !isEmailValid && (
-          <FormControlError className="mt-2">
-            <FormControlErrorIcon as={AlertCircleIcon} />
-            <FormControlErrorText>Please enter a valid university email.</FormControlErrorText>
-          </FormControlError>
-        )}
       </FormControl>
 
       {/* Student Year & Major */}
@@ -90,14 +89,14 @@ export function SignUpForm({ formData, setFormData, showError, errorMessage }: S
         </FormControl>
       </VStack>
 
-      {/* Password Fields */}
+      {/* Password Fields (Optional) */}
       <VStack space="md">
         <FormControl isInvalid={showError && !isPasswordValid}>
-            <FormControlLabel><FormControlLabelText className="text-gray-700 font-semibold">Create Password</FormControlLabelText></FormControlLabel>
+            <FormControlLabel><FormControlLabelText className="text-gray-700 font-semibold">New Password (Optional)</FormControlLabelText></FormControlLabel>
           <Input className="h-14 rounded-[20px] bg-gray-50 border-transparent px-2">
             <InputField 
               type="password" 
-              placeholder="Create Password" 
+              placeholder="Leave blank to keep current password" 
               value={formData.password} 
               onChangeText={(v) => updateField('password', v)} 
               className="text-gray-800"
@@ -112,7 +111,7 @@ export function SignUpForm({ formData, setFormData, showError, errorMessage }: S
         </FormControl>
 
         <FormControl isInvalid={showError && !passwordsMatch}>
-          <FormControlLabel><FormControlLabelText className="text-gray-700 font-semibold">Confirm Password</FormControlLabelText></FormControlLabel>
+          <FormControlLabel><FormControlLabelText className="text-gray-700 font-semibold">Confirm New Password</FormControlLabelText></FormControlLabel>
           <Input className="h-14 rounded-[20px] bg-gray-50 border-transparent px-2">
             <InputField 
             type="password" 

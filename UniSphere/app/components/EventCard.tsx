@@ -26,22 +26,20 @@ export default function EventCard({ item, onPress, onEdit, onDelete }: EventCard
   const [showMenu, setShowMenu] = useState(false);
 
   const handleAction = (action: () => void) => {
+    console.log("handleAction called");
+    action(); 
     setShowMenu(false);
-    action();
   };
 
   return (
     <>
-      {/* 1. GLOBAL BACKDROP 
-          We use a very high zIndex and absolute positioning based on screen size.
-          This sits BEHIND the menu but ABOVE everything else on the page. */}
       {showMenu && (
         <Pressable 
           onPress={() => setShowMenu(false)}
           style={{
             position: 'absolute',
-            top: -height, // Cover far above
-            left: -width,  // Cover far left
+            top: -height,
+            left: -width,
             width: width * 3, 
             height: height * 3,
             zIndex: 50,
@@ -51,16 +49,48 @@ export default function EventCard({ item, onPress, onEdit, onDelete }: EventCard
       )}
 
       <View style={{ zIndex: showMenu ? 100 : 1 }} className="mb-4">
-        <TouchableOpacity 
-          onPress={() => {
-            if (showMenu) setShowMenu(false);
-            else onPress();
-          }}
-          activeOpacity={0.8}
-          className="bg-white rounded-[35px] p-5 shadow-sm border border-gray-100 flex-row justify-between items-center"
-        >
-          <View className="flex-row flex-1 items-center">
-            {/* Date Block */}
+        {showMenu && (
+          <View 
+            className="absolute right-6 top-16 bg-white border border-gray-100 rounded-3xl w-48 overflow-hidden shadow-2xl"
+            style={{ 
+              zIndex: 9999,
+              ...Platform.select({
+                ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.2, shadowRadius: 16 },
+                android: { elevation: 24 }
+              })
+            }}
+          >
+            {onEdit && (
+              <TouchableOpacity 
+                onPress={() => handleAction(onEdit)}
+                className="flex-row items-center p-5 border-b border-gray-50 active:bg-indigo-50"
+              >
+                <Edit2 size={18} color="#4F46E5" />
+                <Text className="ml-4 font-bold text-gray-700 text-base">Edit Event</Text>
+              </TouchableOpacity>
+            )}
+            
+            {onDelete && (
+              <TouchableOpacity 
+                onPress={() => handleAction(onDelete)}
+                className="flex-row items-center p-5 active:bg-red-50"
+              >
+                <Trash2 size={18} color="#EF4444" />
+                <Text className="ml-4 font-bold text-red-500 text-base">Delete Event</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
+        <View className="bg-white rounded-[35px] shadow-sm border border-gray-100 flex-row">
+          <TouchableOpacity 
+            onPress={() => {
+              if (showMenu) setShowMenu(false);
+              else onPress();
+            }}
+            activeOpacity={0.8}
+            className="flex-row flex-1 p-5 items-center"
+          >
             <View className="mr-5 items-center justify-center">
               <View className="bg-white w-16 h-20 rounded-[22px] overflow-hidden shadow-sm border border-gray-100">
                 <View className="bg-indigo-600 py-1.5 w-full items-center">
@@ -100,49 +130,20 @@ export default function EventCard({ item, onPress, onEdit, onDelete }: EventCard
                 </Text>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
 
           {/* Options Button Area */}
           {(onEdit || onDelete) && (
-            <View className="relative" style={{ zIndex: 110 }}> 
+            <View className="pr-5 justify-center"> 
               <TouchableOpacity 
                 onPress={() => setShowMenu(!showMenu)} 
                 className={`p-2 rounded-full ${showMenu ? 'bg-indigo-50' : 'bg-gray-50'}`}
               >
                 <MoreVertical size={20} color={showMenu ? "#4F46E5" : "#6B7280"} />
               </TouchableOpacity>
-
-              {showMenu && (
-                <View 
-                  className="absolute right-0 top-12 bg-white border border-gray-100 rounded-2xl w-40 overflow-hidden shadow-2xl"
-                  style={{ 
-                    zIndex: 120,
-                    ...Platform.select({
-                      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 12 },
-                      android: { elevation: 12 }
-                    })
-                  }}
-                >
-                  <TouchableOpacity 
-                    onPress={() => handleAction(onEdit!)}
-                    className="flex-row items-center p-4 border-b border-gray-50 active:bg-indigo-50"
-                  >
-                    <Edit2 size={16} color="#4F46E5" />
-                    <Text className="ml-3 font-bold text-gray-700">Edit</Text>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity 
-                    onPress={() => handleAction(onDelete!)}
-                    className="flex-row items-center p-4 active:bg-red-50"
-                  >
-                    <Trash2 size={16} color="#EF4444" />
-                    <Text className="ml-3 font-bold text-red-500">Delete</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
             </View>
           )}
-        </TouchableOpacity>
+        </View>
       </View>
     </>
   );

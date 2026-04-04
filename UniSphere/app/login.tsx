@@ -1,4 +1,3 @@
-// app/login.tsx
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -9,52 +8,62 @@ import { ChevronLeftIcon, Icon } from '@/components/ui/icon';
 // Import the component (Make sure the path matches your folder structure)
 import { LoginForm } from './components/form'; 
 import { GraduationCap, Sparkles } from 'lucide-react-native';
+import apiClient from './services/api';
+import { AppStorage } from './services/storage';
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showError, setShowError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    setIsLoading(true);
-    if (password.length < 6 || !email.includes('@')) {
-      setShowError(true);
-      setIsLoading(false);
-    } else {
-      setShowError(false);
-      setTimeout(() => {
-        setIsLoading(false);
-        router.replace('/');
-      }, 1500);
-    }
-  };
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Improved Back function
-  const handleBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      // Fallback: If the user opened the app directly to Login, 
-      // back() won't work, so we send them to Home.
-      router.replace('/');
+    const handleLogin = async () => {
+    // 1. Validate BEFORE calling the API
+    if (!email.includes('@')) {
+      setErrorMessage("Enter a valid email address.");
+      return;
+    }
+    if (password.length < 6) {
+      setErrorMessage("Password must be at least 6 characters.");
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await apiClient.post('/users/login', { email, password });
+      
+      if (response.data.token) {
+        await AppStorage.setItem('userToken', response.data.token);
+        router.replace('/');
+      }
+    } catch (error: any) {
+      // This catches network errors or 401/500 errors from the server
+      const msg = error.response?.data?.message || "Server unreachable. Check your connection.";
+      setErrorMessage(msg);
+      console.error("Connection Error:", error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
+  
+  
 
   return (
     <ScrollView className="flex-1 bg-white" contentContainerStyle={{ flexGrow: 1 }}>
       <View className="px-8 pt-16 pb-8">
         {/* Fixed Back Button */}
         <TouchableOpacity 
-          onPress={handleBack} 
-          className="mb-8 p-2 -ml-2 w-12" // Increased touch area
+          onPress={() => router.back()} 
+          className="mb-8 p-2 -ml-2 w-12"
           activeOpacity={0.7}
         >
           <Icon as={ChevronLeftIcon} size="xl" className="text-gray-900" />
         </TouchableOpacity>
 
-        {/* --- LOGO AND NAME SECTION --- */}
         <View className="items-center mb-10">
           <View className="bg-indigo-600 p-4 rounded-[22px] shadow-lg shadow-indigo-300 mb-4">
             <GraduationCap size={48} color="white" strokeWidth={2} />
@@ -66,7 +75,6 @@ export default function Login() {
             Connect. Explore. Succeed.
           </Text>
         </View>
-        {/* ------------------------------ */}
 
         <View className="mb-10">
           <Text className="text-4xl font-bold text-gray-900 mb-2">Welcome Back</Text>
@@ -80,7 +88,7 @@ export default function Login() {
             setEmail={setEmail} 
             password={password} 
             setPassword={setPassword} 
-            showError={showError} 
+            errorMessage={errorMessage}
           />
 
           <Button 
