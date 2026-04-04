@@ -1,10 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-/**
- * A cross-platform storage helper that uses localStorage on Web
- * and Expo's SecureStore on native platforms (iOS/Android).
- */
 export const AppStorage = {
   /**
    * Get a value from storage

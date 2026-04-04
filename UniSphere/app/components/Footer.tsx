@@ -23,8 +23,6 @@ export default function Footer() {
 
   return (
     <View 
-      // REMOVED: absolute, bottom-0, w-full
-      // ADDED: h-24 (fixed height for consistency)
       className="flex-row justify-around items-center bg-white border-t border-gray-100 pt-2 pb-6 px-2 rounded-t-[35px] shadow-lg h-24"
       style={{ elevation: 20 }} 
     >

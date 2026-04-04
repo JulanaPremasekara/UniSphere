@@ -1,13 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { 
-  FormControl, FormControlLabel, FormControlLabelText, 
-  FormControlError, FormControlErrorIcon, FormControlErrorText 
-} from '@/components/ui/form-control';
-import { 
-  AlertCircleIcon, 
-  Icon 
-} from '@/components/ui/icon';
+import { FormControl, FormControlLabel, FormControlLabelText, FormControlError, FormControlErrorIcon, FormControlErrorText } from '@/components/ui/form-control';
+import { AlertCircleIcon, Icon } from '@/components/ui/icon';
 import { Input, InputField } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 

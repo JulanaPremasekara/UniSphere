@@ -20,14 +20,7 @@ export default function Home() {
     isMine: boolean;
   }
 
-  // Use state for events so we can delete them
-  {/*const [events, setEvents] = useState([
-    { id: '1', title: 'Quantum Computing', month: 'OCT', day: '12', location: 'North Lab, Room 402', organizer: 'Physics Dept', isMine: true },
-    { id: '2', title: 'Post-Digital Design', month: 'OCT', day: '15', location: 'Arts Collective Studio', organizer: 'Design Guild', isMine: false },
-    { id: '3', title: 'Midnight Jazz & Coffee', month: 'OCT', day: '18', location: 'Central Atrium', organizer: 'Music Society', isMine: false },
-  ]);*/}
-
-  const [events, setEvents] = useState<AppEvent[]>([]); // Start with empty array
+  const [events, setEvents] = useState<AppEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -57,7 +50,7 @@ export default function Home() {
         const formattedEvents: AppEvent[] = eventResponse.data.events.map((ev: any) => {
           const eventDate = new Date(ev.startDate);
           return {
-            id: ev._id, // MongoDB uses _id, but we map it to id
+            id: ev._id,
             title: ev.title,
             month: eventDate.toLocaleString('en-US', { month: 'short' }).toUpperCase(),
             day: eventDate.getDate().toString(),

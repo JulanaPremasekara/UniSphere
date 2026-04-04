@@ -1,10 +1,5 @@
-// components/form.tsx
 import React from 'react';
-import { 
-  FormControl, FormControlLabel, FormControlLabelText, 
-  FormControlHelper, FormControlHelperText, 
-  FormControlError, FormControlErrorIcon, FormControlErrorText 
-} from '@/components/ui/form-control';
+import { FormControl, FormControlLabel, FormControlLabelText, FormControlHelper, FormControlHelperText, FormControlError, FormControlErrorIcon, FormControlErrorText } from '@/components/ui/form-control';
 import { AlertCircleIcon } from '@/components/ui/icon';
 import { Input, InputField } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
