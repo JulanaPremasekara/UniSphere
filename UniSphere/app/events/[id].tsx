@@ -72,7 +72,7 @@ export default function EventDetail() {
       <ScrollView 
         className="flex-1" 
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 180 }} // Space for RSVP button & Footer
+        contentContainerStyle={{ paddingBottom: 90 }} // Space for RSVP button & Footer
         bounces={true}
       >
         {/* Event Image Card */}

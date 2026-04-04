@@ -41,7 +41,7 @@ export default function CreateEvent() {
           contentContainerStyle={{ 
             flexGrow: 1,
             paddingTop: Platform.OS === 'ios' ? 70 : 60, 
-            paddingBottom: 160 
+            paddingBottom: 160
           }}
         >
           {/* Header */}

@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { Calendar, Search, Plus } from 'lucide-react-native';
 import EventCard from '../components/EventCard';
 import Footer from '../components/Footer';
+import Header from '../components/Header';
 
 export default function Home() {
   const router = useRouter();
@@ -41,17 +42,7 @@ export default function Home() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      <View className="px-6 pb-4 bg-white" style={{ paddingTop: Platform.OS === 'ios' ? 60 : 50 }}>
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row items-center">
-            <Calendar size={28} color="#4F46E5" />
-            <Text className="text-2xl font-bold ml-2 text-indigo-900">UniSphere</Text>
-          </View>
-          <TouchableOpacity className="bg-gray-100 p-2 rounded-full">
-            <Search size={22} color="#6B7280" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <Header title="UniSphere" />
 
       {/* Filter Tabs */}
       <View className="bg-white pb-4 px-6 border-b border-gray-100">

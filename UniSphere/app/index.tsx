@@ -3,17 +3,20 @@ import { View, Text, TextInput, ScrollView, TouchableOpacity, Image } from 'reac
 import { Search, Bell, ShoppingBasket, Users, Calendar, GraduationCap, UtensilsCrossed, Map as MapIcon, Bookmark } from 'lucide-react-native';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import { Href, router, useRouter } from 'expo-router';
 
 const categories = [
-  { name: 'Marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA' },
-  { name: 'Study Groups', icon: Users, color: '#F5F3FF', iconColor: '#5B21B6' },
-  { name: 'Events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1' },
-  { name: 'Courses', icon: GraduationCap, color: '#F5F3FF', iconColor: '#4338CA' },
-  { name: 'Dining', icon: UtensilsCrossed, color: '#F0F9FF', iconColor: '#0369A1' },
-  { name: 'Map', icon: MapIcon, color: '#EEF2FF', iconColor: '#4338CA' },
+  { name: 'Marketplace', path: '/marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA' },
+  { name: 'Study Groups', path: '/study-groups', icon: Users, color: '#F5F3FF', iconColor: '#5B21B6' },
+  { name: 'Events', path: '/events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1' },
+  { name: 'Courses', path: '/courses', icon: GraduationCap, color: '#F5F3FF', iconColor: '#4338CA' },
+  { name: 'Lost Items', path: '/lost', icon: Search, color: '#FFF7ED', iconColor: '#C2410C' },
+  { name: 'Tutor', path: '/tutor', icon: MapIcon, color: '#EEF2FF', iconColor: '#4338CA' },
 ];
-
+  
 export default function Home() {
+   
+  const router = useRouter();
   return (
     <View className="flex-1 bg-white">
       {/* Header is handled by your component, but ensure it has the profile/search icons */}
@@ -38,6 +41,7 @@ export default function Home() {
           {categories.map((item, index) => (
             <TouchableOpacity 
               key={index} 
+              onPress={() => router.push(item.path as Href)}
               style={{ backgroundColor: item.color }}
               className="w-[47%] aspect-square rounded-[45px] items-center justify-center mb-5"
             >
