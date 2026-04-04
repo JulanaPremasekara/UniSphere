@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { GraduationCap, User } from 'lucide-react-native';
-import { Link } from 'expo-router'; // 1. Import Link
+import { Link } from 'expo-router';
 import React from 'react';
 
 export default function Header({ title }: { title: string }) {
@@ -15,8 +15,6 @@ export default function Header({ title }: { title: string }) {
       
       {/* Title */}
       <Text className="text-xl font-bold text-indigo-900 tracking-tight">{title}</Text>
-      
-      {/* 2. Wrap the Profile icon with Link to navigate to Login */}
       <Link href="/login" asChild>
         <TouchableOpacity>
           <User color="black" size={24} />

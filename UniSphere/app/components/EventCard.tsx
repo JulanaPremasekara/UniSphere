@@ -33,16 +33,13 @@ export default function EventCard({ item, onPress, onEdit, onDelete }: EventCard
 
   return (
     <>
-      {/* 1. GLOBAL BACKDROP 
-          We use a very high zIndex and absolute positioning based on screen size.
-          This sits BEHIND the menu but ABOVE everything else on the page. */}
       {showMenu && (
         <Pressable 
           onPress={() => setShowMenu(false)}
           style={{
             position: 'absolute',
-            top: -height, // Cover far above
-            left: -width,  // Cover far left
+            top: -height,
+            left: -width,
             width: width * 3, 
             height: height * 3,
             zIndex: 50,
@@ -52,7 +49,6 @@ export default function EventCard({ item, onPress, onEdit, onDelete }: EventCard
       )}
 
       <View style={{ zIndex: showMenu ? 100 : 1 }} className="mb-4">
-        {/* The Menu now lives outside the card layout to prevent clipping or touch issues */}
         {showMenu && (
           <View 
             className="absolute right-6 top-16 bg-white border border-gray-100 rounded-3xl w-48 overflow-hidden shadow-2xl"
@@ -87,7 +83,6 @@ export default function EventCard({ item, onPress, onEdit, onDelete }: EventCard
         )}
 
         <View className="bg-white rounded-[35px] shadow-sm border border-gray-100 flex-row">
-          {/* Main Card Content (Touchable) */}
           <TouchableOpacity 
             onPress={() => {
               if (showMenu) setShowMenu(false);
@@ -96,7 +91,6 @@ export default function EventCard({ item, onPress, onEdit, onDelete }: EventCard
             activeOpacity={0.8}
             className="flex-row flex-1 p-5 items-center"
           >
-            {/* Same internal card content as before... */}
             <View className="mr-5 items-center justify-center">
               <View className="bg-white w-16 h-20 rounded-[22px] overflow-hidden shadow-sm border border-gray-100">
                 <View className="bg-indigo-600 py-1.5 w-full items-center">
