@@ -55,6 +55,7 @@ export default function Home() {
   }, []);
 
   return (
+    
     <View className="flex-1 bg-white">
       <Header title="UniSphere" />
       <ScrollView 
@@ -80,7 +81,11 @@ export default function Home() {
               key={index} 
               style={{ backgroundColor: item.color }}
               onPress={() => {
-                if (item.name === 'Events') router.push('/events');
+                if (item.name === 'Events') {
+                  router.push('/events');
+                }else if (item.name === 'Marketplace') {
+                  router.push('/marketplace' as any)
+                };
                 // Navigation for other categories can be added when their index files are created
                 else if (item.name === 'Tutors') router.push('/Tutors');
               }}
