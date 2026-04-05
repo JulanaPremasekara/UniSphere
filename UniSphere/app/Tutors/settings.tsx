@@ -1,0 +1,105 @@
+import React from "react";
+import { ScrollView, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
+// Added ChevronLeft for the back button
+import { Menu, ShieldOff, Trash2, User, ChevronLeft } from "lucide-react-native";
+
+import { Box } from "@/components/ui/box";
+import { HStack } from "@/components/ui/hstack";
+import { VStack } from "@/components/ui/vstack";
+import { Text } from "@/components/ui/text";
+import { Icon } from "@/components/ui/icon";
+import { Avatar } from "@/components/ui/avatar";
+
+export default function SettingsScreen() {
+  const router = useRouter();
+
+  return (
+    <ScrollView className="flex-1 bg-white">
+      
+      {/* 1. TOP HEADER WITH BACK BUTTON */}
+      <HStack className="p-6 mt-10 justify-between items-center">
+        {/* BACK BUTTON: This takes you back to the Profile */}
+        <TouchableOpacity 
+          onPress={() => router.back()} 
+          className="bg-gray-100 p-2 rounded-full"
+        >
+          <Icon as={ChevronLeft} size="lg" className="text-black" />
+        </TouchableOpacity>
+
+        <Text className="text-xl font-bold text-black">Settings</Text>
+        
+        <Avatar size="sm" className="bg-gray-200">
+          <Icon as={User} className="text-gray-600" size="sm" />
+        </Avatar>
+      </HStack>
+
+      <VStack className="px-6 mt-4" space="xl">
+        
+        {/* 2. TITLE SECTION */}
+        <VStack className="items-center">
+          <Text className="text-[#4338CA] font-bold text-xs uppercase tracking-widest">
+            Account Management
+          </Text>
+          <Text className="text-4xl font-bold text-black mt-2 text-center">
+            Settings & Safety.
+          </Text>
+        </VStack>
+
+        {/* 3. GO OFFLINE CARD */}
+        <Box className="bg-white p-6 rounded-[40px] shadow-sm border border-gray-100">
+          <HStack className="justify-between items-start">
+            <Box className="bg-indigo-100 p-3 rounded-full">
+              <Icon as={ShieldOff} size="md" className="text-[#4338CA]" />
+            </Box>
+            <HStack className="items-center bg-red-50 px-3 py-1 rounded-full border border-red-100">
+              <View className="w-2 h-2 bg-red-500 rounded-full mr-2" />
+              <Text className="text-red-600 text-[10px] font-bold uppercase">Active Now</Text>
+            </HStack>
+          </HStack>
+
+          <Text className="text-2xl font-bold text-black mt-4">Go Offline?</Text>
+          <Text className="text-gray-500 mt-2">
+            You will no longer appear in search results.
+          </Text>
+
+          <VStack className="mt-6" space="sm">
+            {/* CANCEL BUTTON: Also acts as a back button */}
+            <TouchableOpacity 
+              onPress={() => router.back()} 
+              className="bg-gray-100 p-4 rounded-full"
+            >
+              <Text className="text-center font-bold text-gray-700">Cancel</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity className="bg-[#4338CA] p-4 rounded-full">
+              <Text className="text-center font-bold text-white">Switch Status</Text>
+            </TouchableOpacity>
+          </VStack>
+        </Box>
+
+        {/* 4. DELETE ACCOUNT CARD */}
+        <Box className="bg-white p-6 rounded-[40px] shadow-sm border border-gray-100">
+          <Box className="bg-red-100 p-3 rounded-full w-12">
+            <Icon as={Trash2} size="md" className="text-red-600" />
+          </Box>
+          <Text className="text-2xl font-bold text-black mt-4">Close account?</Text>
+          
+          <VStack className="mt-6" space="sm">
+            <TouchableOpacity 
+              onPress={() => router.back()} 
+              className="border border-gray-200 p-4 rounded-full"
+            >
+              <Text className="text-center font-bold text-gray-700">Keep Profile</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity className="bg-red-600 p-4 rounded-full">
+              <Text className="text-center font-bold text-white">Delete Account</Text>
+            </TouchableOpacity>
+          </VStack>
+        </Box>
+
+      </VStack>
+    </ScrollView>
+  );
+}

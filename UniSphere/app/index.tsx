@@ -13,7 +13,7 @@ const categories = [
   { name: 'Events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1' },
   { name: 'Lost &\n Found', icon: HelpCircle, color: '#FFF7ED', iconColor: '#C2410C' },
   { name: 'Housing', icon: HomeIcon, color: '#ECFDF5', iconColor: '#047857' },
-  { name: 'Tutor Profile', icon: BookOpen, color: '#FEF2F2', iconColor: '#B91C1C' },
+  { name: 'Tutors', icon: BookOpen, color: '#FEF2F2', iconColor: '#B91C1C' },
 ];
 
 export default function Home() {
@@ -87,6 +87,7 @@ export default function Home() {
                   router.push('/marketplace' as any)
                 };
                 // Navigation for other categories can be added when their index files are created
+                else if (item.name === 'Tutors') router.push('/Tutors');
               }}
               className="w-[47%] aspect-square rounded-[40px] items-center justify-center mb-5"
             >
