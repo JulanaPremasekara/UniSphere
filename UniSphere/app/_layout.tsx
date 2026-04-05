@@ -24,7 +24,9 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="index" />
+        <Stack.Screen name="marketplace"/>
         <Stack.Screen name="events/create" options={{ presentation: 'modal' }} />
+        
       </Stack>
     </GestureHandlerRootView>
     </GluestackUIProvider>
