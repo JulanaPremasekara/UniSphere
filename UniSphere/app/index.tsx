@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { Search, ShoppingBasket, Users, Calendar, GraduationCap, UtensilsCrossed, Map as MapIcon, Bookmark, BookOpen, HomeIcon, HelpCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import Header from './components/Header';
+import { Bookmark, BookOpen, Calendar, HelpCircle, HomeIcon, Search, ShoppingBasket, Users } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
 import Footer from './components/Footer';
+import Header from './components/Header';
 import apiClient from './services/api';
 
 const categories = [
@@ -12,7 +13,7 @@ const categories = [
   { name: 'Events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1' },
   { name: 'Lost &\n Found', icon: HelpCircle, color: '#FFF7ED', iconColor: '#C2410C' },
   { name: 'Housing', icon: HomeIcon, color: '#ECFDF5', iconColor: '#047857' },
-  { name: 'Tutor Profile', icon: BookOpen, color: '#FEF2F2', iconColor: '#B91C1C' },
+  { name: 'Tutors', icon: BookOpen, color: '#FEF2F2', iconColor: '#B91C1C' },
 ];
 
 export default function Home() {
@@ -58,6 +59,7 @@ export default function Home() {
   );
 
   return (
+    
     <View className="flex-1 bg-white">
       <Header title="UniSphere" />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 8, paddingBottom: 30 }}>
@@ -70,7 +72,36 @@ export default function Home() {
 
         <View className="flex-row flex-wrap justify-between px-5 mt-5 -mb-5">
           {categories.map((item, index) => (
-            <CategoryCard key={index} item={item} onPress={() => item.name === 'Events' && router.push('/events')} />
+            <TouchableOpacity 
+              key={index} 
+              style={{ backgroundColor: item.color }}
+              onPress={() => {
+                if (item.name === 'Events') {
+                  router.push('/events');
+                }else if (item.name === 'Marketplace') {
+                  router.push('/marketplace' as any)
+                }
+                // Navigation for other categories can be added when their index files are created
+                else if (item.name === 'Tutors') {
+                  router.push('/Tutors');
+                }
+                else if (item.name === 'Study Groups') {
+                  router.push('/studyGroup' as any);
+                };
+              }}
+
+              className="w-[47%] aspect-square rounded-[40px] items-center justify-center mb-5"
+            >
+
+              <View className="bg-white p-3 rounded-2xl mb-2 shadow-sm">
+                <item.icon size={29} color={item.iconColor} />
+              </View>
+              <Text 
+                className="font-bold text-gray-800 text-[14px] text-center px-2 leading-[16px]"
+              >
+                {item.name}
+              </Text>
+            </TouchableOpacity>
           ))}
         </View>
 
