@@ -3,19 +3,15 @@ import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import "../global.css";
-
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import '@/global.css';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  useEffect(() => {
-    SplashScreen.hideAsync();
-  }, []);
+  useEffect(() => { SplashScreen.hideAsync(); }, []);
 
   return (
-    
     <GluestackUIProvider mode="dark">
       <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack
@@ -31,6 +27,5 @@ export default function RootLayout() {
       </Stack>
     </GestureHandlerRootView>
     </GluestackUIProvider>
-  
   );
 }

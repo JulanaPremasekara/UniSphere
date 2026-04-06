@@ -16,40 +16,17 @@ export default function Footer() {
     { name: "PROFILE", icon: User, path: "/profile" },
   ];
 
-  const isActive = (path: string) => {
-    if (path === "/") return pathname === "/";
-    return pathname.startsWith(path);
-  };
+  const isActive = (path: string) => path === "/" ? pathname === "/" : pathname.startsWith(path);
 
   return (
-    <View 
-      className="flex-row justify-around items-center bg-white border-t border-gray-100 pt-2 pb-6 px-2 rounded-t-[35px] shadow-lg h-24"
-      style={{ elevation: 20 }} 
-    >
+    <View className="flex-row justify-around items-center bg-white border-t border-gray-100 pt-2 pb-6 px-2 rounded-t-[35px] shadow-lg h-24" style={{ elevation: 20 }}>
       {tabs.map((tab) => {
         const active = isActive(tab.path);
         return (
-          <TouchableOpacity
-            key={tab.name}
-            onPress={() => router.push(tab.path as any)}
-            activeOpacity={0.7}
-            className="flex-1 items-center justify-center"
-          >
+          <TouchableOpacity key={tab.name} onPress={() => router.push(tab.path as any)} activeOpacity={0.7} className="flex-1 items-center justify-center">
             <View className={`items-center justify-center rounded-2xl ${active ? "bg-indigo-50 px-2 py-1" : ""}`}>
-              <tab.icon 
-                size={20} 
-                color={active ? "#4F46E5" : "#9CA3AF"} 
-                strokeWidth={active ? 2.5 : 2}
-              />
-              <Text 
-                numberOfLines={2}
-                className={`text-[9px] font-bold text-center leading-[10px] mt-1 ${
-                  active ? "text-indigo-600" : "text-gray-400"
-                }`}
-                style={{ width: 50 }}
-              >
-                {tab.name}
-              </Text>
+              <tab.icon size={20} color={active ? "#4F46E5" : "#9CA3AF"} strokeWidth={active ? 2.5 : 2} />
+              <Text numberOfLines={2} className={`text-[9px] font-bold text-center leading-[10px] mt-1 ${active ? "text-indigo-600" : "text-gray-400"}`} style={{ width: 50 }}>{tab.name}</Text>
             </View>
           </TouchableOpacity>
         );
