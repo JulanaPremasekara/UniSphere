@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { Search, ShoppingBasket, Users, Calendar, GraduationCap, UtensilsCrossed, Map as MapIcon, Bookmark, BookOpen, HomeIcon, HelpCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { Bookmark, BookOpen, Calendar, HelpCircle, HomeIcon, Search, ShoppingBasket, Users } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import Header from './components/Header';
 import Footer from './components/Footer';
+import Header from './components/Header';
 import apiClient from './services/api';
 
 const categories = [
@@ -89,8 +89,12 @@ export default function Home() {
                 // Navigation for other categories can be added when their index files are created
                 else if (item.name === 'Tutors') {
                   router.push('/Tutors');
+                }
+                else if (item.name === 'Study Groups') {
+                  router.push('/studyGroup' as any);
                 };
               }}
+
               className="w-[47%] aspect-square rounded-[40px] items-center justify-center mb-5"
             >
 
