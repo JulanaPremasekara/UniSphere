@@ -11,7 +11,7 @@ export default function Footer() {
     { name: "HOME", icon: Home, path: "/" },
     { name: "TUTORS", icon: BookOpen, path: "/tutors" },
     { name: "LOST &\nFOUND", icon: Search, path: "/lost-and-found" },
-    { name: "GROUPS", icon: Users, path: "/groups" },
+    { name: "GROUPS", icon: Users, path: "/studyGroup" },
     { name: "EVENTS", icon: Calendar, path: "/events" },
     { name: "PROFILE", icon: User, path: "/profile" },
   ];
