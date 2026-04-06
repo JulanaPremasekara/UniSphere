@@ -23,6 +23,8 @@ export default function TutorsLayout() {
 
             {/* 2. Add the dynamic tutor profile page */}
             <Stack.Screen name="[id]" />
+
+            <Stack.Screen name="settings" />
             
         </Stack>
     );

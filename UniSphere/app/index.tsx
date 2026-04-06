@@ -85,9 +85,11 @@ export default function Home() {
                   router.push('/events');
                 }else if (item.name === 'Marketplace') {
                   router.push('/marketplace' as any)
-                };
+                }
                 // Navigation for other categories can be added when their index files are created
-                else if (item.name === 'Tutors') router.push('/Tutors');
+                else if (item.name === 'Tutors') {
+                  router.push('/Tutors');
+                };
               }}
               className="w-[47%] aspect-square rounded-[40px] items-center justify-center mb-5"
             >
