@@ -16,7 +16,7 @@ export default function ProfileSetup() {
 
   return (
     <ScrollView className="flex-1 bg-gray-50">
-      {/* 1. Header Section (The "X" button and Title) */}
+      {/* Header Section (The "X" button and Title) */}
       <View className="bg-white rounded-t-[40px] mt-20 p-8 flex-1">
         <HStack className="justify-between items-center mb-2">
           <Text className="text-3xl font-bold text-black">Profile Setup</Text>
@@ -28,7 +28,7 @@ export default function ProfileSetup() {
         <Text className="text-gray-500 mb-8">Tell us about your academic expertise.</Text>
 
         <VStack space="xl">
-          {/* 2. Full Name Input */}
+          {/* Full Name Input */}
           <VStack space="xs">
             <Text className="text-xs font-bold uppercase tracking-wider text-black">Full Name</Text>
             <Input variant="rounded" className="bg-gray-100 border-0 h-14 px-2">
@@ -36,7 +36,7 @@ export default function ProfileSetup() {
             </Input>
           </VStack>
 
-          {/* 3. Hourly Rate Input */}
+          {/* Hourly Rate Input */}
           <VStack space="xs">
             <Text className="text-xs font-bold uppercase tracking-wider text-black">Hourly Rate (USD)</Text>
             <Input variant="rounded" className="bg-gray-100 border-0 h-14 px-4">
@@ -45,7 +45,7 @@ export default function ProfileSetup() {
             </Input>
           </VStack>
 
-          {/* 4. Subjects Input */}
+          {/* Subjects Input */}
           <VStack space="xs">
             <Text className="text-xs font-bold uppercase tracking-wider text-black">Subjects</Text>
             <Input variant="rounded" className="bg-gray-100 border-0 h-14 px-2">
@@ -53,7 +53,7 @@ export default function ProfileSetup() {
             </Input>
           </VStack>
 
-          {/* 5. Bio Textarea */}
+          {/* Bio Textarea */}
           <VStack space="xs">
             <Text className="text-xs font-bold uppercase tracking-wider text-black">Bio & Experience</Text>
             <Textarea className="bg-gray-100 border-0 rounded-[30px] p-4">
@@ -64,7 +64,7 @@ export default function ProfileSetup() {
             </Textarea>
           </VStack>
 
-          {/* 6. Save Button */}
+          {/* Save Button */}
           <TouchableOpacity className="bg-[#4338CA] p-4 rounded-full mt-4">
              <Text className="text-white text-center font-bold text-lg">Save Profile</Text>
           </TouchableOpacity>

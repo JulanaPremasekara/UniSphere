@@ -1,7 +1,7 @@
 import React from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
-// Added ChevronLeft for the back button
+//ChevronLeft for the back button
 import { Menu, ShieldOff, Trash2, User, ChevronLeft } from "lucide-react-native";
 
 import { Box } from "@/components/ui/box";
@@ -17,9 +17,9 @@ export default function SettingsScreen() {
   return (
     <ScrollView className="flex-1 bg-white">
       
-      {/* 1. TOP HEADER WITH BACK BUTTON */}
+      {/*TOP HEADER WITH BACK BUTTON */}
       <HStack className="p-6 mt-10 justify-between items-center">
-        {/* BACK BUTTON: This takes you back to the Profile */}
+        {/* BACK BUTTON*/}
         <TouchableOpacity 
           onPress={() => router.back()} 
           className="bg-gray-100 p-2 rounded-full"
@@ -36,7 +36,7 @@ export default function SettingsScreen() {
 
       <VStack className="px-6 mt-4" space="xl">
         
-        {/* 2. TITLE SECTION */}
+        {/*TITLE SECTION */}
         <VStack className="items-center">
           <Text className="text-[#4338CA] font-bold text-xs uppercase tracking-widest">
             Account Management
@@ -46,7 +46,7 @@ export default function SettingsScreen() {
           </Text>
         </VStack>
 
-        {/* 3. GO OFFLINE CARD */}
+        {/* GO OFFLINE CARD */}
         <Box className="bg-white p-6 rounded-[40px] shadow-sm border border-gray-100">
           <HStack className="justify-between items-start">
             <Box className="bg-indigo-100 p-3 rounded-full">
@@ -64,7 +64,7 @@ export default function SettingsScreen() {
           </Text>
 
           <VStack className="mt-6" space="sm">
-            {/* CANCEL BUTTON: Also acts as a back button */}
+            {/* CANCEL BUTTON */}
             <TouchableOpacity 
               onPress={() => router.back()} 
               className="bg-gray-100 p-4 rounded-full"
@@ -78,7 +78,7 @@ export default function SettingsScreen() {
           </VStack>
         </Box>
 
-        {/* 4. DELETE ACCOUNT CARD */}
+        {/* DELETE ACCOUNT CARD */}
         <Box className="bg-white p-6 rounded-[40px] shadow-sm border border-gray-100">
           <Box className="bg-red-100 p-3 rounded-full w-12">
             <Icon as={Trash2} size="md" className="text-red-600" />
