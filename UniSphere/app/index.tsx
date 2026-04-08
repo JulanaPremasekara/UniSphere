@@ -79,8 +79,13 @@ export default function Home() {
                 if (item.name === 'Events') {
                   router.push('/events');
                 }else if (item.name === 'Marketplace') {
+chanuthi
+                  router.push('/marketplace' )
+                };
+
                   router.push('/marketplace' as any)
                 }
+development
                 // Navigation for other categories can be added when their index files are created
                 else if (item.name === 'Tutors') {
                   router.push('/Tutors');
