@@ -6,7 +6,7 @@ export default function MarketplaceLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="create"  />
-      {/* Update this path */}
+      <Stack.Screen name="edit"  />
       <Stack.Screen name="[id]" /> 
     </Stack>
   );
