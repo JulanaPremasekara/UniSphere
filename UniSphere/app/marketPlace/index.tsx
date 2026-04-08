@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { ScrollView, TouchableOpacity, Image } from "react-native";
-import { useRouter } from "expo-router";
+import { Avatar, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar";
 import { Box } from "@/components/ui/box";
 import { HStack } from "@/components/ui/hstack";
-import { VStack } from "@/components/ui/vstack";
-import { Text } from "@/components/ui/text";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
-import { Avatar, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar";
-import { Search, Bell, ChevronLeft, Plus } from "lucide-react-native";
+import { Text } from "@/components/ui/text";
+import { VStack } from "@/components/ui/vstack";
+import { useRouter } from "expo-router";
+import { Bell, ChevronLeft, Plus, Search } from "lucide-react-native";
+import React, { useState } from "react";
+import { Image, ScrollView, TouchableOpacity } from "react-native";
 
 
 // Mock Data for the UI
@@ -89,9 +89,9 @@ export default function MarketplaceIndex() {
       </ScrollView>
 
       {/* Floating Action Button */}
+      {/* Floating Action Button */}
       <TouchableOpacity 
-        // Adding 'as any' is a quick way to bypass the strict check if the route is valid
-        onPress={() => router.push("/marketplace/create" as any)}
+        onPress={() => router.push("/marketplace/create" )}
         className="absolute bottom-8 right-6 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
       >
         <Plus size={32} color="white" />
