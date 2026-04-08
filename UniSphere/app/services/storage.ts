@@ -51,3 +51,5 @@ export const AppStorage = {
     return await SecureStore.deleteItemAsync(key);
   }
 };
+
+export default AppStorage;
