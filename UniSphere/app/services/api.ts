@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import { AppStorage } from './storage';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
-const LOCAL_IP = '192.168.8.133';
+const LOCAL_IP = '192.168.8.133';//172.28.4.4
 
 // 2. Determine base URL based on platform and environment
 const getBaseURL = () => {

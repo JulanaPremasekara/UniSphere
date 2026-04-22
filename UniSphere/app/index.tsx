@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Search, ShoppingBasket, Users, Calendar, GraduationCap, UtensilsCrossed, Map as MapIcon, Bookmark, BookOpen, HomeIcon, HelpCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import apiClient from './services/api';
+import { useEvents } from '../hooks/useEvents';
 
 const categories = [
   { name: 'Marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA' },
@@ -17,24 +17,7 @@ const categories = [
 
 export default function Home() {
   const router = useRouter();
-  const [events, setEvents] = useState([]);
-  const [currentUserId, setCurrentUserId] = useState(null);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const userRes = await apiClient.get('/users/me');
-        setCurrentUserId(userRes.data.user._id);
-
-        const { data } = await apiClient.get('/events');
-        setEvents(data.events.map((ev: any) => ({
-          id: ev._id, title: ev.title, location: ev.location, organizer: ev.organizerName,
-          month: new Date(ev.startDate).toLocaleString('default', { month: 'short' }).toUpperCase(),
-          day: new Date(ev.startDate).getDate().toString(), image: ev.image, isMine: ev.organizer === userRes.data.user._id
-        })));
-      } catch (err) { console.error(err); }
-    })();
-  }, []);
+  const { events } = useEvents();
 
   const FeaturedEventCard = ({ event, onPress }: any) => (
     <TouchableOpacity onPress={onPress} activeOpacity={0.9} className="w-[300px] bg-white rounded-[35px] border border-gray-100 shadow-sm mr-5 overflow-hidden">
@@ -95,4 +78,5 @@ export default function Home() {
     </View>
   );
 }
+
 

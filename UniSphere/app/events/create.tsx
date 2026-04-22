@@ -59,11 +59,11 @@ export default function CreateEvent() {
       setIsPublishing(true);
       const sDate = parseDate(form.startDate, form.startTime), eDate = parseDate(form.endDate, form.endTime);
       if (isNaN(sDate.getTime()) || isNaN(eDate.getTime())) { showAlert("Invalid Dates", "Please enter valid dates in mm/dd/yyyy format"); return; }
-      
+
       const payload = { ...form, startDate: sDate, endDate: eDate, tags, image: image || undefined };
       const { data } = isEditing ? await apiClient.put(`/events/${editId}`, payload) : await apiClient.post('/events', payload);
-      
-      if (data.success) { setSuccessMessage(isEditing ? "Event updated successfully!" : "Event published successfully!"); setShowSuccessModal(true); } 
+
+      if (data.success) { setSuccessMessage(isEditing ? "Event updated successfully!" : "Event published successfully!"); setShowSuccessModal(true); }
       else showAlert("Error", data.message || "Something went wrong");
     } catch (error: any) { showAlert("Error", error.response?.data?.message || "An error occurred during publishing"); } finally { setIsPublishing(false); }
   };
@@ -97,7 +97,7 @@ export default function CreateEvent() {
         <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingTop: Platform.OS === 'ios' ? 70 : 60, paddingBottom: 10 }}>
           <View className="flex-row justify-between items-start mb-2">
             <Text className="text-4xl font-black text-gray-900 leading-tight flex-1">{isEditing ? 'Edit Event' : 'New Event'}</Text>
-            <TouchableOpacity onPress={()=> router.back()} className="bg-gray-100 p-3 rounded-full ml-4"><X size={24} color="#1F2937" strokeWidth={2.5} /></TouchableOpacity>
+            <TouchableOpacity onPress={() => router.back()} className="bg-gray-100 p-3 rounded-full ml-4"><X size={24} color="#1F2937" strokeWidth={2.5} /></TouchableOpacity>
           </View>
           <Text className="text-gray-500 text-base mb-8">Fill in the details to curate your campus experience.</Text>
 
