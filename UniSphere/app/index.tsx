@@ -1,14 +1,10 @@
-import React from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Search, ShoppingBasket, Users, Calendar, GraduationCap, UtensilsCrossed, Map as MapIcon, Bookmark, BookOpen, HomeIcon, HelpCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { Bookmark, BookOpen, Calendar, HelpCircle, HomeIcon, Search, ShoppingBasket, Users,loading } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-
 import Footer from './components/Footer';
 import { useEvents } from '../hooks/useEvents';
-import { Header } from '@react-navigation/elements';
+import Header from './components/Header';
 
 // Defined routes inside the category object for cleaner navigation logic
 const categories = [
@@ -22,7 +18,7 @@ const categories = [
 
 export default function Home() {
   const router = useRouter();
-  const { events } = useEvents();
+  const { events, loading } = useEvents();
 
   const FeaturedEventCard = ({ event, onPress }: any) => (
     <TouchableOpacity 

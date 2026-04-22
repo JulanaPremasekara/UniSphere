@@ -52,6 +52,7 @@ export const useProfile = () => {
     try {
       const response = await apiClient.put('/users/update', {
         name: formData.name,
+        phone: formData.phone,
         year: formData.year,
         major: formData.major,
         password: formData.password || undefined

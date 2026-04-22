@@ -11,10 +11,10 @@ export default function UpdateProfile() {
   const { user, loading, isUpdating, errorMessage, successMessage, updateProfile, deleteAccount } = useProfile();
   const [showError, setShowError] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', year: '', major: '', password: '', confirmPassword: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', year: '', major: '', password: '', confirmPassword: '' });
 
   useEffect(() => {
-    if (user) setFormData({ name: user.name || '', email: user.email || '', year: user.year || '', major: user.major || '', password: '', confirmPassword: '' });
+    if (user) setFormData({ name: user.name || '', email: user.email || '', phone: user.phone || '', year: user.year || '', major: user.major || '', password: '', confirmPassword: '' });
   }, [user]);
 
   const handleUpdate = async () => {
