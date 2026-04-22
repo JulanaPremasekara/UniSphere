@@ -10,7 +10,7 @@ export default function SignUp() {
   const router = useRouter();
   const { signup, isLoading, errorMessage } = useAuth();
   const [showError, setShowError] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', year: '', major: '', password: '', confirmPassword: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', year: '', major: '', password: '', confirmPassword: '' });
 
   const handleSignUp = async () => {
     const success = await signup(formData);
