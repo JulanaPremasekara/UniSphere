@@ -14,13 +14,18 @@ export default function RootLayout() {
   return (
     <GluestackUIProvider mode="dark">
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="events/index" />
-          <Stack.Screen name="events/[id]" />
-          <Stack.Screen name="events/create" options={{ presentation: 'modal' }} />
-        </Stack>
-      </GestureHandlerRootView>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="index" />
+        <Stack.Screen name="marketplace"/>
+        <Stack.Screen name="events/create" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="Tutors" />
+        <Stack.Screen name="studyGroup" />
+      </Stack>
+    </GestureHandlerRootView>
     </GluestackUIProvider>
   );
 }
