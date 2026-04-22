@@ -2,33 +2,16 @@ import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Bell, Calendar, ChevronLeft, ChevronRight, CircleUserRound, GraduationCap, LogOut, Mail, Settings, ShieldCheck } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React from 'react';
 import { ActivityIndicator, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Footer from './components/Footer';
-import apiClient from './services/api';
-import { AppStorage } from './services/storage';
+import { useProfile } from '../hooks/useProfile';
 
 export default function Profile() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading, logout, refreshProfile } = useProfile();
 
-  useFocusEffect(React.useCallback(() => { fetchProfile(); }, []));
-
-  const fetchProfile = async () => {
-    try {
-      if (!(await AppStorage.getItem('userToken'))) { setUser(null); return; }
-      const res = await apiClient.get('/users/me');
-      if (res.data.success) Object.assign(user || {}, res.data.user);
-      else { await AppStorage.removeItem('userToken'); setUser(null); }
-      setUser(res.data.success ? res.data.user : null);
-    } catch { setUser(null); } finally { setLoading(false); }
-  };
-
-  const handleLogout = async () => {
-    await AppStorage.removeItem('userToken');
-    setUser(null); router.replace('/login');
-  };
+  useFocusEffect(React.useCallback(() => { refreshProfile(); }, [refreshProfile]));
 
   if (loading) return <View className="flex-1 justify-center items-center bg-white"><ActivityIndicator size="large" color="#4F46E5" /></View>;
 
@@ -83,7 +66,7 @@ export default function Profile() {
             <ProfileMenuItem icon={Calendar} label="Registered Events" onPress={() => router.push('/events/registrations')} />
             <ProfileMenuItem icon={Bell} label="Notifications" />
             <ProfileMenuItem icon={ShieldCheck} label="Privacy & Security" />
-            <TouchableOpacity onPress={handleLogout} className="flex-row items-center bg-red-50 p-5 rounded-[28px] mt-8 border border-red-100">
+            <TouchableOpacity onPress={logout} className="flex-row items-center bg-red-50 p-5 rounded-[28px] mt-8 border border-red-100">
               <LogOut size={22} color="#EF4444" />
               <Text className="ml-4 font-bold text-red-600 text-lg">Log Out</Text>
             </TouchableOpacity>

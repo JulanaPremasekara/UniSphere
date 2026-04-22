@@ -1,55 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Platform, Alert, ActivityIndicator, Modal, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Calendar, Search, Plus, Trash2, X } from 'lucide-react-native';
 import EventCard from '../components/EventCard';
 import Footer from '../components/Footer';
 import apiClient from '../services/api';
+import { useEvents, Event } from '../../hooks/useEvents';
+import { useUser } from '../../hooks/useUser';
 
 export default function Home() {
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState('All');
-  const [events, setEvents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState(null);
+  const { events, loading, refreshEvents } = useEvents();
+  const { userId } = useUser();
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
   const [loginModalVisible, setLoginModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        const { data: { user } } = await apiClient.get('/users/me');
-        setUserId(user._id);
-
-        const { data: { success, events: fetchedEvents } } = await apiClient.get('/events');
-        if (success) {
-          setEvents(fetchedEvents.map((ev: any) => ({
-            id: ev._id, title: ev.title, month: new Date(ev.startDate).toLocaleString('en-US', { month: 'short' }).toUpperCase(),
-            day: new Date(ev.startDate).getDate().toString(), location: ev.location,
-            organizer: ev.organizerName || 'Campus Event', isMine: ev.organizer === user._id,
-          })));
-        }
-      } catch (error) { Alert.alert("Error", "Could not load events."); } finally { setLoading(false); }
-    })();
-  }, []);
-
   const confirmDelete = async () => {
     if (!eventToDelete) return;
     try {
-      if ((await apiClient.delete(`/events/${eventToDelete}`)).data.success) {
-        setEvents(prev => prev.filter(ev => ev.id !== eventToDelete));
-      }
+      if ((await apiClient.delete(`/events/${eventToDelete}`)).data.success) refreshEvents();
     } catch { Alert.alert("Error", "Failed to delete event."); } finally { setDeleteModalVisible(false); setEventToDelete(null); }
   };
 
-  const filteredEvents = events.filter(e => 
+  const filteredEvents = events.filter((e: Event) => 
     (activeFilter === 'All' ? true : activeFilter === 'Mine' ? e.isMine : !e.isMine) &&
     e.title.toLowerCase().startsWith(searchQuery.toLowerCase())
   );
+
 
   if (loading) return <View className="flex-1 justify-center items-center bg-white"><ActivityIndicator size="large" color="#4F46E5" /></View>;
 
@@ -84,7 +65,7 @@ export default function Home() {
 
       <ScrollView className="flex-1 px-6" contentContainerStyle={{ paddingBottom: 120 }}>
         <View className="mt-6 mb-4"><Text className="text-xl font-medium">{searchQuery ? 'Search Results' : 'Campus Feed'}</Text></View>
-        {filteredEvents.length > 0 ? filteredEvents.map(item => (
+        {filteredEvents.length > 0 ? filteredEvents.map((item: Event) => (
           <EventCard key={item.id} item={item} onPress={() => router.push(`/events/${item.id}`)} onEdit={item.isMine ? () => router.push({ pathname: '/events/create', params: { editId: item.id } }) : undefined} onDelete={item.isMine ? () => { setEventToDelete(item.id); setDeleteModalVisible(true); } : undefined} />
         )) : (
           <View className="flex-1 items-center justify-center py-20">
@@ -130,3 +111,4 @@ export default function Home() {
     </View>
   );
 }
+

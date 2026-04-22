@@ -6,35 +6,13 @@ import { VStack } from '@/components/ui/vstack';
 import { ChevronLeftIcon, Icon } from '@/components/ui/icon';
 import LoginForm from './components/form'; 
 import { GraduationCap } from 'lucide-react-native';
-import apiClient from './services/api';
-import { AppStorage } from './services/storage';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const handleLogin = async () => {
-    if (!email.includes('@')) return setErrorMessage("Enter a valid email address.");
-    if (password.length < 6) return setErrorMessage("Password must be at least 6 characters.");
-
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    try {
-      const response = await apiClient.post('/users/login', { email, password });
-      if (response.data.token) {
-        await AppStorage.setItem('userToken', response.data.token);
-        router.replace('/');
-      }
-    } catch (error: any) {
-      setErrorMessage(error.response?.data?.message || "Server unreachable. Check your connection.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { login, isLoading, errorMessage } = useAuth();
 
   return (
     <ScrollView className="flex-1 bg-white" contentContainerStyle={{ flexGrow: 1 }}>
@@ -59,7 +37,7 @@ export default function Login() {
         <VStack space="xl">
           <LoginForm email={email} setEmail={setEmail} password={password} setPassword={setPassword} errorMessage={errorMessage} />
           
-          <Button onPress={handleLogin} disabled={isLoading} className="bg-indigo-600 h-16 rounded-[25px] mt-6 shadow-md shadow-indigo-200">
+          <Button onPress={() => login(email, password)} disabled={isLoading} className="bg-indigo-600 h-16 rounded-[25px] mt-6 shadow-md shadow-indigo-200">
             {isLoading && <ButtonSpinner className="mr-2" />}
             <ButtonText className="font-bold text-lg">Sign In</ButtonText>
           </Button>
