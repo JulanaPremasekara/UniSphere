@@ -1,63 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView, Alert, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView, ActivityIndicator, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import { ChevronLeft, GraduationCap, Trash2 } from 'lucide-react-native';
 import UpdateProfileForm from './components/UpdateProfileForm';
-import apiClient from './services/api';
-import { AppStorage } from './services/storage';
+import { useProfile } from '../hooks/useProfile';
 
 export default function UpdateProfile() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [fetchingUser, setFetchingUser] = useState(true);
+  const { user, loading, isUpdating, errorMessage, successMessage, updateProfile, deleteAccount } = useProfile();
   const [showError, setShowError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', year: '', major: '', password: '', confirmPassword: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', year: '', major: '', password: '', confirmPassword: '' });
 
-  useEffect(() => { fetchUserData(); }, []);
-
-  const fetchUserData = async () => {
-    try {
-      const { data } = await apiClient.get('/users/me');
-      if (data.success) setFormData({ name: data.user.name || '', email: data.user.email || '', year: data.user.year || '', major: data.user.major || '', password: '', confirmPassword: '' });
-    } catch (e) {
-      setErrorMessage("Failed to load user profile");
-    } finally { setFetchingUser(false); }
-  };
+  useEffect(() => {
+    if (user) setFormData({ name: user.name || '', email: user.email || '', phone: user.phone || '', year: user.year || '', major: user.major || '', password: '', confirmPassword: '' });
+  }, [user]);
 
   const handleUpdate = async () => {
-    if ((formData.password && formData.password.length < 6) || formData.password !== formData.confirmPassword) {
-      return setShowError(true);
-    }
-    setShowError(false); setIsLoading(true); setErrorMessage(null);
-    try {
-      const response = await apiClient.put('/users/update', { name: formData.name, year: formData.year, major: formData.major, password: formData.password || undefined });
-      if (response.data.success) {
-        setSuccessMessage("Profile updated successfully!");
-        Platform.OS !== 'web' ? Alert.alert("Success", "Profile updated successfully!", [{ text: "OK", onPress: () => router.back() }]) : setTimeout(() => router.back(), 1500);
-      }
-    } catch (error: any) {
-      setErrorMessage(error.response?.data?.message || "Update failed. Check your network.");
-    } finally { setIsLoading(false); }
+    const success = await updateProfile(formData);
+    if (!success && !errorMessage) setShowError(true);
   };
 
-  const confirmDelete = async () => {
-    try {
-      if ((await apiClient.delete('/users')).data.success) {
-        setDeleteModalVisible(false);
-        await AppStorage.removeItem('userToken');
-        router.replace('/login');
-      }
-    } catch (error: any) {
-      Alert.alert("Error", error.response?.data?.message || "Could not delete account.");
-      setDeleteModalVisible(false);
-    }
-  };
-
-  if (fetchingUser) return <View className="flex-1 justify-center items-center bg-white"><ActivityIndicator size="large" color="#4F46E5" /></View>;
+  if (loading) return <View className="flex-1 justify-center items-center bg-white"><ActivityIndicator size="large" color="#4F46E5" /></View>;
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-white">
@@ -85,8 +50,8 @@ export default function UpdateProfile() {
           <UpdateProfileForm formData={formData} setFormData={setFormData} showError={showError} errorMessage={errorMessage} />
 
           <View className="mt-12 mb-8">
-            <Button onPress={handleUpdate} disabled={isLoading} className="h-16 rounded-[25px] shadow-md shadow-indigo-200" style={{ backgroundColor: '#4F46E5' }}>
-              {isLoading && <ButtonSpinner className="mr-2" />}
+            <Button onPress={handleUpdate} disabled={isUpdating} className="h-16 rounded-[25px] shadow-md shadow-indigo-200" style={{ backgroundColor: '#4F46E5' }}>
+              {isUpdating && <ButtonSpinner className="mr-2" />}
               <ButtonText className="font-bold text-lg" style={{ color: 'white' }}>Update Changes</ButtonText>
             </Button>
           </View>
@@ -103,7 +68,7 @@ export default function UpdateProfile() {
             <Text className="text-gray-500 text-center text-lg mb-8 leading-relaxed">This will permanently remove your UniSphere account and all associated data. This action cannot be undone.</Text>
             <View className="flex-row gap-4 w-full">
               <TouchableOpacity onPress={() => setDeleteModalVisible(false)} className="flex-1 bg-gray-50 p-5 rounded-3xl"><Text className="text-gray-900 font-bold text-center text-lg">Cancel</Text></TouchableOpacity>
-              <TouchableOpacity onPress={confirmDelete} className="flex-1 bg-red-600 p-5 rounded-3xl shadow-lg shadow-red-200"><Text className="text-white font-bold text-center text-lg">Delete</Text></TouchableOpacity>
+              <TouchableOpacity onPress={async () => { await deleteAccount(); setDeleteModalVisible(false); }} className="flex-1 bg-red-600 p-5 rounded-3xl shadow-lg shadow-red-200"><Text className="text-white font-bold text-center text-lg">Delete</Text></TouchableOpacity>
             </View>
           </View>
         </TouchableOpacity>
@@ -111,3 +76,4 @@ export default function UpdateProfile() {
     </KeyboardAvoidingView>
   );
 }
+

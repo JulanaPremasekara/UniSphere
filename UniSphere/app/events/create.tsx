@@ -1,12 +1,40 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView, TextInput, Alert, Image, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView, TextInput, Alert, Image, Modal, GestureResponderEvent, TextInputSubmitEditingEvent } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, router } from 'expo-router';
 import { X, Camera, Calendar as CalendarIcon, MapPin, Plus, CheckCircle2 } from 'lucide-react-native';
 import { Input, InputField, InputSlot } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 import Footer from '../components/Footer';
 import apiClient from '../services/api';
+import { tags } from 'react-native-svg/lib/typescript/xmlTags';
+import form from '../components/form';
+
+const FormField = ({ label, place, val, field, icon: IconComp, multiline = false, className = "", updateForm }: any) => {
+  const isNumeric = ['startDate', 'endDate', 'startTime', 'endTime', 'phone'].includes(field);
+  return (
+    <View className={className}>
+      <Text className="text-[13px] font-bold text-gray-800 uppercase tracking-[1.5px] ml-1 mb-3">{label}</Text>
+      {multiline ? (
+        <View className="bg-gray-50 rounded-[22px] p-5 min-h-[120px]">
+          <TextInput multiline placeholder={place} className="text-gray-900 font-semibold text-lg text-start" placeholderTextColor="#9CA3AF" textAlignVertical="top" value={val} onChangeText={(text) => updateForm(field, text)} />
+        </View>
+      ) : (
+        <Input className="h-16 rounded-[22px] bg-gray-50 border-transparent px-5">
+          <InputField placeholder={place} keyboardType={isNumeric ? 'number-pad' : 'default'} className="font-semibold text-lg text-gray-800" value={val} onChangeText={(text) => updateForm(field, text)} />
+          {IconComp && <InputSlot className="pr-2"><IconComp size={22} color="#1F2937" /></InputSlot>}
+        </Input>
+      )}
+    </View>
+  );
+};
+
+const RowField = ({ label1, place1, val1, field1, icon1, label2, place2, val2, field2, updateForm }: any) => (
+  <View className="flex-row gap-4">
+    <FormField label={label1} place={place1} val={val1} field={field1} icon={icon1} className="flex-1" updateForm={updateForm} />
+    <FormField label={label2} place={place2} val={val2} field={field2} className="w-1/3" updateForm={updateForm} />
+  </View>
+);
 
 export default function CreateEvent() {
   const router = useRouter();
@@ -59,37 +87,31 @@ export default function CreateEvent() {
       setIsPublishing(true);
       const sDate = parseDate(form.startDate, form.startTime), eDate = parseDate(form.endDate, form.endTime);
       if (isNaN(sDate.getTime()) || isNaN(eDate.getTime())) { showAlert("Invalid Dates", "Please enter valid dates in mm/dd/yyyy format"); return; }
-      
+
       const payload = { ...form, startDate: sDate, endDate: eDate, tags, image: image || undefined };
       const { data } = isEditing ? await apiClient.put(`/events/${editId}`, payload) : await apiClient.post('/events', payload);
-      
-      if (data.success) { setSuccessMessage(isEditing ? "Event updated successfully!" : "Event published successfully!"); setShowSuccessModal(true); } 
+
+      if (data.success) { setSuccessMessage(isEditing ? "Event updated successfully!" : "Event published successfully!"); setShowSuccessModal(true); }
       else showAlert("Error", data.message || "Something went wrong");
     } catch (error: any) { showAlert("Error", error.response?.data?.message || "An error occurred during publishing"); } finally { setIsPublishing(false); }
   };
 
-  const FormField = ({ label, place, val, field, icon: IconComp, multiline = false, className = "" }: any) => (
-    <View className={className}>
-      <Text className="text-[13px] font-bold text-gray-800 uppercase tracking-[1.5px] ml-1 mb-3">{label}</Text>
-      {multiline ? (
-        <View className="bg-gray-50 rounded-[22px] p-5 min-h-[120px]">
-          <TextInput multiline placeholder={place} className="text-gray-900 font-semibold text-lg text-start" placeholderTextColor="#9CA3AF" textAlignVertical="top" value={val} onChangeText={(text) => setForm({ ...form, [field]: text })} />
-        </View>
-      ) : (
-        <Input className="h-16 rounded-[22px] bg-gray-50 border-transparent px-5">
-          <InputField placeholder={place} className="font-semibold text-lg text-gray-800" value={val} onChangeText={(text) => setForm({ ...form, [field]: text })} />
-          {IconComp && <InputSlot className="pr-2"><IconComp size={22} color="#1F2937" /></InputSlot>}
-        </Input>
-      )}
-    </View>
-  );
+  const updateForm = (field: string, text: string) => {
+    let formattedText = text;
 
-  const RowField = ({ label1, place1, val1, field1, icon1, label2, place2, val2, field2 }: any) => (
-    <View className="flex-row gap-4">
-      <FormField label={label1} place={place1} val={val1} field={field1} icon={icon1} className="flex-1" />
-      <FormField label={label2} place={place2} val={val2} field={field2} className="w-1/3" />
-    </View>
-  );
+    if (field === 'startDate' || field === 'endDate') {
+      const digits = text.replace(/\D/g, '');
+      if (digits.length <= 2) formattedText = digits;
+      else if (digits.length <= 4) formattedText = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+      else formattedText = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
+    } else if (field === 'startTime' || field === 'endTime') {
+      const digits = text.replace(/\D/g, '');
+      if (digits.length <= 2) formattedText = digits;
+      else formattedText = `${digits.slice(0, 2)}:${digits.slice(2, 4)}`;
+    }
+
+    setForm({ ...form, [field]: formattedText });
+  };
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-white">
@@ -97,7 +119,7 @@ export default function CreateEvent() {
         <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingTop: Platform.OS === 'ios' ? 70 : 60, paddingBottom: 10 }}>
           <View className="flex-row justify-between items-start mb-2">
             <Text className="text-4xl font-black text-gray-900 leading-tight flex-1">{isEditing ? 'Edit Event' : 'New Event'}</Text>
-            <TouchableOpacity onPress={()=> router.back()} className="bg-gray-100 p-3 rounded-full ml-4"><X size={24} color="#1F2937" strokeWidth={2.5} /></TouchableOpacity>
+            <TouchableOpacity onPress={() => router.back()} className="bg-gray-100 p-3 rounded-full ml-4"><X size={24} color="#1F2937" strokeWidth={2.5} /></TouchableOpacity>
           </View>
           <Text className="text-gray-500 text-base mb-8">Fill in the details to curate your campus experience.</Text>
 
@@ -107,11 +129,11 @@ export default function CreateEvent() {
           </TouchableOpacity>
 
           <VStack space="xl">
-            <FormField label="Event Title" place="e.g., Design Symposium" val={form.title} field="title" />
-            <RowField label1="Start Date" place1="mm/dd/yyyy" val1={form.startDate} field1="startDate" icon1={CalendarIcon} label2="Time" place2="00:00" val2={form.startTime} field2="startTime" />
-            <RowField label1="End Date" place1="mm/dd/yyyy" val1={form.endDate} field1="endDate" icon1={CalendarIcon} label2="Time" place2="00:00" val2={form.endTime} field2="endTime" />
-            <FormField label="Venue / Location" place="Innovation Hub, Room 402" val={form.location} field="location" icon={MapPin} />
-            <FormField label="About the Event" place="Describe your event here..." val={form.description} field="description" multiline={true} />
+            <FormField label="Event Title" place="e.g., Design Symposium" val={form.title} field="title" updateForm={updateForm} />
+            <RowField label1="Start Date" place1="mm/dd/yyyy" val1={form.startDate} field1="startDate" icon1={CalendarIcon} label2="Time" place2="00:00" val2={form.startTime} field2="startTime" updateForm={updateForm} />
+            <RowField label1="End Date" place1="mm/dd/yyyy" val1={form.endDate} field1="endDate" icon1={CalendarIcon} label2="Time" place2="00:00" val2={form.endTime} field2="endTime" updateForm={updateForm} />
+            <FormField label="Venue / Location" place="Innovation Hub, Room 402" val={form.location} field="location" icon={MapPin} updateForm={updateForm} />
+            <FormField label="About the Event" place="Describe your event here..." val={form.description} field="description" multiline={true} updateForm={updateForm} />
 
             <View>
               <Text className="text-[13px] font-bold text-gray-800 uppercase tracking-[1.5px] ml-1 mb-3">Event Tags</Text>

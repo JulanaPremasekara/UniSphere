@@ -1,11 +1,10 @@
-import { useRouter } from 'expo-router';
-import { Bookmark, BookOpen, Calendar, HelpCircle, HomeIcon, Search, ShoppingBasket, Users } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { Search, ShoppingBasket, Users, Calendar, GraduationCap, UtensilsCrossed, Map as MapIcon, Bookmark, BookOpen, HomeIcon, HelpCircle } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import Footer from './components/Footer';
+import { useEvents } from '../hooks/useEvents';
 import Header from './components/Header';
-import apiClient from './services/api';
 
 // Defined routes inside the category object for cleaner navigation logic
 const categories = [
@@ -19,42 +18,7 @@ const categories = [
 
 export default function Home() {
   const router = useRouter();
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [currentUserId, setCurrentUserId] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Get Current User
-        const userRes = await apiClient.get('/users/me');
-        const userId = userRes.data?.user?._id;
-        setCurrentUserId(userId);
-
-        // Get Events
-        const { data } = await apiClient.get('/events');
-        if (data && data.events) {
-          const formattedEvents = data.events.map((ev: any) => ({
-            id: ev._id,
-            title: ev.title,
-            location: ev.location,
-            organizer: ev.organizerName || 'Anonymous',
-            month: new Date(ev.startDate).toLocaleString('default', { month: 'short' }).toUpperCase(),
-            day: new Date(ev.startDate).getDate().toString(),
-            image: ev.image,
-            isMine: ev.organizer === userId
-          }));
-          setEvents(formattedEvents);
-        }
-      } catch (err) {
-        console.error("Error fetching home data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const { events, loading } = useEvents();
 
   const FeaturedEventCard = ({ event, onPress }: any) => (
     <TouchableOpacity 
@@ -159,3 +123,5 @@ export default function Home() {
     </View>
   );
 }
+
+

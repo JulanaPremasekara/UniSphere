@@ -1,33 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Platform, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Calendar, ChevronLeft } from 'lucide-react-native';
 import EventCard from '../components/EventCard';
 import Footer from '../components/Footer';
-import apiClient from '../services/api';
+import { useEvents } from '../../hooks/useEvents';
 
 export default function MyRegistrations() {
   const router = useRouter();
-  const [events, setEvents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => { fetchRegistrations(); }, []);
-
-  const fetchRegistrations = async () => {
-    try {
-      setLoading(true);
-      const { data: { user } } = await apiClient.get('/users/me');
-      const { data: { success, events: fetchedEvents } } = await apiClient.get('/events/me/registrations');
-
-      if (success) {
-        setEvents(fetchedEvents.map((ev: any) => ({
-          id: ev._id, title: ev.title, month: new Date(ev.startDate).toLocaleString('en-US', { month: 'short' }).toUpperCase(),
-          day: new Date(ev.startDate).getDate().toString(), location: ev.location,
-          organizer: ev.organizerName || 'Campus Event', isMine: ev.organizer === user._id,
-        })));
-      }
-    } catch { Alert.alert("Error", "Could not load your registered events."); } finally { setLoading(false); }
-  };
+  const { events, loading } = useEvents('registrations');
 
   if (loading) return <View className="flex-1 justify-center items-center bg-white"><ActivityIndicator size="large" color="#4F46E5" /></View>;
 
@@ -56,3 +37,4 @@ export default function MyRegistrations() {
     </View>
   );
 }
+

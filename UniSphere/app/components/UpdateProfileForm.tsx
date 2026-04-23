@@ -5,20 +5,20 @@ import { AlertCircleIcon, Icon } from '@/components/ui/icon';
 import { Input, InputField } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 
+const Field = ({ label, place, val, field, update, edit = true, type = 'text', err }: any) => (
+  <FormControl isInvalid={!!err}>
+    <FormControlLabel><FormControlLabelText className="text-gray-700 font-semibold">{label}</FormControlLabelText></FormControlLabel>
+    <Input className={`h-14 rounded-[20px] ${edit ? 'bg-gray-50' : 'bg-gray-100'} border-transparent px-2`}>
+      <InputField type={type} placeholder={place} value={val} editable={edit} onChangeText={edit ? (v) => update(field, v) : undefined} className={edit ? "text-gray-800" : "text-gray-400"} />
+    </Input>
+    {err && <FormControlError className="mt-2"><FormControlErrorIcon as={AlertCircleIcon} /><FormControlErrorText>{err}</FormControlErrorText></FormControlError>}
+  </FormControl>
+);
+
 export default function UpdateProfileForm({ formData, setFormData, showError, errorMessage }: any) {
   const update = (f: string, v: string) => setFormData({ ...formData, [f]: v });
   const pwOk = !formData.password || formData.password.length >= 6;
   const pwMatch = formData.password === formData.confirmPassword;
-
-  const Field = ({ label, place, val, field, edit = true, type = 'text', err }: any) => (
-    <FormControl isInvalid={!!err}>
-      <FormControlLabel><FormControlLabelText className="text-gray-700 font-semibold">{label}</FormControlLabelText></FormControlLabel>
-      <Input className={`h-14 rounded-[20px] ${edit ? 'bg-gray-50' : 'bg-gray-100'} border-transparent px-2`}>
-        <InputField type={type} placeholder={place} value={val} editable={edit} onChangeText={edit ? (v) => update(field, v) : undefined} className={edit ? "text-gray-800" : "text-gray-400"} />
-      </Input>
-      {err && <FormControlError className="mt-2"><FormControlErrorIcon as={AlertCircleIcon} /><FormControlErrorText>{err}</FormControlErrorText></FormControlError>}
-    </FormControl>
-  );
 
   return (
     <VStack space="lg">
@@ -29,17 +29,18 @@ export default function UpdateProfileForm({ formData, setFormData, showError, er
         </View>
       )}
 
-      <Field label="Full Name" place="John Doe" val={formData.name} field="name" />
-      <Field label="University Email (Cannot be changed)" place="University Email" val={formData.email} edit={false} />
+      <Field label="Full Name" place="John Doe" val={formData.name} field="name" update={update} />
+      <Field label="University Email (Cannot be changed)" place="University Email" val={formData.email} edit={false} update={update} />
+      <Field label="Phone Number" place="Phone Number" val={formData.phone} field="phone" update={update} />
       
       <VStack space="md">
-        <Field label="Year of Study" place="e.g. Year 1" val={formData.year} field="year" />
-        <Field label="Field of Study" place="e.g., Data Science" val={formData.major} field="major" />
+        <Field label="Year of Study" place="e.g. Year 1" val={formData.year} field="year" update={update} />
+        <Field label="Field of Study" place="e.g., Data Science" val={formData.major} field="major" update={update} />
       </VStack>
 
       <VStack space="md">
-        <Field label="New Password (Optional)" place="Leave blank to keep current" val={formData.password} field="password" type="password" err={showError && !pwOk ? "Password must be at least 6 characters." : null} />
-        <Field label="Confirm New Password" place="Confirm Password" val={formData.confirmPassword} field="confirmPassword" type="password" err={showError && !pwMatch ? "Passwords do not match" : null} />
+        <Field label="New Password (Optional)" place="Leave blank to keep current" val={formData.password} field="password" type="password" update={update} err={showError && !pwOk ? "Password must be at least 6 characters." : null} />
+        <Field label="Confirm New Password" place="Confirm Password" val={formData.confirmPassword} field="confirmPassword" type="password" update={update} err={showError && !pwMatch ? "Passwords do not match" : null} />
       </VStack>
     </VStack>
   );

@@ -1,42 +1,15 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft, Calendar, Clock, MapPin, VerifiedIcon, CheckCheckIcon, CheckCircle2 } from 'lucide-react-native';
-import { Modal, Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View, Platform, ActivityIndicator, Alert } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import { ChevronLeft, Calendar, Clock, MapPin, Verified, CheckCheck, CheckCircle2 } from 'lucide-react-native';
+import { Modal, Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View, Platform, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
 import Footer from '../components/Footer';
-import apiClient from '../services/api';
+import { useEventDetail } from '../../hooks/useEventDetail';
 
 export default function EventDetail() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  
-  const [event, setEvent] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [isRegistered, setIsRegistered] = useState(false);
-  const [registering, setRegistering] = useState(false);
+  const { event, loading, isRegistered, registering, register } = useEventDetail(id);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        const [{ data: evRes }, { data: userRes }] = await Promise.all([
-          apiClient.get(`/events/${id}`),
-          apiClient.get('/users/me').catch(() => ({ data: { success: false } }))
-        ]);
-        if (evRes.success) {
-          setEvent(evRes.event);
-          if (userRes.success && (evRes.event.registrants || []).includes(userRes.user._id)) setIsRegistered(true);
-        }
-      } catch (error) { console.error("Error fetching event details:", error); } finally { setLoading(false); }
-    })();
-  }, [id]);
-
-  const performRegistration = async () => {
-    try {
-      setConfirmModalVisible(false); setRegistering(true);
-      if ((await apiClient.post(`/events/${id}/register`)).data.success) setIsRegistered(true);
-    } catch (error: any) { Alert.alert("Error", error.response?.data?.message || "Could not register for event"); } finally { setRegistering(false); }
-  };
 
   if (loading) return <View className="flex-1 justify-center items-center bg-white"><ActivityIndicator size="large" color="#4F46E5" /></View>;
   if (!event) return <View className="flex-1 justify-center items-center"><Text>Event not found.</Text><TouchableOpacity onPress={() => router.back()} className="mt-4 bg-indigo-600 px-6 py-2 rounded-full"><Text className="text-white">Go Back</Text></TouchableOpacity></View>;
@@ -58,7 +31,7 @@ export default function EventDetail() {
       <View className="flex-row justify-between items-center px-6 bg-white" style={{ paddingTop: Platform.OS === 'ios' ? 60 : 50, paddingBottom: 15 }}>
         <TouchableOpacity onPress={() => router.back()}><ChevronLeft color="#000" size={28} /></TouchableOpacity>
         <Text className="text-xl font-bold text-indigo-900">UniSphere</Text>
-        <TouchableOpacity></TouchableOpacity>
+        <View style={{ width: 28 }} />
       </View>
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
@@ -74,7 +47,7 @@ export default function EventDetail() {
 
         <View className="px-6 mt-6">
           <Text className="text-3xl font-black text-gray-900 leading-tight">{event.title}</Text>
-          <View className="flex-row items-center mt-2"><VerifiedIcon color="#4F46E5" size={18} /><Text className="text-gray-600 font-medium ml-2">Hosted by {event.organizerName}</Text></View>
+          <View className="flex-row items-center mt-2"><Verified color="#4F46E5" size={18} /><Text className="text-gray-600 font-medium ml-2">Hosted by {event.organizerName}</Text></View>
         </View>  
 
         <View className="mx-6 mt-8 bg-gray-100/60 p-6 rounded-[35px]">
@@ -95,7 +68,7 @@ export default function EventDetail() {
 
       <View className="absolute bottom-28 left-0 right-0 px-6">
         <TouchableOpacity onPress={() => !isRegistered && !registering && setConfirmModalVisible(true)} disabled={isRegistered || registering} className={`${isRegistered ? 'bg-emerald-600' : 'bg-indigo-700'} py-5 rounded-[30px] flex-row items-center justify-center`}>
-          {isRegistered && <CheckCheckIcon color="white" size={20} className="mr-2" />}
+          {isRegistered && <CheckCheck color="white" size={20} className="mr-2" />}
           <Text className="text-white font-black text-lg">{registering ? 'Registering...' : isRegistered ? 'Registered' : 'RSVP / Register'}</Text>
         </TouchableOpacity>
       </View>
@@ -109,7 +82,7 @@ export default function EventDetail() {
             <Text className="text-gray-500 text-center text-lg mb-8 leading-relaxed">Are you sure you want to register for "{event.title}"? Your attendance will be confirmed.</Text>
             <View className="flex-row gap-4 w-full">
               <TouchableOpacity onPress={() => setConfirmModalVisible(false)} className="flex-1 bg-gray-50 p-5 rounded-3xl"><Text className="text-gray-900 font-bold text-center text-lg">Cancel</Text></TouchableOpacity>
-              <TouchableOpacity onPress={performRegistration} className="flex-1 bg-indigo-600 p-5 rounded-3xl shadow-lg shadow-indigo-200"><Text className="text-white font-bold text-center text-lg">Register</Text></TouchableOpacity>
+              <TouchableOpacity onPress={async () => { setConfirmModalVisible(false); await register(); }} className="flex-1 bg-indigo-600 p-5 rounded-3xl shadow-lg shadow-indigo-200"><Text className="text-white font-bold text-center text-lg">Register</Text></TouchableOpacity>
             </View>
           </View>
         </TouchableOpacity>
@@ -117,3 +90,4 @@ export default function EventDetail() {
     </SafeAreaView>
   );
 }
+

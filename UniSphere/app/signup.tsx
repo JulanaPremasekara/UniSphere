@@ -4,36 +4,17 @@ import { useRouter } from 'expo-router';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import { ChevronLeft, GraduationCap } from 'lucide-react-native';
 import SignUpForm from './components/SignUpForm';
-import apiClient from './services/api';
+import { useAuth } from '../hooks/useAuth';
 
 export default function SignUp() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const { signup, isLoading, errorMessage } = useAuth();
   const [showError, setShowError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const [formData, setFormData] = useState({ name: '', email: '', year: '', major: '', password: '', confirmPassword: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', year: '', major: '', password: '', confirmPassword: '' });
 
   const handleSignUp = async () => {
-    if (!formData.email.includes('@') || formData.password.length < 6 || formData.password !== formData.confirmPassword) {
-      setShowError(true);
-      setErrorMessage(null);
-      return;
-    }
-
-    setShowError(false);
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    try {
-      const response = await apiClient.post('/users/signup', formData);
-      if (response.status === 201) router.replace('/login');
-    } catch (error: any) {
-      setErrorMessage(error.response?.data?.message || "Registration failed. Check your network.");
-      setShowError(false);
-    } finally {
-      setIsLoading(false);
-    }
+    const success = await signup(formData);
+    if (!success && !errorMessage) setShowError(true);
   };
 
   return (
