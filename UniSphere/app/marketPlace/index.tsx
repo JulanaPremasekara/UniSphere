@@ -6,20 +6,50 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useRouter } from "expo-router";
 import { Bell, ChevronLeft, Plus, Search } from "lucide-react-native";
-import React, { useState } from "react";
-import { Image, ScrollView, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Image, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
+import axios from 'axios';
+import { RefreshControl } from 'react-native';
 
-
-// Mock Data for the UI
+// 1. Move static constants outside the component
 const CATEGORIES = ["All items", "Textbooks", "Electronics", "Clothing"];
-const PRODUCTS = [
-  { id: "1", title: "Modern Physics: Third Edition", price: "$45.00", image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1000", isNew: true },
-  { id: "2", title: "MacBook Air M2 (8GB/256GB)", price: "$850.00", image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1000", isNew: false },
-];
 
 export default function MarketplaceIndex() {
-  const [activeTab, setActiveTab] = useState("All items");
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState("All items");
+  
+  // 2. Hook up state for live database products
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // 3. Fetch data from backend inside the component
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        // Double-check your computer's IP via ipconfig
+        const response = await axios.get("http://192.168.1.7:5000/api/marketplace");
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Error fetching items:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchItems();
+  }, []);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+const onRefresh = async () => {
+  setRefreshing(true);
+  try {
+    const response = await axios.get("http://192.168.1.7:5000/api/marketplace");
+    setProducts(response.data);
+  } catch (error) {
+    console.error(error);
+  }
+  setRefreshing(false);
+};
 
   return (
     <Box className="flex-1 bg-white">
@@ -49,7 +79,9 @@ export default function MarketplaceIndex() {
           </Input>
 
           {/* Category Pills */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6" refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }>
             <HStack space="sm">
               {CATEGORIES.map((cat) => (
                 <TouchableOpacity 
@@ -64,31 +96,33 @@ export default function MarketplaceIndex() {
           </ScrollView>
 
           {/* Product Grid */}
-          <HStack className="flex-wrap justify-between">
-            {PRODUCTS.map((item) => (
-              <TouchableOpacity 
-                key={item.id} 
-                className="w-[48%] mb-6"
-                // Using the object syntax helps TypeScript resolve the dynamic ID
-                onPress={() => router.push({ pathname: "/marketplace/[id]", params: { id: item.id } })}
-              >
-                <Box className="relative aspect-square rounded-[30px] overflow-hidden bg-gray-100 mb-2">
-                  <Image source={{ uri: item.image }} className="w-full h-full" />
-                  {item.isNew && (
-                    <Box className="absolute top-3 right-3 bg-white px-2 py-1 rounded-lg">
-                      <Text className="text-[10px] font-bold text-indigo-600">NEW</Text>
-                    </Box>
-                  )}
-                </Box>
-                <Text className="font-bold text-gray-800" numberOfLines={1}>{item.title}</Text>
-                <Text className="text-gray-900 font-black">{item.price}</Text>
-              </TouchableOpacity>
-            ))}
-          </HStack>
+          {loading ? (
+            <ActivityIndicator size="large" color="#4F46E5" />
+          ) : (
+            <HStack className="flex-wrap justify-between">
+              {products.map((item) => (
+                <TouchableOpacity 
+                  key={item._id} // Using MongoDB _id
+                  className="w-[48%] mb-6"
+                  onPress={() => router.push({ pathname: "/marketplace/[id]", params: { id: item._id } })}
+                >
+                  <Box className="relative aspect-square rounded-[30px] overflow-hidden bg-gray-100 mb-2">
+                    <Image source={{ uri: item.image || "https://via.placeholder.com/150" }} className="w-full h-full" />
+                  </Box>
+                  <Text className="font-bold text-gray-800" numberOfLines={1}>{item.title}</Text>
+                  <Text className="text-indigo-600 font-black">${item.price}</Text>
+                </TouchableOpacity>
+              ))}
+            </HStack>
+          )}
+
+          {/* Show empty state if no products */}
+          {!loading && products.length === 0 && (
+            <Text className="text-center text-gray-400 mt-10">No items listed yet.</Text>
+          )}
         </VStack>
       </ScrollView>
 
-      {/* Floating Action Button */}
       {/* Floating Action Button */}
       <TouchableOpacity 
         onPress={() => router.push("/marketplace/create" )}
