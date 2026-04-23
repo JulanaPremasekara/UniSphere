@@ -5,6 +5,7 @@ import { Calendar, Search, Plus, Trash2 } from 'lucide-react-native';
 import EventCard from '../components/EventCard';
 import Footer from '../components/Footer';
 import apiClient from '../services/api';
+import Header from '../components/Header';
 
 export default function Home() {
   const router = useRouter();
