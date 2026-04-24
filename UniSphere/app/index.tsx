@@ -71,7 +71,7 @@ export default function Home() {
               key={index} 
               style={{ backgroundColor: item.color }}
               onPress={() => router.push(item.route as any)}
-              className="w-[47%] aspect-square rounded-[40px] items-center justify-center mb-5"
+              className="w-[47%] aspect-square rounded-[40px] items-center justify-center mb-4"
             >
               <View className="bg-white p-3 rounded-2xl mb-2 shadow-sm">
                 <item.icon size={29} color={item.iconColor} />
@@ -84,7 +84,7 @@ export default function Home() {
         </View>
 
         {/* Featured Events Header */}
-        <View className="px-6 flex-row justify-between items-end mt-[-15]">
+        <View className="px-6 flex-row justify-between items-end mt-[-55]">
           <Text className="text-2xl font-bold text-gray-900">Featured Events</Text>
           <TouchableOpacity onPress={() => router.push('/events')}>
             <Text className="text-indigo-600 font-bold text-base">View all</Text>
@@ -95,7 +95,7 @@ export default function Home() {
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false} 
-          className="mt-3 pl-6" 
+          className="mt-0 pl-6" 
           contentContainerStyle={{ paddingRight: 24 }}
         >
           {loading ? (

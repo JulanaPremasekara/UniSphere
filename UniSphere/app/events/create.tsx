@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView, TextInput, Alert, Image, Modal, GestureResponderEvent, TextInputSubmitEditingEvent } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter, useLocalSearchParams, router } from 'expo-router';
-import { X, Camera, Calendar as CalendarIcon, Clock, MapPin, Plus, CheckCircle2 } from 'lucide-react-native';
+import { X, Camera, Calendar as CalendarIcon, MapPin, Plus, CheckCircle2, Clock, Minus } from 'lucide-react-native';
 import { Input, InputField, InputSlot } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 import Footer from '../components/Footer';
@@ -45,7 +45,7 @@ const CalendarModal = ({ visible, onClose, onSelectDate, currentMonth, setCurren
       <View className="flex-1 bg-black/50 justify-center items-center px-6">
         <View className="bg-white w-full max-w-sm rounded-[30px] p-6 shadow-2xl">
           <View className="flex-row justify-between items-center mb-6">
-            <TouchableOpacity onPress={() => setCurrentMonth(new Date(year, month - 1, 1))} className="p-2 bg-gray-50 rounded-xl"><X size={20} color="#4F46E5" className="rotate-180" /></TouchableOpacity>
+            <TouchableOpacity onPress={() => setCurrentMonth(new Date(year, month - 1, 1))} className="p-2 bg-gray-50 rounded-xl"><Minus size={20} color="#4F46E5" /></TouchableOpacity>
             <Text className="text-lg font-bold text-gray-900">{months[month]} {year}</Text>
             <TouchableOpacity onPress={() => setCurrentMonth(new Date(year, month + 1, 1))} className="p-2 bg-gray-50 rounded-xl"><Plus size={20} color="#4F46E5" /></TouchableOpacity>
           </View>
@@ -62,42 +62,69 @@ const CalendarModal = ({ visible, onClose, onSelectDate, currentMonth, setCurren
   );
 };
 
-const TimePickerModal = ({ visible, onClose, onSelectTime }: any) => {
-  const [hour, setHour] = useState('12');
-  const [minute, setMinute] = useState('00');
-  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
-  const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0'));
+const TimeModal = ({ visible, onClose, onSelectTime }: any) => {
+  const [selectedHour, setSelectedHour] = useState('12');
+  const [selectedMinute, setSelectedMinute] = useState('00');
+  const [period, setPeriod] = useState('AM');
+
+  const hours = ['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
+  const minutes = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
+
+  const handleConfirm = () => {
+    let h = parseInt(selectedHour);
+    if (period === 'PM' && h !== 12) h += 12;
+    if (period === 'AM' && h === 12) h = 0;
+    onSelectTime(`${h.toString().padStart(2, '0')}:${selectedMinute}`);
+  };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 bg-black/50 justify-center items-center px-6">
-        <View className="bg-white w-full max-w-sm rounded-[30px] p-6 shadow-2xl">
-          <Text className="text-xl font-bold text-gray-900 mb-6 text-center">Select Time</Text>
-          <View className="flex-row justify-between h-48">
-            <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-              {hours.map(h => (
-                <TouchableOpacity key={h} onPress={() => setHour(h)} className={`p-3 items-center rounded-2xl mb-1 ${hour === h ? 'bg-indigo-600 shadow-md shadow-indigo-100' : 'bg-transparent'}`}>
-                  <Text className={`text-lg ${hour === h ? 'text-white font-black' : 'text-gray-400 font-bold'}`}>{h}</Text>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View className="flex-1 bg-black/60 justify-end">
+        <View className="bg-white rounded-t-[40px] p-8 pb-12 shadow-2xl">
+          <View className="flex-row justify-between items-center mb-8">
+            <Text className="text-2xl font-black text-gray-900">Select Time</Text>
+            <TouchableOpacity onPress={onClose} className="bg-gray-100 p-3 rounded-full"><X size={20} color="#6B7280" /></TouchableOpacity>
+          </View>
+
+          <View className="flex-row h-72 mb-10">
+            <View className="flex-1">
+              <Text className="text-[10px] font-black text-gray-400 uppercase mb-4 tracking-widest text-center">Hour</Text>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {hours.map(h => (
+                  <TouchableOpacity key={h} onPress={() => setSelectedHour(h)} className={`py-4 items-center rounded-2xl mb-1 ${selectedHour === h ? 'bg-indigo-600' : ''}`}>
+                    <Text className={`text-xl font-bold ${selectedHour === h ? 'text-white' : 'text-gray-400'}`}>{h}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+            
+            <View className="w-[1px] bg-gray-100 mx-4 h-full" />
+
+            <View className="flex-1">
+              <Text className="text-[10px] font-black text-gray-400 uppercase mb-4 tracking-widest text-center">Minute</Text>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {minutes.map(m => (
+                  <TouchableOpacity key={m} onPress={() => setSelectedMinute(m)} className={`py-4 items-center rounded-2xl mb-1 ${selectedMinute === m ? 'bg-indigo-600' : ''}`}>
+                    <Text className={`text-xl font-bold ${selectedMinute === m ? 'text-white' : 'text-gray-400'}`}>{m}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            <View className="w-[1px] bg-gray-100 mx-4 h-full" />
+
+            <View className="flex-1 justify-center gap-4">
+              {['AM', 'PM'].map(p => (
+                <TouchableOpacity key={p} onPress={() => setPeriod(p)} className={`py-6 items-center rounded-2xl ${period === p ? 'bg-indigo-100 border border-indigo-200' : 'bg-gray-50'}`}>
+                  <Text className={`text-lg font-black ${period === p ? 'text-indigo-600' : 'text-gray-400'}`}>{p}</Text>
                 </TouchableOpacity>
               ))}
-            </ScrollView>
-            <View className="w-4 items-center justify-center"><Text className="text-2xl font-bold text-gray-300">:</Text></View>
-            <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-              {minutes.map(m => (
-                <TouchableOpacity key={m} onPress={() => setMinute(m)} className={`p-3 items-center rounded-2xl mb-1 ${minute === m ? 'bg-indigo-600 shadow-md shadow-indigo-100' : 'bg-transparent'}`}>
-                  <Text className={`text-lg ${minute === m ? 'text-white font-black' : 'text-gray-400 font-bold'}`}>{m}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            </View>
           </View>
-          <View className="flex-row gap-4 mt-8">
-            <TouchableOpacity onPress={onClose} className="flex-1 bg-gray-100 p-4 rounded-2xl items-center">
-              <Text className="text-gray-600 font-bold">Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => onSelectTime(`${hour}:${minute}`)} className="flex-1 bg-indigo-600 p-4 rounded-2xl items-center shadow-lg shadow-indigo-100">
-              <Text className="text-white font-bold">Confirm</Text>
-            </TouchableOpacity>
-          </View>
+
+          <TouchableOpacity onPress={handleConfirm} className="bg-indigo-600 p-6 rounded-[30px] items-center shadow-xl shadow-indigo-100">
+            <Text className="text-white font-black text-lg uppercase tracking-widest">Confirm Time</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -298,7 +325,7 @@ export default function CreateEvent() {
         setCurrentMonth={setCurrentMonth} 
       />
 
-      <TimePickerModal
+      <TimeModal
         visible={showTimePicker}
         onClose={() => setShowTimePicker(false)}
         onSelectTime={handleSelectTime}
