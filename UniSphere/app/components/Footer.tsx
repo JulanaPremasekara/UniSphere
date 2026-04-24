@@ -1,11 +1,10 @@
-import { usePathname, useRouter } from "expo-router";
+import { usePathname, router } from "expo-router";
 import { Home, Compass, Users, Calendar, User, Search, BookOpen } from "lucide-react-native";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 export default function Footer() {
-  const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() || "";
 
   const tabs = [
     { name: "HOME", icon: Home, path: "/" },

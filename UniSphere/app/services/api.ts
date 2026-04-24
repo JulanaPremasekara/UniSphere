@@ -1,38 +1,27 @@
-import axios from 'axios';
-import { Platform } from 'react-native';
-import { AppStorage } from './storage';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+import axios from "axios";
+import { AppStorage } from "./storage";
 
-const LOCAL_IP = '192.168.8.133';//172.28.4.4
+const baseURL = process.env.EXPO_PUBLIC_API_URL;
 
-// 2. Determine base URL based on platform and environment
-const getBaseURL = () => {
-  // http://192.168.8.133:8081
-  if (Platform.OS === 'web') return `http://${LOCAL_IP}:3000`;
-
-  if (Platform.OS === 'android') {
-    // 10.0.2.2 is usually the address for the Android Emulator's host
-    return `http://10.0.2.2:3000`;
-  }
-  // For iOS simulators or physical devices (Expo Go), use the local IP
-  return `http://${LOCAL_IP}:3000`;
-};
-
-const baseURL = getBaseURL();
+if (!baseURL) {
+  throw new Error("EXPO_PUBLIC_API_URL is not set");
+}
 
 const apiClient = axios.create({
   baseURL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
+  timeout: 10000,
 });
 
-// Interceptor: Attach the access token to every request
 apiClient.interceptors.request.use(async (config) => {
-  const token = await AppStorage.getItem('userToken');
+  const token = await AppStorage.getItem("userToken");
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 

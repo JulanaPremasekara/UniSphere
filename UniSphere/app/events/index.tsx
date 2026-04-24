@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Platform, Alert, ActivityIndicator, Modal, TextInput } from 'react-native';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import { Calendar, Search, Plus, Trash2, X } from 'lucide-react-native';
 import EventCard from '../components/EventCard';
 import Footer from '../components/Footer';
@@ -8,8 +8,7 @@ import apiClient from '../services/api';
 import { useEvents, Event } from '../../hooks/useEvents';
 import { useUser } from '../../hooks/useUser';
 
-export default function Home() {
-  const router = useRouter();
+export default function EventsPage() {
   const [activeFilter, setActiveFilter] = useState('All');
   const { events, loading, refreshEvents } = useEvents();
   const { userId } = useUser();
@@ -26,10 +25,12 @@ export default function Home() {
     } catch { Alert.alert("Error", "Failed to delete event."); } finally { setDeleteModalVisible(false); setEventToDelete(null); }
   };
 
-  const filteredEvents = events.filter((e: Event) => 
-    (activeFilter === 'All' ? true : activeFilter === 'Mine' ? e.isMine : !e.isMine) &&
-    e.title.toLowerCase().startsWith(searchQuery.toLowerCase())
-  );
+  const filteredEvents = (events || []).filter((e: Event) => {
+    if (!e) return false;
+    const matchesFilter = activeFilter === 'All' ? true : activeFilter === 'Mine' ? e.isMine : !e.isMine;
+    const matchesSearch = (e.title || '').toLowerCase().startsWith((searchQuery || '').toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
 
   if (loading) return <View className="flex-1 justify-center items-center bg-white"><ActivityIndicator size="large" color="#4F46E5" /></View>;
@@ -54,10 +55,16 @@ export default function Home() {
       </View>
 
       <View className="bg-white pb-4 px-6 border-b border-gray-100">
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 4 }}>
           {['All', 'Mine', 'Others'].map(f => (
-            <TouchableOpacity key={f} onPress={() => setActiveFilter(f)} className={`mr-3 px-6 py-2 rounded-full ${activeFilter === f ? 'bg-indigo-600' : 'bg-gray-100'}`}>
-              <Text className={`font-bold ${activeFilter === f ? 'text-white' : 'text-gray-500'}`}>{f === 'Mine' ? 'My Events' : f === 'Others' ? 'By Others' : 'All Events'}</Text>
+            <TouchableOpacity 
+              key={f} 
+              onPress={() => setActiveFilter(f)} 
+              className={`mr-3 px-6 py-2.5 rounded-2xl border ${activeFilter === f ? 'bg-indigo-600 border-indigo-600 shadow-sm' : 'bg-white border-gray-200'}`}
+            >
+              <Text className={`font-bold text-sm ${activeFilter === f ? 'text-white' : 'text-gray-600'}`}>
+                {f === 'Mine' ? 'My Events' : f === 'Others' ? 'By Others' : 'All Events'}
+              </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>

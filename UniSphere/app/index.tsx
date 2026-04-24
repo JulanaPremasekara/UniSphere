@@ -84,7 +84,7 @@ export default function Home() {
         </View>
 
         {/* Featured Events Header */}
-        <View className="px-6 flex-row justify-between items-end mt-4">
+        <View className="px-6 flex-row justify-between items-end mt-[-15]">
           <Text className="text-2xl font-bold text-gray-900">Featured Events</Text>
           <TouchableOpacity onPress={() => router.push('/events')}>
             <Text className="text-indigo-600 font-bold text-base">View all</Text>
