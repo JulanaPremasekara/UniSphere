@@ -18,9 +18,20 @@ export default function SignUp() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-white">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingBottom: 60 }}>
-        <View className="px-8" style={{ paddingTop: Platform.OS === 'ios' ? 70 : 60 }}>
+    // KeyboardAvoidingView ensures the keyboard doesn't cover input fields
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+      className="flex-1 bg-white"
+    >
+      <ScrollView 
+        className="flex-1" 
+        showsVerticalScrollIndicator={false}
+        // contentContainerStyle is key for making the whole area scrollable with padding at the end
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+      >
+        <View className="px-8" style={{ paddingTop: Platform.OS === 'ios' ? 50 : 50 }}>
+          
+          {/* Back Button */}
           <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 w-12 mb-4">
             <ChevronLeft size={28} color="#1E1B4B" />
           </TouchableOpacity>
