@@ -10,7 +10,7 @@ type UseFilteredListParams<T> = {
 };
 
 export const useFilteredList = <T>({
-  items = [],
+  items,
   searchText,
   selectedFilter,
   searchFields = [],
@@ -18,19 +18,23 @@ export const useFilteredList = <T>({
   customFilter,
 }: UseFilteredListParams<T>) => {
   return useMemo(() => {
-    return items.filter((item) => {
-      const normalizedSearch = searchText.trim().toLowerCase();
+    // 🔥 Ensure items is always an array
+    const safeItems: T[] = Array.isArray(items) ? items : [];
 
+    const normalizedSearch = searchText.trim().toLowerCase();
+
+    return safeItems.filter((item) => {
+      // 🔍 Search logic
       const matchesSearch =
         !normalizedSearch ||
         searchFields.some((field) => {
           const value = item[field];
-
           return String(value ?? "")
             .toLowerCase()
             .includes(normalizedSearch);
         });
 
+      // 🎯 Filter logic
       const matchesFilter =
         !selectedFilter ||
         selectedFilter === "ALL" ||
@@ -38,7 +42,10 @@ export const useFilteredList = <T>({
         String(item[filterField] ?? "").toUpperCase() ===
           selectedFilter.toUpperCase();
 
-      const matchesCustomFilter = customFilter ? customFilter(item) : true;
+      // ⚙️ Custom filter
+      const matchesCustomFilter = customFilter
+        ? customFilter(item)
+        : true;
 
       return matchesSearch && matchesFilter && matchesCustomFilter;
     });

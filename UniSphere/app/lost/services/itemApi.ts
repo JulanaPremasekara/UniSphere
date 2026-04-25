@@ -1,3 +1,4 @@
+import { getTimeAgo } from '@/app/utils/timeAgo';
 import apiClient from '../../services/api';
 
 export const getLostItemById = async (itemId: string) => {
@@ -5,10 +6,14 @@ export const getLostItemById = async (itemId: string) => {
     return response.data;
 }
 
-export const getAllLostItems = async () =>{
-    const response = await apiClient.get('/lost');
-    return response.data;
-}
+export const getAllLostItems = async () => {
+  const response = await apiClient.get("/lost");
+  return response.data.data.map((item: any) => ({
+    ...item,
+    id: item._id, 
+    timeAgo: getTimeAgo(item.createdAt),
+  }));
+};
 
 export const createLostItem = async (itemData: any) => {
     const response = await apiClient.post('/lost', itemData);

@@ -1,22 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Search, ShoppingBasket, Users, Calendar, GraduationCap, UtensilsCrossed, Map as MapIcon, Bookmark, BookOpen, HomeIcon, HelpCircle } from 'lucide-react-native';
-<<<<<<< HEAD
-
-import Header from './components/Header';
-import Footer from './components/Footer';
-import { Href, router, useRouter } from 'expo-router';
-import apiClient from './services/api';
-=======
 import { useRouter } from 'expo-router';
 import Footer from './components/Footer';
 import { useEvents } from '../hooks/useEvents';
 import Header from './components/Header';
->>>>>>> 38c5d82b312eaeb60c7d2795c730b22e6d55a1a5
 
 // Defined routes inside the category object for cleaner navigation logic
 const categories = [
-<<<<<<< HEAD
   { name: 'Marketplace', path: '/marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA' },
   { name: 'Study Groups', path: '/study-groups', icon: Users, color: '#F5F3FF', iconColor: '#5B21B6' },
   { name: 'Events', path: '/events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1' },
@@ -24,14 +15,6 @@ const categories = [
   { name: 'Lost Items', path: '/lost', icon: Search, color: '#FFF7ED', iconColor: '#C2410C' },
   { name: 'Tutor', path: '/tutor', icon: MapIcon, color: '#EEF2FF', iconColor: '#4338CA' },
 
-=======
-  { name: 'Marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA', route: '/marketplace' },
-  { name: 'Study Groups', icon: Users, color: '#F5F3FF', iconColor: '#5B21B6', route: '/studyGroup' },
-  { name: 'Events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1', route: '/events' },
-  { name: 'Lost &\n Found', icon: HelpCircle, color: '#FFF7ED', iconColor: '#C2410C', route: '/lost-found' },
-  { name: 'Housing', icon: HomeIcon, color: '#ECFDF5', iconColor: '#047857', route: '/housing' },
-  { name: 'Tutors', icon: BookOpen, color: '#FEF2F2', iconColor: '#B91C1C', route: '/Tutors' },
->>>>>>> 38c5d82b312eaeb60c7d2795c730b22e6d55a1a5
 ];
 
   
@@ -88,12 +71,8 @@ export default function Home() {
           {categories.map((item, index) => (
             <TouchableOpacity 
               key={index} 
-              onPress={() => router.push(item.path as Href)}
+              onPress={() => router.push(item.path as any)}
               style={{ backgroundColor: item.color }}
-<<<<<<< HEAD
-=======
-              onPress={() => router.push(item.route as any)}
->>>>>>> 38c5d82b312eaeb60c7d2795c730b22e6d55a1a5
               className="w-[47%] aspect-square rounded-[40px] items-center justify-center mb-5"
             >
               <View className="bg-white p-3 rounded-2xl mb-2 shadow-sm">

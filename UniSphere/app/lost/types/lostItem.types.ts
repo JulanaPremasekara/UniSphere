@@ -3,10 +3,10 @@ export type LostItemType = "lost" | "found";
 export type LostItem = {
   id: string;
   title: string;
-  imageUrl: string;
+  image: string;
   location: string;
   timeAgo: string;
-  type: LostItemType;
+  status: LostItemType;
   category: string;
   isMine?: boolean;
 };

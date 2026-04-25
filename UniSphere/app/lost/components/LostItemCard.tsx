@@ -25,20 +25,20 @@ const LostItemCard = ({ item, onPress }: LostItemCardProps) => {
 
         <View
           className={`absolute right-3 top-3 z-10 rounded-full px-3 py-1.5 ${
-            item.type === "lost" ? "bg-red-100" : "bg-indigo-100"
+            item.status === "lost" ? "bg-red-100" : "bg-indigo-100"
           }`}
         >
           <Text
             className={`text-[10px] font-extrabold ${
-              item.type === "lost" ? "text-red-600" : "text-indigo-700"
+              item.status === "lost" ? "text-red-600" : "text-indigo-700"
             }`}
           >
-            {item.type.toUpperCase()}
+            {item.status.toUpperCase()}
           </Text>
         </View>
 
         <Image
-          source={{ uri: item.imageUrl }}
+          source={{ uri: item.image }}
           className="h-[260px] w-full rounded-[24px]"
           resizeMode="cover"
         />

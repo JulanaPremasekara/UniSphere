@@ -2,11 +2,11 @@ import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  SafeAreaView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context"; // ✅ Modern
 import { router } from "expo-router";
 
 import AppHeader from "../components/AppHeader";
@@ -18,6 +18,7 @@ import LostItemCard from "./components/LostItemCard";
 import { useLostItemsListQuery } from "./hooks/useLostItems";
 import { LostItem } from "./types/lostItem.types";
 import { useFilteredList } from "../hooks/useFilteredList";
+import Footer from "../components/Footer";
 
 type LostItemsFilter =
   | "ALL"
@@ -52,7 +53,7 @@ export default function LostIndexScreen() {
       }
 
       return (
-        item.type.toUpperCase() === selectedFilter ||
+        item.status.toUpperCase() === selectedFilter ||
         item.category.toUpperCase() === selectedFilter
       );
     },
@@ -125,30 +126,32 @@ export default function LostIndexScreen() {
     );
   }
 
-  return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1">
-        <FlatList
-          data={filteredItems}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          ListHeaderComponent={renderHeader}
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingTop: 16,
-            paddingBottom: 100,
-          }}
-          showsVerticalScrollIndicator={false}
-        />
+ return (
+  <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+    <View className="flex-1">
+      <FlatList
+        data={filteredItems}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        ListHeaderComponent={renderHeader}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 16,
+          paddingBottom: 160,
+        }}
+        showsVerticalScrollIndicator={false}
+      />
 
-        <TouchableOpacity
-          onPress={handleCreateReport}
-          activeOpacity={0.9}
-          className="absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-full bg-indigo-600 shadow-lg"
-        >
-          <Text className="text-3xl font-bold text-white">+</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
-  );
+      <TouchableOpacity
+        onPress={handleCreateReport}
+        activeOpacity={0.9}
+        className="absolute bottom-24 right-6 h-14 w-14 items-center justify-center rounded-full bg-indigo-600 shadow-lg"
+      >
+        <Text className="text-3xl font-bold text-white">+</Text>
+      </TouchableOpacity>
+
+      <Footer />
+    </View>
+  </SafeAreaView>
+);
 }

@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Image,
-  SafeAreaView,
   ScrollView,
   Text,
   TextInput,
@@ -9,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
-
+import { SafeAreaView } from "react-native-safe-area-context"; // ✅ Modern
 import { useCreateLostForm } from "./hooks/useCreateLostForm";
 
 export default function CreateLostReportScreen() {
@@ -17,12 +16,9 @@ export default function CreateLostReportScreen() {
     useCreateLostForm();
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0B1020]">
+    <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 px-4 pt-4">
-        <View className="mb-3 flex-row items-center justify-between px-1">
-          <Text className="text-lg font-semibold text-white">Reporting Form</Text>
-        </View>
-
+        
         <View className="flex-1 rounded-[32px] bg-white px-5 pt-6">
           <ScrollView
             showsVerticalScrollIndicator={false}
