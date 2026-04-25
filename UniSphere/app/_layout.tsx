@@ -22,6 +22,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="marketplace"/>
         <Stack.Screen name="events/create" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="housing"/>
         <Stack.Screen name="Tutors" />
         <Stack.Screen name="studyGroup" />
       </Stack>
