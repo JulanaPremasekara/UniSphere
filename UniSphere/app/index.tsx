@@ -71,9 +71,9 @@ export default function Home() {
           {categories.map((item, index) => (
             <TouchableOpacity 
               key={index} 
-              onPress={() => router.push(item.path as any)}
               style={{ backgroundColor: item.color }}
-              className="w-[47%] aspect-square rounded-[40px] items-center justify-center mb-5"
+              onPress={() => router.push(item.path as any)}
+              className="w-[47%] aspect-square rounded-[40px] items-center justify-center mb-4"
             >
               <View className="bg-white p-3 rounded-2xl mb-2 shadow-sm">
                 <item.icon size={29} color={item.iconColor} />
@@ -86,7 +86,7 @@ export default function Home() {
         </View>
 
         {/* Featured Events Header */}
-        <View className="px-6 flex-row justify-between items-end mt-4">
+        <View className="px-6 flex-row justify-between items-end mt-[-55]">
           <Text className="text-2xl font-bold text-gray-900">Featured Events</Text>
           <TouchableOpacity onPress={() => router.push('/events')}>
             <Text className="text-indigo-600 font-bold text-base">View all</Text>
@@ -97,7 +97,7 @@ export default function Home() {
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false} 
-          className="mt-3 pl-6" 
+          className="mt-0 pl-6" 
           contentContainerStyle={{ paddingRight: 24 }}
         >
           {loading ? (

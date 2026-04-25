@@ -2,7 +2,6 @@ import axios from "axios";
 import { AppStorage } from "./storage";
 
 const baseURL = process.env.EXPO_PUBLIC_API_URL;
-console.log("Current API URL:", baseURL);
 
 if (!baseURL) {
   throw new Error("EXPO_PUBLIC_API_URL is not set");
