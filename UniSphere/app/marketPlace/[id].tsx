@@ -193,7 +193,7 @@ export default function ProductDetailScreen() {
           onPress={() => {
             console.log("Deleted ID:", id); // Replace with your delete logic
             setShowDeleteModal(false);
-            router.replace("/marketplace"); // Redirect after delete
+            router.replace("/marketPlace"); // Redirect after delete
           }}
         >
           <ButtonText className="font-bold text-lg">Yes, Delete</ButtonText>

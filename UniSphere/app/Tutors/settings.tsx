@@ -1,8 +1,8 @@
-import React from "react";
-import { ScrollView, TouchableOpacity, View } from "react-native";
-import { useRouter } from "expo-router";
-//ChevronLeft for the back button
-import { Menu, ShieldOff, Trash2, User, ChevronLeft } from "lucide-react-native";
+import React, { useState } from "react";
+import { ScrollView, TouchableOpacity, View, Alert, ActivityIndicator } from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import axios from "axios";
+import { ShieldOff, Trash2, User, ChevronLeft } from "lucide-react-native";
 
 import { Box } from "@/components/ui/box";
 import { HStack } from "@/components/ui/hstack";
@@ -10,16 +10,71 @@ import { VStack } from "@/components/ui/vstack";
 import { Text } from "@/components/ui/text";
 import { Icon } from "@/components/ui/icon";
 import { Avatar } from "@/components/ui/avatar";
+import Footer from '../components/Footer';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { id } = useLocalSearchParams(); 
+  const [loading, setLoading] = useState(false);
+
+  // Ensure this matches your server IP and Port
+  const API_URL = `http://192.168.8.123:3000/tutors`;
+
+  // --- SWITCH STATUS (TOGGLE ONLINE/OFFLINE) ---
+  const handleToggleStatus = async () => {
+  if (!id) return Alert.alert("Error", "Tutor ID missing");
+
+  setLoading(true);
+  try {
+    // We send a dummy boolean to satisfy your 'updateStatusSchema' validation
+    // Even though the service will just flip whatever is currently in the DB
+    await axios.patch(`${API_URL}/${id}/status`, { isOnline: false }); 
+    
+    Alert.alert("Success", "Status updated successfully.");
+    router.replace("/Tutors"); 
+  } catch (error: any) {
+    console.log("Error Detail:", error.response?.data || error.message);
+    Alert.alert("Error", "Validation still failing. See console.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // --- DELETE ACCOUNT ---
+  const handleDeleteAccount = async () => {
+    if (!id) return Alert.alert("Error", "Tutor ID missing");
+
+    Alert.alert(
+      "Delete Profile",
+      "Are you sure? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Delete", 
+          style: "destructive", 
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await axios.delete(`${API_URL}/${id}`);
+              Alert.alert("Deleted", "Your profile has been removed.");
+              router.replace("/Tutors");
+            } catch (error) {
+              console.error("Delete Error:", error);
+              Alert.alert("Error", "Failed to delete account.");
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
+  };
 
   return (
     <ScrollView className="flex-1 bg-white">
       
-      {/*TOP HEADER WITH BACK BUTTON */}
+      {/* TOP HEADER */}
       <HStack className="p-6 mt-10 justify-between items-center">
-        {/* BACK BUTTON*/}
         <TouchableOpacity 
           onPress={() => router.back()} 
           className="bg-gray-100 p-2 rounded-full"
@@ -36,7 +91,7 @@ export default function SettingsScreen() {
 
       <VStack className="px-6 mt-4" space="xl">
         
-        {/*TITLE SECTION */}
+        {/* TITLE SECTION */}
         <VStack className="items-center">
           <Text className="text-[#4338CA] font-bold text-xs uppercase tracking-widest">
             Account Management
@@ -52,34 +107,43 @@ export default function SettingsScreen() {
             <Box className="bg-indigo-100 p-3 rounded-full">
               <Icon as={ShieldOff} size="md" className="text-[#4338CA]" />
             </Box>
-            <HStack className="items-center bg-red-50 px-3 py-1 rounded-full border border-red-100">
-              <View className="w-2 h-2 bg-red-500 rounded-full mr-2" />
-              <Text className="text-red-600 text-[10px] font-bold uppercase">Active Now</Text>
+            {/* Status indicator - visual only here */}
+            <HStack className="items-center bg-green-50 px-3 py-1 rounded-full border border-green-100">
+              <View className="w-2 h-2 bg-green-500 rounded-full mr-2" />
+              <Text className="text-green-600 text-[10px] font-bold uppercase">Status Ready</Text>
             </HStack>
           </HStack>
 
-          <Text className="text-2xl font-bold text-black mt-4">Go Offline?</Text>
+          <Text className="text-2xl font-bold text-black mt-4">Switch Status?</Text>
           <Text className="text-gray-500 mt-2">
-            You will no longer appear in search results.
+            Toggling this will change your visibility in search results.
           </Text>
 
           <VStack className="mt-6" space="sm">
-            {/* CANCEL BUTTON */}
             <TouchableOpacity 
               onPress={() => router.back()} 
               className="bg-gray-100 p-4 rounded-full"
+              disabled={loading}
             >
               <Text className="text-center font-bold text-gray-700">Cancel</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity className="bg-[#4338CA] p-4 rounded-full">
-              <Text className="text-center font-bold text-white">Switch Status</Text>
+            <TouchableOpacity 
+              className="bg-[#4338CA] p-4 rounded-full"
+              onPress={handleToggleStatus}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text className="text-center font-bold text-white">Switch Status</Text>
+              )}
             </TouchableOpacity>
           </VStack>
         </Box>
 
         {/* DELETE ACCOUNT CARD */}
-        <Box className="bg-white p-6 rounded-[40px] shadow-sm border border-gray-100">
+        <Box className="bg-white p-6 rounded-[40px] shadow-sm border border-gray-100 mb-10">
           <Box className="bg-red-100 p-3 rounded-full w-12">
             <Icon as={Trash2} size="md" className="text-red-600" />
           </Box>
@@ -89,16 +153,21 @@ export default function SettingsScreen() {
             <TouchableOpacity 
               onPress={() => router.back()} 
               className="border border-gray-200 p-4 rounded-full"
+              disabled={loading}
             >
               <Text className="text-center font-bold text-gray-700">Keep Profile</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity className="bg-red-600 p-4 rounded-full">
+            <TouchableOpacity 
+              className="bg-red-600 p-4 rounded-full"
+              onPress={handleDeleteAccount}
+              disabled={loading}
+            >
               <Text className="text-center font-bold text-white">Delete Account</Text>
             </TouchableOpacity>
           </VStack>
         </Box>
-
+      <Footer />
       </VStack>
     </ScrollView>
   );
