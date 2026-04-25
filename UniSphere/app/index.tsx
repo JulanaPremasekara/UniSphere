@@ -8,14 +8,16 @@ import Header from './components/Header';
 
 // Defined routes inside the category object for cleaner navigation logic
 const categories = [
-  { name: 'Marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA', route: '/marketplace' },
-  { name: 'Study Groups', icon: Users, color: '#F5F3FF', iconColor: '#5B21B6', route: '/studyGroup' },
-  { name: 'Events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1', route: '/events' },
-  { name: 'Lost &\n Found', icon: HelpCircle, color: '#FFF7ED', iconColor: '#C2410C', route: '/lost-found' },
-  { name: 'Housing', icon: HomeIcon, color: '#ECFDF5', iconColor: '#047857', route: '/housing' },
-  { name: 'Tutors', icon: BookOpen, color: '#FEF2F2', iconColor: '#B91C1C', route: '/Tutors' },
+  { name: 'Marketplace', path: '/marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA' },
+  { name: 'Study Groups', path: '/study-groups', icon: Users, color: '#F5F3FF', iconColor: '#5B21B6' },
+  { name: 'Events', path: '/events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1' },
+  { name: 'Courses', path: '/courses', icon: GraduationCap, color: '#F5F3FF', iconColor: '#4338CA' },
+  { name: 'Lost Items', path: '/lost', icon: Search, color: '#FFF7ED', iconColor: '#C2410C' },
+  { name: 'Tutor', path: '/tutor', icon: MapIcon, color: '#EEF2FF', iconColor: '#4338CA' },
+
 ];
 
+  
 export default function Home() {
   const router = useRouter();
   const { events, loading } = useEvents();
@@ -70,7 +72,7 @@ export default function Home() {
             <TouchableOpacity 
               key={index} 
               style={{ backgroundColor: item.color }}
-              onPress={() => router.push(item.route as any)}
+              onPress={() => router.push(item.path as any)}
               className="w-[47%] aspect-square rounded-[40px] items-center justify-center mb-4"
             >
               <View className="bg-white p-3 rounded-2xl mb-2 shadow-sm">
