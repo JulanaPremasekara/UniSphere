@@ -7,6 +7,7 @@ import Footer from '../components/Footer';
 import apiClient from '../services/api';
 import { useEvents, Event } from '../../hooks/useEvents';
 import { useUser } from '../../hooks/useUser';
+import Header from '../components/Header';
 
 export default function Home() {
   const router = useRouter();
@@ -36,22 +37,7 @@ export default function Home() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      <View className="px-6 pb-4 bg-white" style={{ paddingTop: Platform.OS === 'ios' ? 60 : 50 }}>
-        <View className="flex-row justify-between items-center h-12">
-          {isSearching ? (
-            <View className="flex-1 bg-gray-100 rounded-full flex-row items-center px-4 h-full">
-              <Search size={20} color="#6B7280" />
-              <TextInput value={searchQuery} onChangeText={setSearchQuery} placeholder="Search events..." className="flex-1 ml-2 text-base text-gray-800" autoFocus />
-              <TouchableOpacity onPress={() => { setIsSearching(false); setSearchQuery(''); }}><X size={20} color="#6B7280" /></TouchableOpacity>
-            </View>
-          ) : (
-            <>
-              <View className="flex-row items-center"><Calendar size={28} color="#4F46E5" /><Text className="text-2xl font-bold ml-2 text-indigo-900">UniSphere</Text></View>
-              <TouchableOpacity onPress={() => setIsSearching(true)} className="bg-gray-100 p-2 rounded-full"><Search size={22} color="#6B7280" /></TouchableOpacity>
-            </>
-          )}
-        </View>
-      </View>
+      <Header title="UniSphere" />
 
       <View className="bg-white pb-4 px-6 border-b border-gray-100">
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>

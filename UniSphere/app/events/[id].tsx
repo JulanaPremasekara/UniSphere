@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, Calendar, Clock, MapPin, Verified, CheckCheck, CheckCircle2 } from 'lucide-react-native';
-import { Modal, Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View, Platform, ActivityIndicator } from 'react-native';
+import { Modal, Image,  ScrollView, Text, TouchableOpacity, View, Platform, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context"; // ✅ Modern
 import React, { useState } from 'react';
 import Footer from '../components/Footer';
 import { useEventDetail } from '../../hooks/useEventDetail';
@@ -72,7 +73,7 @@ export default function EventDetail() {
           <Text className="text-white font-black text-lg">{registering ? 'Registering...' : isRegistered ? 'Registered' : 'RSVP / Register'}</Text>
         </TouchableOpacity>
       </View>
-      <Footer />
+      
 
       <Modal animationType="fade" transparent={true} visible={confirmModalVisible} onRequestClose={() => setConfirmModalVisible(false)}>
         <TouchableOpacity activeOpacity={1} onPress={() => setConfirmModalVisible(false)} className="flex-1 bg-black/60 justify-center items-center px-6">
@@ -87,6 +88,7 @@ export default function EventDetail() {
           </View>
         </TouchableOpacity>
       </Modal>
+      <Footer />
     </SafeAreaView>
   );
 }
