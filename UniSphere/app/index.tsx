@@ -13,7 +13,7 @@ const categories = [
   { name: 'Events', path: '/events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1' },
   { name: 'Courses', path: '/courses', icon: GraduationCap, color: '#F5F3FF', iconColor: '#4338CA' },
   { name: 'Lost Items', path: '/lost', icon: Search, color: '#FFF7ED', iconColor: '#C2410C' },
-  { name: 'Tutor', path: '/tutor', icon: MapIcon, color: '#EEF2FF', iconColor: '#4338CA' },
+  { name: 'Tutor', path: '/Tutors', icon: MapIcon, color: '#EEF2FF', iconColor: '#4338CA' },
 
 ];
 

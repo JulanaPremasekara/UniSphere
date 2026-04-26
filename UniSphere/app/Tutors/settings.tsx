@@ -11,24 +11,21 @@ import { Text } from "@/components/ui/text";
 import { Icon } from "@/components/ui/icon";
 import { Avatar } from "@/components/ui/avatar";
 import Footer from '../components/Footer';
+import apiClient from "../services/api";
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams(); 
   const [loading, setLoading] = useState(false);
 
-  // Ensure this matches your server IP and Port
-  const API_URL = `http://192.168.8.123:3000/tutors`;
-
+  
   // --- SWITCH STATUS (TOGGLE ONLINE/OFFLINE) ---
   const handleToggleStatus = async () => {
   if (!id) return Alert.alert("Error", "Tutor ID missing");
 
   setLoading(true);
   try {
-    // We send a dummy boolean to satisfy your 'updateStatusSchema' validation
-    // Even though the service will just flip whatever is currently in the DB
-    await axios.patch(`${API_URL}/${id}/status`, { isOnline: false }); 
+    await apiClient.patch(`/tutors/${id}/status`, { isOnline: false }); // Using apiClient for consistency
     
     Alert.alert("Success", "Status updated successfully.");
     router.replace("/Tutors"); 
@@ -55,7 +52,8 @@ export default function SettingsScreen() {
           onPress: async () => {
             setLoading(true);
             try {
-              await axios.delete(`${API_URL}/${id}`);
+              await apiClient.delete(`/tutors/${id}`); // Using apiClient for consistency
+              
               Alert.alert("Deleted", "Your profile has been removed.");
               router.replace("/Tutors");
             } catch (error) {

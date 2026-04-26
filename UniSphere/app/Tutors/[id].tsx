@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Phone, ShieldCheck, Star, User } from "lucid
 import React, { useState } from "react";
 import { ActivityIndicator, Linking, ScrollView, TouchableOpacity, View } from "react-native";
 
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Box } from "@/components/ui/box";
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
@@ -23,12 +23,9 @@ export default function TutorProfile() {
   const [loading, setLoading] = useState(true);
   const [showContact, setShowContact] = useState(false);
 
-  // YOUR IP AND PORT
-  const API_URL = `http://192.168.8.123:3000/tutors/${id}`;
 
   // --- FETCH DATA FROM BACKEND ---
-  // Using useFocusEffect ensures that if you change status in Settings and come back, 
-  // the dot color updates immediately.
+  
   useFocusEffect(
     React.useCallback(() => {
       const fetchTutorDetails = async () => {
@@ -83,19 +80,27 @@ export default function TutorProfile() {
 
         <VStack className="items-center px-6">
           
-          {/* UPDATED: AVATAR ICON & STATUS DOT */}
-          <View className="relative">
-            <Avatar size="2xl" className="bg-indigo-600 border-4 border-white shadow-xl">
-               <Icon as={User} size="xl" className="text-white" />
-            </Avatar>
-            
-            {/* Status dot logic */}
-            <Box 
-              className={`absolute bottom-1 right-2 w-6 h-6 border-4 border-white rounded-full ${
-                tutor.isOnline !== false ? 'bg-green-500' : 'bg-gray-400'
-              }`} 
-            />
-          </View>
+          {/* AVATAR ICON & STATUS DOT */}
+          
+<View className="relative">
+  <Avatar size="2xl" className="bg-indigo-600 border-4 border-white shadow-xl">
+    {tutor.image ? (
+      <AvatarImage 
+        source={{ uri: tutor.image }} 
+        className="w-full h-full rounded-full" 
+      />
+    ) : (
+      <Icon as={User} size="xl" className="text-white" />
+    )}
+  </Avatar>
+  
+  {/* Status dot logic remains exactly as you had it */}
+  <Box 
+    className={`absolute bottom-1 right-2 w-6 h-6 border-4 border-white rounded-full ${
+      tutor.isOnline !== false ? 'bg-green-500' : 'bg-gray-400'
+    }`} 
+  />
+</View>
 
           <Text className="text-3xl font-bold text-black mt-4 text-center">{tutor.name}</Text>
           <Text className="text-gray-500 text-center mt-1">{tutor.subject}</Text>

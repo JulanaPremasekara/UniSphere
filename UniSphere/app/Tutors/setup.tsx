@@ -1,17 +1,18 @@
 import axios from "axios";
 import { useRouter } from "expo-router";
-import { CircleX, User, X } from "lucide-react-native"; // Swapped UserCircle2 for User
+import { CircleX, User, X, Camera } from "lucide-react-native"; // Check if you prefer lucide-react-native
 import React, { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, View, ActivityIndicator } from "react-native";
+import * as ImagePicker from 'expo-image-picker';
 
 // UI Components
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
 import { Input, InputField, InputSlot } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-
+import apiClient from "../services/api";
 
 export default function ProfileSetup() {
   const router = useRouter();
@@ -21,38 +22,81 @@ export default function ProfileSetup() {
   const [hourlyRate, setHourlyRate] = useState("");
   const [subjects, setSubjects] = useState("");
   const [bio, setBio] = useState("");
+  const [phone, setPhone] = useState("");
+  const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [phone, setPhone] = useState(""); 
 
-  const API_URL = `http://192.168.8.123:3000/tutors/setup`; 
-
-  // --- SAVE FUNCTION ---
-  const handleSaveProfile = async () => {
-    if (!fullName || !hourlyRate || !subjects) {
-      Alert.alert("Error", "Please fill in all required fields.");
+  // --- IMAGE PICKER FUNCTION ---
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert("Permission Denied", "We need access to your photos to upload a profile picture.");
       return;
     }
 
-    setLoading(true);
-    try {
-      const payload = {
-        name: fullName,
-        subject: subjects,
-        price: `Rs.${hourlyRate}`, 
-        bio: bio,
-        phone: phone,
-        isOnline: true 
-      };
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
 
-      const response = await axios.post(API_URL, payload);
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+  // --- SAVE FUNCTION ---
+const handleSaveProfile = async () => {
+  // Added !image to the validation check
+  if (!fullName || !hourlyRate || !subjects || !image) {
+    Alert.alert(
+      "Missing Information", 
+      "Please upload a profile picture and fill in all required fields."
+    );
+    return;
+  }
+
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("name", fullName);
+    formData.append("subject", subjects);
+    formData.append("price", `Rs.${hourlyRate}`);
+    formData.append("bio", bio);
+    formData.append("phone", phone);
+    formData.append("isOnline", "true");
+
+    if (image) {
+      const filename = image.split('/').pop() || "profile.jpg";
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : `image/jpeg`;
+
+      // @ts-ignore - FormData needs this specific object structure for files
+      formData.append("image", {
+        uri: image,
+        name: filename,
+        type,
+      });
+    }
+
+    try {
+      const response = await apiClient.post(`/tutors/setup`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       
       if (response.status === 201 || response.status === 200) {
         Alert.alert("Success", "Tutor profile created successfully!");
-        router.push('/Tutors'); 
+        
+        // Use replace to ensure the Tutors list refreshes its data
+        router.replace('/Tutors'); 
       }
-    } catch (error) {
-      console.error("Save Profile Error:", error);
-      Alert.alert("Connection Failed", "Could not reach the server. Make sure your backend is running.");
+    } catch (error: any) {
+      console.error("Save Profile Error:", error.response?.data || error.message);
+      const errorMsg = error.response?.data?.message || "Failed to save profile.";
+      Alert.alert("Error", errorMsg);
     } finally {
       setLoading(false);
     }
@@ -78,114 +122,110 @@ export default function ProfileSetup() {
           
           <Text className="text-gray-500 mb-6">Tell us about your academic expertise.</Text>
 
-          {/* UPDATED AVATAR SECTION */}
+          {/* Avatar Section */}
           <View className="items-center mb-8">
-            <Avatar className="bg-indigo-600 w-24 h-24">
-              <Icon as={User} size="xl" className="text-white" />
-            </Avatar>
-            <Text className="text-gray-400 text-xs mt-3 font-medium uppercase tracking-tighter">Tutor Identity</Text>
+            <TouchableOpacity onPress={pickImage} activeOpacity={0.7}>
+              <Avatar className="bg-indigo-600 w-24 h-24 relative">
+                {image ? (
+                  <AvatarImage source={{ uri: image }} className="w-full h-full rounded-full" />
+                ) : (
+                  <Icon as={User} size="xl" className="text-white" />
+                )}
+                <View className="absolute bottom-0 right-0 bg-white p-1.5 rounded-full shadow-sm border border-gray-100">
+                  <Icon as={Camera} size="xs" className="text-indigo-600" />
+                </View>
+              </Avatar>
+            </TouchableOpacity>
+            <Text className="text-gray-400 text-xs mt-3 font-medium uppercase tracking-tighter">
+              {image ? "Tap to change" : "Add Profile Photo"}
+            </Text>
           </View>
 
           <VStack space="xl">
             {/* Full Name */}
             <VStack space="xs">
-              <Text className="text-xs font-bold uppercase tracking-wider text-black">
-                Full Name
-              </Text>
+              <Text className="text-xs font-bold uppercase tracking-wider text-black">Full Name</Text>
               <Input variant="rounded" className="bg-gray-100 border-0 h-14 px-2">
                 <InputField 
-                  placeholder="Dr. Julian Sterling" 
                   className="text-black"
+                  placeholder="Dr. Julian Sterling" 
                   value={fullName}
-                  onChangeText={(text) => setFullName(text)}
+                  onChangeText={setFullName}
                 />
-                {fullName.length > 0 && (
-                  <InputSlot className="pr-3" onPress={() => setFullName("")}>
-                    <Icon as={CircleX} size="sm" />
-                  </InputSlot>
-                )}
               </Input>
             </VStack>
 
             {/* Hourly Rate */}
             <VStack space="xs">
-              <Text className="text-xs font-bold uppercase tracking-wider text-black">
-                Hourly Rate (LKR)
-              </Text>
+              <Text className="text-xs font-bold uppercase tracking-wider text-black">Hourly Rate (LKR)</Text>
               <Input variant="rounded" className="bg-gray-100 border-0 h-14 px-2">
                 <InputSlot className="pl-3">
                   <Text className="text-gray-400 mr-1">Rs.</Text>
                 </InputSlot>
                 <InputField 
+                  className="text-black"
                   placeholder="1000" 
                   keyboardType="numeric" 
-                  className="text-black"
                   value={hourlyRate}
-                  onChangeText={(text) => setHourlyRate(text)}
+                  onChangeText={setHourlyRate}
                 />
               </Input>
             </VStack>
 
-            {/* Subjects Input */}
+            {/* Subjects */}
             <VStack space="xs">
-              <Text className="text-xs font-bold uppercase tracking-wider text-black">
-                Subjects
-              </Text>
+              <Text className="text-xs font-bold uppercase tracking-wider text-black">Subjects</Text>
               <Input variant="rounded" className="bg-gray-100 border-0 h-14 px-2">
                 <InputField 
-                  placeholder="Physics, Calculus, Ethics"
-                  className="text-black" 
+                  className="text-black"
+                  placeholder="Physics, Calculus"
                   value={subjects}        
-                  onChangeText={(text) => setSubjects(text)}
+                  onChangeText={setSubjects}
                 />
               </Input>
             </VStack>
 
-            {/* Bio Textarea */}
+            {/* Bio */}
             <VStack space="xs">
-              <Text className="text-xs font-bold uppercase tracking-wider text-black">
-                Bio & Experience
-              </Text>
-              <Input variant="rounded" className="bg-gray-100 border-0 h-14 px-4">
+              <Text className="text-xs font-bold uppercase tracking-wider text-black">Bio & Experience</Text>
+              <Input variant="rounded" className="bg-gray-100 border-0 h-14 px-2">
                 <InputField
-                  placeholder="Share your academic background..." 
-                  className="text-black flex-1" 
-                  style={{ textAlignVertical: 'top' }} 
+                  className="text-black"
+                  placeholder="Share your background..." 
                   value={bio}
-                  onChangeText={(text) => setBio(text)}
+                  onChangeText={setBio}
                 />
               </Input>
             </VStack>
 
-            {/* contact number */}
+            {/* Contact Number */}
             <VStack space="xs">
-              <Text className="text-xs font-bold uppercase tracking-wider text-black">
-                Contact Number
-              </Text>
+              <Text className="text-xs font-bold uppercase tracking-wider text-black">Contact Number</Text>
               <Input variant="rounded" className="bg-gray-100 border-0 h-14 px-2">
                 <InputField 
+                  className="text-black"
                   placeholder="0771234567" 
                   keyboardType="numeric" 
-                  className="text-black"
                   value={phone}
-                  onChangeText={(text) => setPhone(text)}
+                  onChangeText={setPhone}
                 />
               </Input>
             </VStack>
 
+            {/* Save Button */}
             <TouchableOpacity 
-              className={`bg-[#4338CA] p-4 rounded-full mt-4 ${loading ? 'opacity-50' : 'active:opacity-80'}`}
+              className={`bg-[#4338CA] p-4 rounded-full mt-4 mb-10 ${loading ? 'opacity-50' : ''}`}
               onPress={handleSaveProfile}
               disabled={loading}
             >
-               <Text className="text-white text-center font-bold text-lg">
-                 {loading ? "Saving..." : "Save Profile"}
-               </Text>
+                {loading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text className="text-white text-center font-bold text-lg">Save Profile</Text>
+                )}
             </TouchableOpacity>
           </VStack>
-          
           <View className="h-20" />
-        
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
