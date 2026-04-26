@@ -25,6 +25,7 @@ export const useLostItemsListQuery = () => {
   return useQuery({
     queryKey: ["lostItems"],
     queryFn: getAllLostItems,
+    
   });
 };
 
@@ -36,10 +37,11 @@ export const useCreateLostItemMutation = () => {
 
   return useMutation({
     mutationFn: createLostItem,
-
     onSuccess: () => {
-      // refresh list
-      queryClient.invalidateQueries({ queryKey: ["lostItems"] });
+      queryClient.invalidateQueries({
+        queryKey: ["lostItems"],
+        refetchType: "all",
+      });
     },
   });
 };
@@ -79,17 +81,19 @@ export const useUpdateLostItemMutation = () => {
       itemData,
     }: {
       itemId: string;
-      itemData: any;
+      itemData: FormData;
     }) => updateLostItem(itemId, itemData),
 
     onSuccess: (_, variables) => {
-      // refresh detail
       queryClient.invalidateQueries({
-        queryKey: ["lostItem", variables.itemId],
+        queryKey: ["lostItems"],
+        refetchType: "all",
       });
 
-      // refresh list
-      queryClient.invalidateQueries({ queryKey: ["lostItems"] });
+      queryClient.invalidateQueries({
+        queryKey: ["lostItem", variables.itemId],
+        refetchType: "all",
+      });
     },
   });
 };
