@@ -13,6 +13,8 @@ import { Buffer } from "buffer";
 
 SplashScreen.preventAutoHideAsync();
 
+const queryClient = new QueryClient();
+
 export default function RootLayout() {
   useEffect(() => {
     SplashScreen.hideAsync();

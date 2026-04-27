@@ -13,13 +13,15 @@
   "dependencies": {
     "@expo/html-elements": "^0.10.1",
     "@expo/vector-icons": "^15.0.3",
+    "@gluestack-style/react": "^1.0.57",
     "@gluestack-ui/core": "^3.0.10",
     "@gluestack-ui/themed": "^1.1.73",
     "@gluestack-ui/utils": "^3.0.11",
-    "@legendapp/motion": "^2.3.0",
+    "@legendapp/motion": "^2.5.3",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
+    "@tanstack/react-query": "^5.100.3",
     "axios": "1.14.0",
     "babel-preset-expo": "~55.0.8",
     "buffer": "^6.0.3",
@@ -63,5 +65,8 @@
     "tailwindcss": "^3.4.17",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "axios": "1.14.0"
+  }
 }
