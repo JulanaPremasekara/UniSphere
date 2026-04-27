@@ -9,7 +9,7 @@ export default function Footer() {
 
   const tabs = [
     { name: "HOME", icon: Home, path: "/" },
-    { name: "TUTORS", icon: BookOpen, path: "/tutors" },
+    { name: "TUTORS", icon: BookOpen, path: "/Tutors" },
     { name: "LOST &\nFOUND", icon: Search, path: "/lost-and-found" },
     { name: "GROUPS", icon: Users, path: "/studyGroup" },
     { name: "EVENTS", icon: Calendar, path: "/events" },
