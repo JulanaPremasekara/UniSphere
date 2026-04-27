@@ -50,8 +50,6 @@ export default function LostIndexScreen() {
     isError,
     error,
   } = useLostItemsListQuery();
-
-  console.log("Fetched lost items:", items);
   
   const customFilter = useCallback(
     (item: LostItem) => {

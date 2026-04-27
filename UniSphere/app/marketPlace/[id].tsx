@@ -1,21 +1,19 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Image, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Linking, Clipboard } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import { ChevronLeft, MapPin, PhoneCall, Edit3, Trash2, Phone, MessageCircle, Heart } from 'lucide-react-native';
+import { ChevronLeft, MapPin, PhoneCall, Edit3, Trash2, Phone } from 'lucide-react-native';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { Button, ButtonText } from '@/components/ui/button';
 import apiClient from "../services/api";
-import { AlertDialog, AlertDialogBackdrop, AlertDialogContent } from "@/components/ui/alert-dialog";
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const fetchProduct = useCallback(async () => {
     try {
@@ -44,14 +42,18 @@ export default function ProductDetailScreen() {
     }
   };
 
-  const handleDelete = () => {
-    setShowDeleteModal(true);
+  const handleDelete = async () => {
+    Alert.alert("Delete", "Remove this item permanently?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", style: "destructive", onPress: async () => {
+          await apiClient.delete(`/api/marketplace/${id}`);
+          router.replace("/marketplace");
+      }}
+    ]);
   };
 
   if (loading) return <Box className="flex-1 justify-center items-center bg-white"><ActivityIndicator size="large" color="#4F46E5" /></Box>;
   if (!product) return <Box className="flex-1 justify-center items-center"><Text>Product not found.</Text></Box>;
-
-
 
   return (
     <Box className="flex-1 bg-white">
@@ -95,61 +97,11 @@ export default function ProductDetailScreen() {
         </VStack>
       </ScrollView>
 
-      {/* Footer Buttons */}
-      <Box className="absolute bottom-6 left-6 right-6 flex-row" style={{ height: 70 }}>
-        <TouchableOpacity className="flex-1 bg-indigo-600 rounded-full flex-row items-center justify-center shadow-lg shadow-indigo-300">
-          <MessageCircle size={22} color="white" />
-          <Text className="text-white font-bold text-lg ml-2">Message Seller</Text>
-        </TouchableOpacity>
-        <TouchableOpacity className="ml-4 w-[70px] h-[70px] bg-white rounded-full items-center justify-center border border-gray-100 shadow-sm">
-          <Heart size={26} color="#1f2937" />
-        </TouchableOpacity>
-      </Box>
-      <AlertDialog
-  isOpen={showDeleteModal}
-  onClose={() => setShowDeleteModal(false)}
-  size="md"
->
-  <AlertDialogBackdrop />
-  <AlertDialogContent className="rounded-[40px] p-8">
-    <VStack space="lg" className="items-center">
-      
-      {/* Icon Circle */}
-      <Box className="bg-red-100 w-16 h-16 rounded-full items-center justify-center">
-         <Trash2 size={28} color="#991b1b" />
-      </Box>
-
-      {/* Text Content */}
-      <VStack space="xs" className="items-center">
-        <Text className="text-2xl font-bold text-gray-900 text-center">
-          Delete this item?
-        </Text>
-        <Text className="text-gray-500 text-center px-4">
-          This action cannot be undone. The listing will be permanently removed from UniSphere.
-        </Text>
-      </VStack>
-
-      {/* Action Buttons */}
-      <VStack space="sm" className="w-full mt-4">
-        <Button
-          className="bg-red-800 rounded-full h-14"
-          onPress={async () => {
-            try {
-              await apiClient.delete(`/api/marketplace/${id}`);
-              setShowDeleteModal(false);
-              router.replace("/marketPlace");
-            } catch (error) {
-              console.error("Delete failed:", error);
-              Alert.alert("Error", "Failed to delete item.");
-            }
-          }}
-        >
-          <ButtonText className="font-bold text-lg">Yes, Delete</ButtonText>
+      <Box className="absolute bottom-0 w-full p-6 bg-white border-t border-gray-50">
+        <Button onPress={handleContact} className="bg-indigo-500 rounded-full h-16 shadow-lg shadow-indigo-100">
+          <HStack space="sm" className="items-center"><PhoneCall size={22} color="white" /><ButtonText className="text-white font-bold text-lg">Contact Seller</ButtonText></HStack>
         </Button>
-      </VStack>
-    </VStack>
-  </AlertDialogContent>
-</AlertDialog>
+      </Box>
     </Box>
   );
 }

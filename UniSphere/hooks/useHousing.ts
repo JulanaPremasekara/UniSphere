@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import apiClient from '../app/services/api';
+import { useState, useEffect, useCallback } from "react";
+import apiClient from "../app/services/api";
 
 export interface Housing {
   id: string;
@@ -22,27 +22,32 @@ export const useHousing = () => {
     location: h.address,
     rentPrice: h.rentPrice,
     roomType: h.roomType,
-    images: h.images,
+    images: h.images || [],
     isMine: currentUserId ? h.postedBy === currentUserId : false,
   });
 
   const fetchHousings = useCallback(async () => {
     try {
       setLoading(true);
+
       const [userRes, housingsRes] = await Promise.all([
-        apiClient.get('/users/me').catch(() => ({ data: { user: null } })),
-        apiClient.get('/housing')
+        apiClient.get("/users/me").catch(() => ({ data: { user: null } })),
+        apiClient.get("/housing"),
       ]);
 
-      const currentUserId = userRes.data.user?._id;
-      const fetchedHousings = housingsRes.data.housings || [];
+      const currentUserId =
+        userRes.data.user?._id || userRes.data.user?.studentId;
 
-      const processedHousings = fetchedHousings.map((h: any) => formatHousing(h, currentUserId));
+      const fetchedHousings = housingsRes.data.data || [];
+
+      const processedHousings = fetchedHousings.map((h: any) =>
+        formatHousing(h, currentUserId)
+      );
 
       setHousings(processedHousings);
       setError(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch housings');
+      setError(err.message || "Failed to fetch housings");
       setHousings([]);
     } finally {
       setLoading(false);
@@ -53,5 +58,10 @@ export const useHousing = () => {
     fetchHousings();
   }, [fetchHousings]);
 
-  return { housings, loading, error, refreshHousings: fetchHousings };
+  return {
+    housings,
+    loading,
+    error,
+    refreshHousings: fetchHousings,
+  };
 };
