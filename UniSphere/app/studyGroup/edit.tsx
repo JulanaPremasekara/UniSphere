@@ -1,6 +1,6 @@
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Book, Clock, MapPin, Users, X } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -12,16 +12,43 @@ import {
 } from "react-native";
 import apiClient from "../services/api";
 
-export default function CreateSession() {
+export default function EditSession() {
   const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
 
   const [subject, setSubject] = useState("");
   const [location, setLocation] = useState("");
   const [time, setTime] = useState("");
   const [maxParticipants, setMaxParticipants] = useState("");
-  const [submitting, setSubmitting] = useState(false);
 
-  const handlePostSession = async () => {
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        setLoading(true);
+
+        const response = await apiClient.get(`/studyGroups/${id}`);
+        const session = response.data?.data;
+
+        setSubject(session?.subject || "");
+        setLocation(session?.location || "");
+        setTime(session?.time || "");
+        setMaxParticipants(String(session?.maxParticipants || ""));
+      } catch (error: any) {
+        Alert.alert("Error", "Could not load session details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchSession();
+    }
+  }, [id]);
+
+  const handleUpdateSession = async () => {
     const maxParticipantsNumber = Number(maxParticipants);
 
     if (
@@ -32,21 +59,18 @@ export default function CreateSession() {
     ) {
       Alert.alert(
         "Missing Details",
-        "Please enter subject title, location, time, and number of participants."
+        "Please enter subject title, location, time, and participants."
       );
       return;
     }
 
     if (isNaN(maxParticipantsNumber) || maxParticipantsNumber <= 0) {
-      Alert.alert(
-        "Invalid Participants",
-        "Please enter a valid participant number."
-      );
+      Alert.alert("Invalid Participants", "Please enter a valid number.");
       return;
     }
 
     try {
-      setSubmitting(true);
+      setUpdating(true);
 
       const payload = {
         subject: subject.trim(),
@@ -55,31 +79,37 @@ export default function CreateSession() {
         maxParticipants: maxParticipantsNumber,
       };
 
-      console.log("Sending payload:", payload);
+      const response = await apiClient.put(`/studyGroups/${id}`, payload);
 
-      const response = await apiClient.post("/studyGroups", payload);
+      if (!response.data?.success) {
+        throw new Error(response.data?.message || "Update failed");
+      }
 
-      console.log("Backend response:", response.data);
-
-      Alert.alert("Success", "Study session posted successfully!", [
+      Alert.alert("Success", "Study session updated successfully!", [
         {
           text: "OK",
-          onPress: () => router.back(),
+          onPress: () => router.replace(`/studyGroup/${id}` as any),
         },
       ]);
     } catch (error: any) {
-      console.log("Post error:", error?.response?.data || error.message);
-
       const message =
         error?.response?.data?.message ||
         error?.message ||
-        "Could not post session";
+        "Could not update session";
 
-      Alert.alert("Post Failed", message);
+      Alert.alert("Update Failed", message);
     } finally {
-      setSubmitting(false);
+      setUpdating(false);
     }
   };
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#4F46E5" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -87,7 +117,7 @@ export default function CreateSession() {
       keyboardShouldPersistTaps="handled"
     >
       <View className="flex-row justify-between items-center mb-2">
-        <Text className="text-3xl font-bold">Post Session</Text>
+        <Text className="text-3xl font-bold">Edit Session</Text>
 
         <TouchableOpacity onPress={() => router.back()}>
           <X color="black" />
@@ -95,7 +125,7 @@ export default function CreateSession() {
       </View>
 
       <Text className="text-gray-500 mb-8">
-        Coordinate a study group in the Academic Gallery.
+        Update your study group session details.
       </Text>
 
       <Text className="font-bold mb-2">Subject Title</Text>
@@ -144,18 +174,18 @@ export default function CreateSession() {
       </View>
 
       <TouchableOpacity
-        onPress={handlePostSession}
-        disabled={submitting}
+        onPress={handleUpdateSession}
+        disabled={updating}
         activeOpacity={0.8}
         className={`p-5 rounded-[25px] mt-10 mb-20 ${
-          submitting ? "bg-indigo-400" : "bg-indigo-600"
+          updating ? "bg-indigo-400" : "bg-indigo-600"
         }`}
       >
-        {submitting ? (
+        {updating ? (
           <ActivityIndicator color="white" />
         ) : (
           <Text className="text-white text-center font-bold">
-            Post Session
+            Update Session
           </Text>
         )}
       </TouchableOpacity>

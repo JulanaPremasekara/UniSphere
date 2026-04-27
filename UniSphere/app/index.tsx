@@ -1,19 +1,20 @@
 import { useRouter } from 'expo-router';
-import { Bookmark, BookOpen, Calendar, HelpCircle, HomeIcon, Search, ShoppingBasket, Users } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-
+import { Bookmark, Calendar, GraduationCap, Map as MapIcon, Search, ShoppingBasket, Users } from 'lucide-react-native';
+import React from 'react';
+import { ActivityIndicator, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useEvents } from '../hooks/useEvents';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import apiClient from './services/api';
 
 const categories = [
-  { name: 'Marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA' },
-  { name: 'Study Groups', icon: Users, color: '#F5F3FF', iconColor: '#5B21B6' },
-  { name: 'Events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1' },
-  { name: 'Lost &\n Found', icon: HelpCircle, color: '#FFF7ED', iconColor: '#C2410C' },
-  { name: 'Housing', icon: HomeIcon, color: '#ECFDF5', iconColor: '#047857' },
-  { name: 'Tutors', icon: BookOpen, color: '#FEF2F2', iconColor: '#B91C1C' },
+  { name: 'Marketplace', path: '/marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA' },
+  { name: 'Study Groups', path: '/studyGroup', icon: Users, color: '#F5F3FF', iconColor: '#5B21B6' },
+  { name: 'Events', path: '/events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1' },
+  { name: 'Courses', path: '/courses', icon: GraduationCap, color: '#F5F3FF', iconColor: '#4338CA' },
+  { name: 'Lost Items', path: '/lost', icon: Search, color: '#FFF7ED', iconColor: '#C2410C' },
+  { name: 'Tutor', path: '/Tutors', icon: MapIcon, color: '#EEF2FF', iconColor: '#4338CA' },
+
 ];
 
 export default function Home() {
