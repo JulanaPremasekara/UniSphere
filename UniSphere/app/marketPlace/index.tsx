@@ -1,98 +1,132 @@
-import { Avatar, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar";
+import React, { useState, useCallback } from "react";
+import { Image, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from "react-native";
+import { useRouter, useFocusEffect } from "expo-router";
+import { ChevronLeft, Plus, Search, X } from "lucide-react-native";
 import { Box } from "@/components/ui/box";
 import { HStack } from "@/components/ui/hstack";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { useRouter } from "expo-router";
-import { Bell, ChevronLeft, Plus, Search } from "lucide-react-native";
-import React, { useState } from "react";
-import { Image, ScrollView, TouchableOpacity } from "react-native";
-
-
-// Mock Data for the UI
-const CATEGORIES = ["All items", "Textbooks", "Electronics", "Clothing"];
-const PRODUCTS = [
-  { id: "1", title: "Modern Physics: Third Edition", price: "$45.00", image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1000", isNew: true },
-  { id: "2", title: "MacBook Air M2 (8GB/256GB)", price: "$850.00", image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1000", isNew: false },
-];
+import apiClient from "../services/api"; 
 
 export default function MarketplaceIndex() {
-  const [activeTab, setActiveTab] = useState("All items");
   const router = useRouter();
+  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      const response = await apiClient.get('/api/marketplace');
+      const data = response.data.data || response.data;
+      setProducts(Array.isArray(data) ? data : []); 
+    } catch (error) {
+      console.error("Error fetching marketplace items:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchProducts();
+    }, [fetchProducts])
+  );
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchProducts();
+  };
+
+  const filteredProducts = products.filter(item => {
+    return item.title?.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   return (
     <Box className="flex-1 bg-white">
-      {/* Header */}
-      <HStack className="px-6 pt-12 pb-4 items-center justify-between">
-        <HStack space="md" className="items-center">
-          <TouchableOpacity onPress={() => router.replace("/")}>
+      {/* HEADER SECTION */}
+      <Box className="pt-12 px-6 pb-4">
+        {/* Top Row: Back Button and Centered Title */}
+        <Box className="relative flex-row items-center justify-center h-12">
+          <TouchableOpacity 
+            onPress={() => router.replace("/")} 
+            className="absolute left-0 z-10"
+          >
             <ChevronLeft size={28} color="#1f2937" />
           </TouchableOpacity>
-          <Avatar size="md">
-            <AvatarFallbackText>UN</AvatarFallbackText>
-            <AvatarImage source={{ uri: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde" }} />
-          </Avatar>
-          <Text className="text-xl font-bold text-indigo-600">UniSphere</Text>
-        </HStack>
-        <Bell size={24} color="#1f2937" />
-      </HStack>
+          
+          <Text className="text-2xl font-black text-indigo-800">UniSphere</Text>
+        </Box>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Marketplace Subtitle: Smaller and Centered */}
+        
+      </Box>
+
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <VStack className="px-6 pb-20">
-          <Text className="text-3xl font-black text-gray-900 mt-4 mb-6">Marketplace</Text>
-
-          {/* Search */}
-          <Input className="bg-gray-100 border-none rounded-2xl h-14 px-4 mb-6">
-            <InputSlot className="pl-3"><InputIcon as={Search} /></InputSlot>
-            <InputField placeholder="Find textbooks, gear, or tech..." />
+          
+          {/* SEARCH BOX */}
+          <Input className="bg-gray-100 border-none rounded-2xl h-14 px-4 mb-8 mt-4">
+            <InputSlot className="pl-3">
+              <InputIcon as={Search} color="#6B7280" />
+            </InputSlot>
+            <InputField 
+              placeholder="Find items..." 
+              placeholderTextColor="#9CA3AF"
+              className="text-gray-900 font-medium"
+              value={searchQuery}
+              onChangeText={(text) => setSearchQuery(text)}
+            />
+            {searchQuery.length > 0 && (
+              <InputSlot className="pr-3" onPress={() => setSearchQuery("")}>
+                <InputIcon as={X} color="#9CA3AF" size="sm" />
+              </InputSlot>
+            )}
           </Input>
 
-          {/* Category Pills */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6">
-            <HStack space="sm">
-              {CATEGORIES.map((cat) => (
-                <TouchableOpacity 
-                  key={cat}
-                  onPress={() => setActiveTab(cat)}
-                  className={`px-6 py-3 rounded-full ${activeTab === cat ? 'bg-indigo-600' : 'bg-gray-100'}`}
-                >
-                  <Text className={`font-bold ${activeTab === cat ? 'text-white' : 'text-gray-500'}`}>{cat}</Text>
-                </TouchableOpacity>
-              ))}
-            </HStack>
-          </ScrollView>
-
-          {/* Product Grid */}
-          <HStack className="flex-wrap justify-between">
-            {PRODUCTS.map((item) => (
-              <TouchableOpacity 
-                key={item.id} 
-                className="w-[48%] mb-6"
-                // Using the object syntax helps TypeScript resolve the dynamic ID
-                onPress={() => router.push({ pathname: "/marketplace/[id]", params: { id: item.id } })}
-              >
-                <Box className="relative aspect-square rounded-[30px] overflow-hidden bg-gray-100 mb-2">
-                  <Image source={{ uri: item.image }} className="w-full h-full" />
-                  {item.isNew && (
-                    <Box className="absolute top-3 right-3 bg-white px-2 py-1 rounded-lg">
-                      <Text className="text-[10px] font-bold text-indigo-600">NEW</Text>
+          {/* PRODUCT GRID */}
+          {loading && !refreshing ? (
+            <ActivityIndicator size="large" color="#4F46E5" className="mt-10" />
+          ) : (
+            <HStack className="flex-wrap justify-between">
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((item) => (
+                  <TouchableOpacity 
+                    key={item._id}
+                    className="w-[48%] mb-6"
+                    onPress={() => router.push({ pathname: "/marketPlace/[id]", params: { id: item._id } })}
+                  >
+                    <Box className="relative aspect-square rounded-[30px] overflow-hidden bg-gray-100 mb-2 border border-gray-50">
+                      <Image 
+                        source={{ uri: item.image || "https://via.placeholder.com/150" }} 
+                        className="w-full h-full" 
+                        resizeMode="cover"
+                      />
                     </Box>
-                  )}
+                    <Text className="font-bold text-gray-800" numberOfLines={1}>{item.title}</Text>
+                    <Text className="text-indigo-600 font-black">${item.price}</Text>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <Box className="w-full py-10 items-center">
+                  <Text className="text-gray-400 font-medium">No items found</Text>
                 </Box>
-                <Text className="font-bold text-gray-800" numberOfLines={1}>{item.title}</Text>
-                <Text className="text-gray-900 font-black">{item.price}</Text>
-              </TouchableOpacity>
-            ))}
-          </HStack>
+              )}
+            </HStack>
+          )}
         </VStack>
       </ScrollView>
 
-      {/* Floating Action Button */}
-      {/* Floating Action Button */}
+      {/* FLOATING ACTION BUTTON */}
       <TouchableOpacity 
-        onPress={() => router.push("/marketplace/create" )}
-        className="absolute bottom-8 right-6 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+        onPress={() => router.push("/marketPlace/create")}
+        className="absolute bottom-8 right-6 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-xl"
       >
         <Plus size={32} color="white" />
       </TouchableOpacity>
