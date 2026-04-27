@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
-import { Search, ShoppingBasket, Users, Calendar, GraduationCap, UtensilsCrossed, Map as MapIcon, Bookmark, BookOpen, HomeIcon, HelpCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import Footer from './components/Footer';
+import { Bookmark, Calendar, GraduationCap, Map as MapIcon, Search, ShoppingBasket, Users } from 'lucide-react-native';
+import React from 'react';
+import { ActivityIndicator, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useEvents } from '../hooks/useEvents';
+import Footer from './components/Footer';
 import Header from './components/Header';
 
 // Defined routes inside the category object for cleaner navigation logic
 const categories = [
   { name: 'Marketplace', path: '/marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA' },
-  { name: 'Study Groups', path: '/study-groups', icon: Users, color: '#F5F3FF', iconColor: '#5B21B6' },
+  { name: 'Study Groups', path: '/studyGroup', icon: Users, color: '#F5F3FF', iconColor: '#5B21B6' },
   { name: 'Events', path: '/events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1' },
   { name: 'Courses', path: '/courses', icon: GraduationCap, color: '#F5F3FF', iconColor: '#4338CA' },
   { name: 'Lost Items', path: '/lost', icon: Search, color: '#FFF7ED', iconColor: '#C2410C' },
