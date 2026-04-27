@@ -68,11 +68,11 @@ export default function LostIndexScreen() {
   });
 
   const handlePressItem = (itemId: string) => {
-    router.push(`/lost/${itemId}`);
+    router.push(`/lost/${itemId}` as any);
   };
 
   const handleCreateReport = () => {
-    router.push("/lost/create");
+    router.push("/lost/create" as any);
   };
 
   const renderHeader = () => (

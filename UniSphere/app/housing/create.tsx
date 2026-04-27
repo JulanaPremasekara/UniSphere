@@ -93,9 +93,7 @@ export default function CreateHousing() {
       setIsPicking(true);
       const result = await ImagePicker.launchImageLibraryAsync({ 
         mediaTypes: ['images'], 
-        allowsMultiple: true,
-        allowsEditing: true, 
-        aspect: [1, 1], 
+        allowsMultipleSelection: true,
         quality: 0.7, 
         base64: true 
       });
@@ -188,11 +186,11 @@ export default function CreateHousing() {
     }
   };
 
-  const updateForm = (field: string, text: string) => {
+  const updateForm = (field: keyof typeof form, text: string) => {
     setForm({ ...form, [field]: text });
   };
 
-  const toggleFeature = (feature: string) => {
+  const toggleFeature = (feature: keyof typeof form) => {
     setForm({ ...form, [feature]: !form[feature] });
   };
 

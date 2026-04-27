@@ -66,7 +66,7 @@ export default function HousingList() {
       <ScrollView className="flex-1 px-6" contentContainerStyle={{ paddingBottom: 120 }}>
         <View className="mt-6 mb-4"><Text className="text-xl font-medium">Available Rooms</Text></View>
         {filteredHousings.length > 0 ? filteredHousings.map((item: Housing) => (
-          <HousingCard key={item.id} item={item} onPress={() => router.push(`/housing/${item.id}`)} onEdit={item.isMine ? () => router.push({ pathname: '/housing/create', params: { editId: item.id } }) : undefined} onDelete={item.isMine ? () => { setHousingToDelete(item.id); setDeleteModalVisible(true); } : undefined} />
+          <HousingCard key={item.id} item={item} onPress={() => router.push(`/housing/${item.id}` as any)} onEdit={item.isMine ? () => router.push({ pathname: '/housing/create' as any, params: { editId: item.id } }) : undefined} onDelete={item.isMine ? () => { setHousingToDelete(item.id); setDeleteModalVisible(true); } : undefined} />
         )) : (
           <View className="flex-1 items-center justify-center py-20">
             <View className="bg-gray-100 p-8 rounded-full mb-4"><Search size={48} color="#9CA3AF" /></View>
@@ -76,7 +76,7 @@ export default function HousingList() {
         )}
       </ScrollView>
 
-      <TouchableOpacity onPress={() => !userId ? setLoginModalVisible(true) : router.push('/housing/create')} className="absolute bottom-28 right-8 bg-emerald-600 w-16 h-16 rounded-full items-center justify-center shadow-lg">
+      <TouchableOpacity onPress={() => !userId ? setLoginModalVisible(true) : router.push('/housing/create' as any)} className="absolute bottom-28 right-8 bg-emerald-600 w-16 h-16 rounded-full items-center justify-center shadow-lg">
         <Plus color="white" size={32} />
       </TouchableOpacity>
       <Footer />

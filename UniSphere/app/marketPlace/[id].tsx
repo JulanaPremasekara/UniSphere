@@ -137,7 +137,7 @@ export default function ProductDetailScreen() {
             try {
               await apiClient.delete(`/api/marketplace/${id}`);
               setShowDeleteModal(false);
-              router.replace("/marketPlace");
+              router.replace("/marketplace");
             } catch (error) {
               console.error("Delete failed:", error);
               Alert.alert("Error", "Failed to delete item.");
