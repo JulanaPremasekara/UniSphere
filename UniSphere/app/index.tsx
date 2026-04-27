@@ -8,7 +8,7 @@ import Header from './components/Header';
 
 // Defined routes inside the category object for cleaner navigation logic
 const categories = [
-  { name: 'Marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA', route: '/marketPlace' },
+  { name: 'Marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA', route: '/marketplace' },
   { name: 'Study Groups', icon: Users, color: '#F5F3FF', iconColor: '#5B21B6', route: '/studyGroup' },
   { name: 'Events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1', route: '/events' },
   { name: 'Lost &\n Found', icon: HelpCircle, color: '#FFF7ED', iconColor: '#C2410C', route: '/lost' },

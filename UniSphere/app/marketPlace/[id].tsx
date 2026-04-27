@@ -47,7 +47,7 @@ export default function ProductDetailScreen() {
       { text: "Cancel", style: "cancel" },
       { text: "Delete", style: "destructive", onPress: async () => {
           await apiClient.delete(`/api/marketplace/${id}`);
-          router.replace("/marketPlace");
+          router.replace("/marketplace");
       }}
     ]);
   };
@@ -60,7 +60,7 @@ export default function ProductDetailScreen() {
       <HStack className="absolute top-12 left-0 right-0 z-10 px-6 justify-between items-center">
         <TouchableOpacity onPress={() => router.back()} className="bg-white/80 p-2 rounded-full shadow-sm"><ChevronLeft size={28} color="#1f2937" /></TouchableOpacity>
         <HStack space="md">
-          <TouchableOpacity onPress={() => router.push(`/marketPlace/edit?id=${id}`)} className="bg-white/80 p-2 rounded-full shadow-sm"><Edit3 size={24} color="#4F46E5" /></TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push(`/marketplace/edit?id=${id}`)} className="bg-white/80 p-2 rounded-full shadow-sm"><Edit3 size={24} color="#4F46E5" /></TouchableOpacity>
           <TouchableOpacity onPress={handleDelete} className="bg-white/80 p-2 rounded-full shadow-sm"><Trash2 size={24} color="#ef4444" /></TouchableOpacity>
         </HStack>
       </HStack>

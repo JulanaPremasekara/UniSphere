@@ -100,7 +100,7 @@ export default function MarketplaceIndex() {
                   <TouchableOpacity 
                     key={item._id}
                     className="w-[48%] mb-6"
-                    onPress={() => router.push({ pathname: "/marketPlace/[id]", params: { id: item._id } })}
+                    onPress={() => router.push({ pathname: "/marketplace/[id]", params: { id: item._id } })}
                   >
                     <Box className="relative aspect-square rounded-[30px] overflow-hidden bg-gray-100 mb-2 border border-gray-50">
                       <Image 
@@ -125,7 +125,7 @@ export default function MarketplaceIndex() {
 
       {/* FLOATING ACTION BUTTON */}
       <TouchableOpacity 
-        onPress={() => router.push("/marketPlace/create")}
+        onPress={() => router.push("/marketplace/create")}
         className="absolute bottom-8 right-6 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-xl"
       >
         <Plus size={32} color="white" />
