@@ -1,86 +1,155 @@
 import { useRouter } from "expo-router";
-import React from "react";
-import { ScrollView, TouchableOpacity } from "react-native"; 
-import { ChevronLeft, Plus, User } from 'lucide-react-native';
+import { ChevronLeft, Plus, User } from 'lucide-react-native'; 
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, TouchableOpacity, View } from "react-native";
 
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Box } from "@/components/ui/box";
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
-import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { Avatar } from "@/components/ui/avatar"; 
+import apiClient from "../services/api";
+import Footer from "../components/Footer";
+import SearchInput from "../components/SearchInput"; 
+import Header from "../components/Header"; 
 
 export default function FindTutor() {
   const router = useRouter();
 
-  const tutorList = [
-    { id: "1", name: "Julian Vane", subject: "Introduction to Programming", price: "Rs.1000" },
-    { id: "2", name: "Ronald Richards", subject: "Nursing Assistant", price: "Rs.1000" },
-    { id: "3", name: "Kevin James", subject: "Web Designer", price: "Rs.1000" },
-  ];
+  // --- STATE MANAGEMENT ---
+  const [tutorList, setTutorList] = useState<any[]>([]);
+  const [filteredTutors, setFilteredTutors] = useState<any[]>([]); 
+  const [searchQuery, setSearchQuery] = useState(""); 
+  const [loading, setLoading] = useState(true);
+
+  // --- FETCH DATA FROM BACKEND ---
+  useEffect(() => {
+    const fetchAllTutors = async () => {
+      try {
+        setLoading(true); 
+        const response = await apiClient.get(`/tutors`);
+        if (response.data && response.data.data) {
+          setTutorList(response.data.data);
+          setFilteredTutors(response.data.data); 
+        }
+      } catch (error) {
+        console.error("Error fetching tutors:", error);
+      } finally {
+        setLoading(false); 
+      }
+    };
+
+    fetchAllTutors();
+  }, []);
+
+  // --- SEARCH LOGIC ---
+  const handleSearch = (text: string) => {
+    setSearchQuery(text);
+    if (!text.trim()) {
+      setFilteredTutors(tutorList); 
+      return;
+    }
+
+    const query = text.toLowerCase();
+    const filtered = tutorList.filter((tutor) => 
+      tutor.name.toLowerCase().includes(query) || 
+      tutor.subject.toLowerCase().includes(query)
+    );
+    setFilteredTutors(filtered);
+  };
 
   return (
-    <ScrollView className="flex-1 bg-white">
-      <VStack space="md" className="p-6 mt-10">
-        
-        {/* Header Section */}
-        <HStack className="items-center justify-between mb-2">
-          <HStack space="md" className="items-center">
-            <TouchableOpacity onPress={() => router.back()}>
-              <Icon as={ChevronLeft} size="xl" className="text-black" />
-            </TouchableOpacity>
-            <Text className="text-3xl font-bold text-indigo-800">Find a Tutor</Text>
+    <View className="flex-1 bg-white">
+      {/* Added Header Component */}
+      <Header title="UniSphere" />
+
+      <ScrollView className="flex-1 bg-white">
+        <VStack space="md" className="p-6 mt-4">
+          
+          {/* --- SEARCH BAR --- */}
+          <SearchInput 
+            value={searchQuery}
+            onChangeText={handleSearch}
+            placeholder="Search subjects..."
+          />
+          
+          {/* Categories */}
+          <HStack space="sm" className="mt-2">
+            <Box className="bg-[#4338CA] px-8 py-2 rounded-full">
+              <Text className="text-white font-bold text-sm">All Tutors</Text>
+            </Box>
           </HStack>
 
-          <TouchableOpacity 
-            onPress={() => router.push('/Tutors/setup' as any)}
-            className="bg-[#4338CA] p-2 rounded-full"
-          >
-            <Icon as={Plus} size="sm" className="text-white" />
-          </TouchableOpacity>
-        </HStack>
+          {/* List of Tutors */}
+          {loading ? (
+            <View className="mt-20">
+              <ActivityIndicator size="large" color="#4338CA" />
+              <Text className="text-center text-gray-400 mt-4">Finding tutors...</Text>
+            </View>
+          ) : (
+            <VStack space="lg" className="mt-4 mb-32"> 
+              {filteredTutors.length > 0 ? (
+                filteredTutors.map((tutor) => (
+                  <TouchableOpacity 
+                    key={tutor._id} 
+                    onPress={() => router.push(`/Tutors/${tutor._id}` as any)}
+                    className="bg-white rounded-[25px] shadow-sm border border-gray-100 p-4"
+                  >
+                    <HStack space="md" className="items-center">
+                      
+                      <View className="relative">
+                        <Avatar className="bg-indigo-600 w-16 h-16">
+                          {tutor.image ? (
+                            <AvatarImage 
+                              source={{ uri: tutor.image }} 
+                              className="w-full h-full rounded-full" 
+                            />
+                          ) : (
+                            <Icon as={User} size="xl" className="text-white" />
+                          )}
+                        </Avatar>
+                        <Box 
+                          className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${
+                            tutor.isOnline !== false ? 'bg-green-500' : 'bg-gray-300'
+                          }`} 
+                        />
+                      </View>
 
-        <Input variant="rounded" className="bg-gray-100 border-0 h-12">
-          <InputField placeholder="Search subjects..." />
-        </Input>
-
-        {/* Categories */}
-        <HStack space="sm" className="mt-2">
-          <Box className="bg-[#4338CA] px-4 py-1.5 rounded-full"><Text className="text-white font-bold text-xs">All</Text></Box>
-          <Box className="bg-gray-100 px-4 py-1.5 rounded-full"><Text className="text-gray-500 text-xs">Computing</Text></Box>
-          <Box className="bg-gray-100 px-4 py-1.5 rounded-full"><Text className="text-gray-500 text-xs">Business</Text></Box>
-        </HStack>
-
-        {/* List of Tutors */}
-        <VStack space="md" className="mt-4">
-          {tutorList.map((tutor) => (
-            <TouchableOpacity 
-              key={tutor.id} 
-              onPress={() => router.push(`/Tutors/${tutor.id}` as any)}
-              className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
-            >
-              <HStack space="md" className="items-center justify-between">
-                <HStack space="md" className="items-center">
-                  <Avatar size="lg" className="bg-indigo-500 rounded-full">
-                    <Icon as={User} className="text-white" size="md" />
-                  </Avatar>
-
-                  <VStack>
-                    <Text className="font-bold text-lg text-black">{tutor.name}</Text>
-                    <Text className="text-gray-400 text-sm">{tutor.subject}</Text>
-                  </VStack>
-                </HStack>
-
-                <Text className="font-bold text-indigo-700">
-                   {tutor.price}<Text className="text-gray-400 text-[10px] font-normal">/hr</Text>
-                </Text>
-              </HStack>
-            </TouchableOpacity>
-          ))}
+                      <VStack className="flex-1" space="xs">
+                        <Text className="font-bold text-xl text-black">{tutor.name}</Text>
+                        <Text className="text-gray-400 text-sm">{tutor.subject}</Text>
+                        
+                        <HStack className="justify-between items-center mt-1">
+                          <Text className="font-bold text-[#4338CA] text-lg">
+                             {tutor.price}<Text className="text-gray-400 text-sm font-normal">/hr</Text>
+                          </Text>
+                        </HStack>
+                      </VStack>
+                    </HStack>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <View className="mt-10 items-center">
+                  <Text className="text-gray-400">No tutors found.</Text>
+                </View>
+              )}
+            </VStack>
+          )}
         </VStack>
+      </ScrollView>
 
-      </VStack>
-    </ScrollView>
+      {/* --- FLOATING ACTION BUTTON --- */}
+      <TouchableOpacity 
+        onPress={() => router.push('/Tutors/setup' as any)}
+        activeOpacity={0.8}
+        className="absolute bottom-28 right-6 bg-[#5B50E6] w-16 h-16 rounded-full items-center justify-center shadow-lg"
+        style={{ elevation: 5 }}
+      >
+        <Icon as={Plus} size="xl" className="text-white" />
+      </TouchableOpacity>
+
+      <Footer />
+    </View>
   );
 }

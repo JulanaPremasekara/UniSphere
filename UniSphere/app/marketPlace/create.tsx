@@ -20,14 +20,16 @@ import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
+<<<<<<< HEAD
 
+=======
+>>>>>>> 25a4edbe06043e3b2042c9fb845a6ae0a4a50681
 import apiClient from "../services/api";
 
 const CONDITIONS = ["New", "Used", "Like New"];
 
 export default function CreateListingScreen() {
   const router = useRouter();
-
   const [loading, setLoading] = useState(false);
 
   const [title, setTitle] = useState("");
