@@ -17,6 +17,13 @@ import { X, Camera, MapPin, CheckCircle2 } from "lucide-react-native";
 import { Input, InputField, InputSlot } from "@/components/ui/input";
 import apiClient from "../services/api";
 
+const blurActiveElement = () => {
+  if (Platform.OS === "web" && typeof document !== "undefined") {
+    const active = document.activeElement as HTMLElement | null;
+    active?.blur();
+  }
+};
+
 type FormState = {
   title: string;
   description: string;
@@ -245,7 +252,7 @@ export default function CreateHousing() {
     const loadHousingDetails = async () => {
       try {
         const {
-          data: { success, housing: h },
+          data: { success, data: h },
         } = await apiClient.get(`/housing/${editId}`);
 
         if (success) {
@@ -366,6 +373,7 @@ export default function CreateHousing() {
             : "Listing posted successfully!"
         );
 
+        blurActiveElement();
         setShowSuccessModal(true);
 
         setTimeout(() => {
@@ -382,6 +390,12 @@ export default function CreateHousing() {
     } finally {
       setIsPublishing(false);
     }
+  };
+
+  const closeSuccessModal = () => {
+    blurActiveElement();
+    setShowSuccessModal(false);
+    router.back();
   };
 
   return (
@@ -619,14 +633,11 @@ export default function CreateHousing() {
         animationType="fade"
         transparent
         visible={showSuccessModal}
-        onRequestClose={() => setShowSuccessModal(false)}
+        onRequestClose={closeSuccessModal}
       >
         <TouchableOpacity
           activeOpacity={1}
-          onPress={() => {
-            setShowSuccessModal(false);
-            router.back();
-          }}
+          onPress={closeSuccessModal}
           className="flex-1 bg-black/60 justify-center items-center px-6"
         >
           <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
@@ -643,10 +654,7 @@ export default function CreateHousing() {
             </Text>
 
             <TouchableOpacity
-              onPress={() => {
-                setShowSuccessModal(false);
-                router.back();
-              }}
+              onPress={closeSuccessModal}
               className="bg-emerald-600 px-8 py-4 rounded-[20px]"
             >
               <Text className="text-white font-bold">Done</Text>
