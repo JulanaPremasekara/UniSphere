@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Platform, Alert, ActivityIndicator, Modal, TextInput } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Home, Search, Plus, Trash2, X } from 'lucide-react-native';
 import Footer from '../components/Footer';
 import apiClient from '../services/api';
@@ -11,19 +11,30 @@ import HousingCard from '../components/HousingCard';
 export default function HousingList() {
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState('All');
-  const { housings, loading, refreshHousings } = useHousing();
-  const { userId } = useUser();
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [housingToDelete, setHousingToDelete] = useState<string | null>(null);
   const [loginModalVisible, setLoginModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const { housings, loading, refreshHousings } = useHousing();
+  const { userId } = useUser();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshHousings();
+    }, [refreshHousings])
+  );
 
   const confirmDelete = async () => {
     if (!housingToDelete) return;
     try {
       if ((await apiClient.delete(`/housing/${housingToDelete}`)).data.success) refreshHousings();
     } catch { Alert.alert("Error", "Failed to delete housing listing."); } finally { setDeleteModalVisible(false); setHousingToDelete(null); }
+  };
+
+  const goToHousing = (item: Housing) => {
+    if (!item.id?.trim()) return;
+    router.push({ pathname: '/housing/[id]', params: { id: item.id } });
   };
 
   const filteredHousings = housings.filter((h: Housing) => 
@@ -66,7 +77,7 @@ export default function HousingList() {
       <ScrollView className="flex-1 px-6" contentContainerStyle={{ paddingBottom: 120 }}>
         <View className="mt-6 mb-4"><Text className="text-xl font-medium">Available Rooms</Text></View>
         {filteredHousings.length > 0 ? filteredHousings.map((item: Housing) => (
-          <HousingCard key={item.id} item={item} onPress={() => router.push(`/housing/${item.id}`)} onEdit={item.isMine ? () => router.push({ pathname: '/housing/create', params: { editId: item.id } }) : undefined} onDelete={item.isMine ? () => { setHousingToDelete(item.id); setDeleteModalVisible(true); } : undefined} />
+          <HousingCard key={item.id} item={item} onPress={() => goToHousing(item)} onEdit={item.isMine ? () => router.push({ pathname: '/housing/create', params: { editId: item.id } }) : undefined} onDelete={item.isMine ? () => { setHousingToDelete(item.id); setDeleteModalVisible(true); } : undefined} />
         )) : (
           <View className="flex-1 items-center justify-center py-20">
             <View className="bg-gray-100 p-8 rounded-full mb-4"><Search size={48} color="#9CA3AF" /></View>
