@@ -1,107 +1,229 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { Image, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Linking, Clipboard } from 'react-native';
-import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import { ChevronLeft, MapPin, PhoneCall, Edit3, Trash2, Phone } from 'lucide-react-native';
-import { Box } from '@/components/ui/box';
-import { HStack } from '@/components/ui/hstack';
-import { Text } from '@/components/ui/text';
-import { VStack } from '@/components/ui/vstack';
-import { Button, ButtonText } from '@/components/ui/button';
+import React, { useState, useCallback } from "react";
+import {
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  Linking,
+  Clipboard,
+  View,
+} from "react-native";
+import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
+import { ChevronLeft, PhoneCall } from "lucide-react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { Box } from "@/components/ui/box";
+import { Text } from "@/components/ui/text";
+import { Button, ButtonText } from "@/components/ui/button";
+import { HStack } from "@/components/ui/hstack";
+
 import apiClient from "../services/api";
+import Footer from "../components/Footer";
+import { useUser } from "@/hooks/useUser";
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+
+  const { userId } = useUser();
+
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchProduct = useCallback(async () => {
     try {
       const response = await apiClient.get(`/api/marketplace/${id}`);
-      setProduct(response.data);
-    } catch (error) { console.error(error); } 
-    finally { setLoading(false); }
+      setProduct(response.data.data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
-  useFocusEffect(useCallback(() => { fetchProduct(); }, [fetchProduct]));
+  useFocusEffect(
+    useCallback(() => {
+      fetchProduct();
+    }, [fetchProduct])
+  );
 
   const handleContact = () => {
     if (product?.contactNumber) {
-      Alert.alert(
-        "Seller Contact",
-        `Phone Number: ${product.contactNumber}`,
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Copy Number", onPress: () => {
-              Clipboard.setString(product.contactNumber);
-              Alert.alert("Success", "Copied to clipboard!");
-          }},
-          { text: "Call Now", onPress: () => Linking.openURL(`tel:${product.contactNumber}`) }
-        ]
-      );
+      Alert.alert("Seller Contact", `Phone Number: ${product.contactNumber}`, [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Copy Number",
+          onPress: () => {
+            Clipboard.setString(product.contactNumber);
+            Alert.alert("Success", "Copied to clipboard!");
+          },
+        },
+        {
+          text: "Call Now",
+          onPress: () => Linking.openURL(`tel:${product.contactNumber}`),
+        },
+      ]);
     }
   };
 
-  const handleDelete = async () => {
-    Alert.alert("Delete", "Remove this item permanently?", [
+  const handleEdit = () => {
+    router.push(`/marketplace/edit?id=${id}` as any);
+  };
+
+  const handleDelete = () => {
+    Alert.alert("Delete Item", "This action cannot be undone!", [
       { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: async () => {
-          await apiClient.delete(`/api/marketplace/${id}`);
-          router.replace("/marketplace");
-      }}
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await apiClient.delete(`/api/marketplace/${id}`);
+            router.replace("/marketplace");
+          } catch (error) {
+            Alert.alert("Error", "Failed to delete item.");
+          }
+        },
+      },
     ]);
   };
 
-  if (loading) return <Box className="flex-1 justify-center items-center bg-white"><ActivityIndicator size="large" color="#4F46E5" /></Box>;
-  if (!product) return <Box className="flex-1 justify-center items-center"><Text>Product not found.</Text></Box>;
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#4F46E5" />
+      </SafeAreaView>
+    );
+  }
 
+  if (!product) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-white px-6">
+        <Text className="text-lg font-bold text-slate-900">
+          Product not found.
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  const isOwner =product.seller === userId;
+    
   return (
-    <Box className="flex-1 bg-white">
-      <HStack className="absolute top-12 left-0 right-0 z-10 px-6 justify-between items-center">
-        <TouchableOpacity onPress={() => router.back()} className="bg-white/80 p-2 rounded-full shadow-sm"><ChevronLeft size={28} color="#1f2937" /></TouchableOpacity>
-        <HStack space="md">
-          <TouchableOpacity onPress={() => router.push(`/marketplace/edit?id=${id}`)} className="bg-white/80 p-2 rounded-full shadow-sm"><Edit3 size={24} color="#4F46E5" /></TouchableOpacity>
-          <TouchableOpacity onPress={handleDelete} className="bg-white/80 p-2 rounded-full shadow-sm"><Trash2 size={24} color="#ef4444" /></TouchableOpacity>
-        </HStack>
-      </HStack>
+    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-white">
+      <ScrollView showsVerticalScrollIndicator={false} className="bg-white">
+        <View className="flex-row justify-between items-center px-5 pt-14 pb-4 bg-white">
+          <View className="flex-row items-center gap-4">
+            <TouchableOpacity onPress={() => router.back()}>
+              <ChevronLeft size={28} color="#4B5563" />
+            </TouchableOpacity>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Image source={{ uri: product.image }} className="w-full h-[450px]" resizeMode="cover" />
-        
-        <VStack className="px-8 mt-6 pb-40" space="lg">
-          <HStack className="justify-between items-start">
-            <VStack className="flex-1">
-              <Text className="text-3xl font-black text-gray-900 leading-tight">{product.title}</Text>
-              <HStack space="xs" className="mt-1 items-center">
-                <MapPin size={16} color="#6366f1" />
-                <Text className="text-indigo-600 font-bold">{product.location}</Text>
-              </HStack>
-            </VStack>
-            <Box className="bg-indigo-100 px-3 py-1 rounded-full"><Text className="text-indigo-600 font-bold text-xs uppercase">{product.condition}</Text></Box>
-          </HStack>
+            <Text className="text-lg font-bold text-indigo-600">
+              Marketplace
+            </Text>
+          </View>
+        </View>
 
-          <Text className="text-3xl font-black text-indigo-600">${product.price}</Text>
+        <View className="p-5">
+          <View className="relative rounded-[30px] overflow-hidden">
+            <Image
+              source={{ uri: product.image }}
+              className="w-full h-64"
+              resizeMode="cover"
+            />
 
-          <HStack className="bg-indigo-50 p-4 rounded-2xl items-center" space="md">
-            <Box className="bg-white p-2 rounded-full shadow-sm"><Phone size={20} color="#4F46E5" /></Box>
-            <VStack>
-              <Text className="text-[10px] font-bold text-indigo-400 uppercase">Seller Contact</Text>
-              <Text className="text-indigo-900 font-bold text-lg">{product.contactNumber}</Text>
-            </VStack>
-          </HStack>
+            <View className="absolute top-4 left-4 bg-white/90 px-3 py-1.5 rounded-full">
+              <Text className="text-[10px] font-black text-indigo-900 uppercase">
+                {product.condition || "Item"}
+              </Text>
+            </View>
+          </View>
 
-          <VStack className="bg-gray-50 p-5 rounded-3xl border border-gray-100">
-            <Text className="text-[11px] font-bold text-gray-400 uppercase mb-2">Description</Text>
-            <Text className="text-gray-600 text-base leading-relaxed">{product.description}</Text>
-          </VStack>
-        </VStack>
+          <View className="flex-row items-center mt-4 mb-2 gap-2">
+            <View className="w-2 h-2 rounded-full bg-emerald-500" />
+            <Text className="text-xs font-bold text-emerald-500 uppercase">
+              Status: Available
+            </Text>
+          </View>
+
+          <View className="flex-row justify-between items-start gap-4">
+            <Text className="text-3xl font-extrabold text-gray-800 leading-tight flex-1">
+              {product.title}
+            </Text>
+
+            <Text className="text-3xl font-black text-indigo-600">
+              ${product.price}
+            </Text>
+          </View>
+
+          <View className="mt-4 gap-y-2">
+            <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
+              <Text className="mr-2">📍</Text>
+              <Text className="text-sm text-gray-600 font-medium">
+                {product.location}
+              </Text>
+            </View>
+
+            <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
+              <Text className="mr-2">📞</Text>
+              <Text className="text-sm text-gray-600 font-medium">
+                {product.contactNumber}
+              </Text>
+            </View>
+          </View>
+
+          <View className="mt-6">
+            <Text className="text-base font-bold text-gray-800 mb-2">
+              Description
+            </Text>
+            <Text className="text-sm text-gray-500 leading-5">
+              {product.description}
+            </Text>
+          </View>
+
+          {isOwner ? (
+            <View className="mx-5 my-4 p-6 bg-gray-100 rounded-[40px]">
+              <Text className="text-[10px] font-bold text-gray-400 text-center tracking-[2px] mb-5 uppercase">
+                Admin Controls
+              </Text>
+
+              {/* <TouchableOpacity className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3">
+                <Text className="font-bold text-gray-800">Mark Sold</Text>
+              </TouchableOpacity> */}
+
+              <TouchableOpacity
+                onPress={handleEdit}
+                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3"
+              >
+                <Text className="font-bold text-gray-800">Edit Details</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleDelete}
+                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center"
+              >
+                <Text className="font-bold text-red-500">Remove Listing</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View className="mt-8 mb-10">
+              <Button
+                onPress={handleContact}
+                className="bg-indigo-600 rounded-3xl h-16 shadow-lg shadow-indigo-100"
+              >
+                <HStack space="sm" className="items-center">
+                  <PhoneCall size={22} color="white" />
+                  <ButtonText className="text-white font-bold text-lg">
+                    Contact Seller
+                  </ButtonText>
+                </HStack>
+              </Button>
+            </View>
+          )}
+        </View>
+
+        <Footer />
       </ScrollView>
-
-      <Box className="absolute bottom-0 w-full p-6 bg-white border-t border-gray-50">
-        <Button onPress={handleContact} className="bg-indigo-500 rounded-full h-16 shadow-lg shadow-indigo-100">
-          <HStack space="sm" className="items-center"><PhoneCall size={22} color="white" /><ButtonText className="text-white font-bold text-lg">Contact Seller</ButtonText></HStack>
-        </Button>
-      </Box>
-    </Box>
+    </SafeAreaView>
   );
 }

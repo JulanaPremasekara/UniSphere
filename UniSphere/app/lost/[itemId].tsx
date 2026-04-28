@@ -122,7 +122,7 @@ export default function LostDetailScreen() {
               {item.features || item.description}
             </Text>
           </View>
-          {isOwner ? <LostAdminActions itemId={itemId}/>:<LostUserActions itemId={itemId} category={item.category || "General"} user={item.reporter}/>}
+          {isOwner ? <LostAdminActions itemId={itemId}/>:<LostUserActions itemId={item.title} category={item.category || "General"} ownerid={item.reporter}/>}
           
         </View>
         
