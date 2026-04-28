@@ -16,16 +16,21 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from "react";
 
 import Footer from "../components/Footer";
 import { useEventDetail } from "../../hooks/useEventDetail";
+import { useUser } from "@/hooks/useUser";
+import apiClient from "../services/api";
 
 export default function EventDetail() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+
+  const { userId } = useUser();
 
   const { event, loading, isRegistered, registering, register } =
     useEventDetail(id);
@@ -60,6 +65,36 @@ export default function EventDetail() {
   const start = new Date(event.startDate);
   const end = new Date(event.endDate);
 
+  const isOwner =
+    userId === event.userId ||
+    userId === event.createdBy ||
+    userId === event.organizerId;
+
+  const handleEdit = () => {
+    router.push({
+      pathname: "/events/create",
+      params: { editId: event.id || id },
+    });
+  };
+
+  const handleDelete = () => {
+    Alert.alert("Delete Event", "This action cannot be undone!", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await apiClient.delete(`/events/${event.id || id}`);
+            router.replace("/events");
+          } catch {
+            Alert.alert("Error", "Failed to delete event.");
+          }
+        },
+      },
+    ]);
+  };
+
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-white">
       <ScrollView showsVerticalScrollIndicator={false} className="bg-white">
@@ -69,9 +104,7 @@ export default function EventDetail() {
               <ChevronLeft size={28} color="#4B5563" />
             </TouchableOpacity>
 
-            <Text className="text-lg font-bold text-indigo-600">
-              Events
-            </Text>
+            <Text className="text-lg font-bold text-indigo-600">Events</Text>
           </View>
         </View>
 
@@ -98,8 +131,8 @@ export default function EventDetail() {
           </View>
 
           <View className="flex-row items-center mt-4 mb-2 gap-2">
-            <View className="w-2 h-2 rounded-full bg-emerald-500" />
-            <Text className="text-xs font-bold text-emerald-500 uppercase tracking-tighter">
+            <View className="w-2 h-2 rounded-full bg-indigo-500" />
+            <Text className="text-xs font-bold text-indigo-500 uppercase tracking-tighter">
               Status: Open for Registration
             </Text>
           </View>
@@ -163,27 +196,53 @@ export default function EventDetail() {
             </View>
           )}
 
-          <View className="mt-8 mb-10">
-            <TouchableOpacity
-              onPress={() =>
-                !isRegistered && !registering && setConfirmModalVisible(true)
-              }
-              disabled={isRegistered || registering}
-              className={`${
-                isRegistered ? "bg-emerald-600" : "bg-indigo-600"
-              } py-5 rounded-3xl flex-row items-center justify-center`}
-            >
-              {isRegistered && <CheckCheck color="white" size={20} />}
-
-              <Text className="text-white font-bold text-lg ml-2">
-                {registering
-                  ? "Registering..."
-                  : isRegistered
-                  ? "Registered"
-                  : "RSVP / Register"}
+          {isOwner ? (
+            <View className="mx-5 my-6 p-6 bg-gray-100 rounded-[40px]">
+              <Text className="text-[10px] font-bold text-gray-400 text-center tracking-[2px] mb-5 uppercase">
+                Admin Controls
               </Text>
-            </TouchableOpacity>
-          </View>
+
+              <TouchableOpacity className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3">
+                <Text className="font-bold text-gray-800">Mark Completed</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleEdit}
+                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3"
+              >
+                <Text className="font-bold text-gray-800">Edit Event</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleDelete}
+                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center"
+              >
+                <Text className="font-bold text-red-500">Remove Event</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View className="mt-8 mb-10">
+              <TouchableOpacity
+                onPress={() =>
+                  !isRegistered && !registering && setConfirmModalVisible(true)
+                }
+                disabled={isRegistered || registering}
+                className={`${
+                  isRegistered ? "bg-indigo-400" : "bg-indigo-600"
+                } py-5 rounded-3xl flex-row items-center justify-center`}
+              >
+                {isRegistered && <CheckCheck color="white" size={20} />}
+
+                <Text className="text-white font-bold text-lg ml-2">
+                  {registering
+                    ? "Registering..."
+                    : isRegistered
+                    ? "Registered"
+                    : "RSVP / Register"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         <Footer />
@@ -241,4 +300,4 @@ export default function EventDetail() {
       </Modal>
     </SafeAreaView>
   );
-} 
+}
