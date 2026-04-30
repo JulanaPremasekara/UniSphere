@@ -143,7 +143,7 @@ export default function TutorProfile() {
           {/* SETTINGS & SAFETY BUTTON */}
           <TouchableOpacity 
             onPress={() => router.push({
-              pathname: '/Tutors/settings',
+              pathname: '/tutors/settings',
               params: { id: tutor._id || id } 
             })}
             className="bg-white border border-gray-100 p-5 rounded-[25px] shadow-sm w-full mt-6 mb-24"

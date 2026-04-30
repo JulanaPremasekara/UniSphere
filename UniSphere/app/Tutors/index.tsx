@@ -93,7 +93,7 @@ export default function FindTutor() {
                 filteredTutors.map((tutor) => (
                   <TouchableOpacity 
                     key={tutor._id} 
-                    onPress={() => router.push(`/Tutors/${tutor._id}` as any)}
+                    onPress={() => router.push(`/tutors/${tutor._id}` as any)}
                     className="bg-white rounded-[25px] shadow-sm border border-gray-100 p-4"
                   >
                     <HStack space="md" className="items-center">
@@ -141,7 +141,7 @@ export default function FindTutor() {
 
       {/* --- FLOATING ACTION BUTTON --- */}
       <TouchableOpacity 
-        onPress={() => router.push('/Tutors/setup' as any)}
+        onPress={() => router.push('/tutors/setup' as any)}
         activeOpacity={0.8}
         className="absolute bottom-28 right-6 bg-[#5B50E6] w-16 h-16 rounded-full items-center justify-center shadow-lg"
         style={{ elevation: 5 }}

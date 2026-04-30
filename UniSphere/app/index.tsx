@@ -11,9 +11,9 @@ const categories = [
   { name: 'Marketplace', icon: ShoppingBasket, color: '#EEF2FF', iconColor: '#4338CA', route: '/marketplace' },
   { name: 'Study Groups', icon: Users, color: '#F5F3FF', iconColor: '#5B21B6', route: '/studyGroup' },
   { name: 'Events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1', route: '/events' },
-  { name: 'Lost &\n Found', icon: HelpCircle, color: '#FFF7ED', iconColor: '#C2410C', route: '/lost-found' },
+  { name: 'Lost &\n Found', icon: HelpCircle, color: '#FFF7ED', iconColor: '#C2410C', route: '/lost' },
   { name: 'Housing', icon: HomeIcon, color: '#ECFDF5', iconColor: '#047857', route: '/housing' },
-  { name: 'Tutors', icon: BookOpen, color: '#FEF2F2', iconColor: '#B91C1C', route: '/Tutors' },
+  { name: 'Tutors', icon: BookOpen, color: '#FEF2F2', iconColor: '#B91C1C', route: '/tutors' },
 ];
 
 export default function Home() {

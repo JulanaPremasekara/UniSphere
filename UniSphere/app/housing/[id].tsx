@@ -116,7 +116,7 @@ export default function HousingDetail() {
             <ArrowLeft size={24} color="#1F2937" />
           </TouchableOpacity>
           {housing.isMine && (
-            <TouchableOpacity onPress={() => router.push({ pathname: '/housing/create' as any, params: { editId: housing.id } })} className="bg-emerald-600 px-4 py-2 rounded-full">
+            <TouchableOpacity onPress={() => router.push({ pathname: "/housing/create", params: { editId: housing.id } })} className="bg-emerald-600 px-4 py-2 rounded-full">
               <View className="flex-row items-center gap-2">
                 <Edit size={16} color="white" />
                 <Text className="text-white font-bold text-sm">Edit</Text>

@@ -1,15 +1,55 @@
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Bell, Calendar, ChevronLeft, ChevronRight, CircleUserRound, GraduationCap, LogOut, Mail, Settings, ShieldCheck } from 'lucide-react-native';
-import React from 'react';
-import { ActivityIndicator, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Camera, Bell, Calendar, ChevronLeft, ChevronRight, CircleUserRound, GraduationCap, LogOut, Mail, Settings, ShieldCheck } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, Platform, ScrollView, Text, TouchableOpacity, View, Image, Alert } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+
 import Footer from './components/Footer';
 import { useProfile } from '../hooks/useProfile';
 
 export default function Profile() {
   const router = useRouter();
-  const { user, loading, logout, refreshProfile } = useProfile();
+  const { user, loading, isUpdating, logout, refreshProfile, updateProfile, deleteProfileImage } = useProfile();
+
+  const handleImagePick = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permission Required", "Please allow access to your photo library to update your profile picture.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      const success = await updateProfile({
+        name: user.name,
+        phone: user.phone,
+        year: user.year,
+        major: user.major
+      }, result.assets[0], false); // Pass false to stay on the page
+      
+      if (success) {
+        refreshProfile();
+      }
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    Alert.alert("Remove Photo", "Are you sure you want to remove your profile photo?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Remove", style: "destructive", onPress: async () => {
+        await deleteProfileImage();
+        refreshProfile();
+      }}
+    ]);
+  };
 
   useFocusEffect(React.useCallback(() => { refreshProfile(); }, [refreshProfile]));
 
@@ -39,8 +79,33 @@ export default function Profile() {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
         <View className="items-center mt-6">
-          <View className="bg-indigo-50 p-1 rounded-[45px] border-2 border-indigo-100">
-            <View className="bg-white w-32 h-32 rounded-[40px] items-center justify-center shadow-sm"><CircleUserRound size={80} color="#4F46E5" strokeWidth={1.5} /></View>
+          <View className="relative">
+            <TouchableOpacity onPress={handleImagePick} onLongPress={user.image ? handleDeleteImage : undefined} activeOpacity={0.9}>
+              <View className="bg-indigo-50 p-1 rounded-[45px] border-2 border-indigo-100">
+                <View className="bg-white w-32 h-32 rounded-[40px] items-center justify-center shadow-sm overflow-hidden">
+                  {user.image ? (
+                    <Image 
+                      source={{ 
+                        uri: user.image.startsWith('http') 
+                          ? `${user.image}?t=${new Date().getTime()}` 
+                          : `${process.env.EXPO_PUBLIC_API_URL}${user.image}?t=${new Date().getTime()}` 
+                      }} 
+                      className="w-full h-full" 
+                    />
+                  ) : (
+                    <CircleUserRound size={80} color="#4F46E5" strokeWidth={1.5} />
+                  )}
+                  {isUpdating && (
+                    <View className="absolute inset-0 bg-black/30 items-center justify-center">
+                      <ActivityIndicator color="white" />
+                    </View>
+                  )}
+                </View>
+              </View>
+              <View className="absolute bottom-2 right-2 bg-indigo-600 p-2.5 rounded-2xl border-2 border-white shadow-md">
+                <Camera size={18} color="white" />
+              </View>
+            </TouchableOpacity>
           </View>
           <Text className="text-3xl font-extrabold text-gray-900 mt-5">{user?.name || 'User'}</Text>
           <View className="flex-row items-center mt-2 bg-gray-50 px-4 py-1.5 rounded-full border border-gray-100">

@@ -91,7 +91,7 @@ const handleSaveProfile = async () => {
         Alert.alert("Success", "Tutor profile created successfully!");
         
         // Use replace to ensure the Tutors list refreshes its data
-        router.replace('/Tutors'); 
+        router.replace('/tutors'); 
       }
     } catch (error: any) {
       console.error("Save Profile Error:", error.response?.data || error.message);
