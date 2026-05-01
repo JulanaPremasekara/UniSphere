@@ -68,7 +68,7 @@ export default function TutorProfile() {
     await apiClient.patch(`/tutors/${id}/status`, { isOnline: false }); // Using apiClient for consistency
     
     Alert.alert("Success", "Status updated successfully.");
-    router.replace("/Tutors"); 
+    router.replace("/tutors"); 
   } catch (error: any) {
     console.log("Error Detail:", error.response?.data || error.message);
     Alert.alert("Error", "Validation still failing. See console.");
@@ -86,7 +86,7 @@ export default function TutorProfile() {
         onPress: async () => {
           try {
             await apiClient.delete(`/tutors/${id}`);
-            router.replace("/Tutors");
+            router.replace("/tutors");
           } catch (error) {
             Alert.alert("Error", "Failed to delete profile.");
           }

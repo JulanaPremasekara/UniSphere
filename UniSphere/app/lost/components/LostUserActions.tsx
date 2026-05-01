@@ -31,7 +31,7 @@ export default function LostUserActions({ itemId, category, ownerid }: Props) {
         const user = await getuserById(ownerid);
         setCreatedUser(user);
       } catch (error) {
-        
+
         setCreatedUser(null);
       } finally {
         setLoadingOwner(false);
