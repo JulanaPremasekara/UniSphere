@@ -1,35 +1,58 @@
 import { useUser } from "@/hooks/useUser";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, Image, Linking, Text, TouchableOpacity, View } from "react-native";
 
-// 1. Update the Props type to include the user object
 type Props = {
   itemId: string;
   category: string;
-  owner: {
-    image: string;
-    name: string;
-    phone: string;
-  };
+  ownerid: string;
 };
 
-// 2. Destructure everything from the first argument (props)
-export default function LostUserActions({ itemId, category, owner }: Props) {
-  const{user} = useUser();
+type User = {
+  _id: string;
+  name?: string;
+  phone?: string;
+  image?: string;
+};
 
-  
+export default function LostUserActions({ itemId, category, ownerid }: Props) {
+  const { getuserById } = useUser();
+
+  const [createdUser, setCreatedUser] = useState<User | null>(null);
+  const [loadingOwner, setLoadingOwner] = useState(false);
+
+  useEffect(() => {
+    if (!ownerid) return;
+
+    const fetchOwner = async () => {
+      try {
+        setLoadingOwner(true);
+
+        const user = await getuserById(ownerid);
+        setCreatedUser(user);
+      } catch (error) {
+        
+        setCreatedUser(null);
+      } finally {
+        setLoadingOwner(false);
+      }
+    };
+
+    fetchOwner();
+  }, [ownerid]);
+
   const handleCall = () => {
-    if (!user.phone) {
+    if (!createdUser?.phone) {
       Alert.alert("Error", "Phone number not available");
       return;
     }
 
-    Alert.alert("Contact Finder", `Call ${user.phone}?`, [
+    Alert.alert("Contact Finder", `Call ${createdUser.phone}?`, [
       { text: "Cancel", style: "cancel" },
       {
         text: "Call",
         onPress: () => {
-          Linking.openURL(`tel:${user.phone}`);
+          Linking.openURL(`tel:${createdUser.phone}`);
         },
       },
     ]);
@@ -40,17 +63,23 @@ export default function LostUserActions({ itemId, category, owner }: Props) {
       <View className="bg-white p-6 rounded-[40px] border border-gray-100 shadow-xl shadow-black/5">
         <View className="flex-row items-center mb-6">
           <View className="w-12 h-12 rounded-full bg-indigo-50 mr-4 overflow-hidden">
-            <Image
-              source={{ uri: user.image }}
-              className="w-full h-full"
-            />
+            {createdUser?.image ? (
+              <Image
+                source={{ uri: createdUser.image }}
+                className="w-full h-full"
+              />
+            ) : (
+              <View className="w-full h-full bg-gray-200" />
+            )}
           </View>
+
           <View>
             <Text className="text-[10px] text-gray-400 font-medium">
               Found by
             </Text>
+
             <Text className="text-base font-bold text-gray-800">
-              {user.name}
+              {loadingOwner ? "Loading..." : createdUser?.name || "Unknown User"}
             </Text>
           </View>
         </View>
@@ -67,8 +96,8 @@ export default function LostUserActions({ itemId, category, owner }: Props) {
           </Text>
         </View>
 
-        <TouchableOpacity 
-          onPress={handleCall} 
+        <TouchableOpacity
+          onPress={handleCall}
           className="w-full bg-indigo-600 py-5 rounded-3xl items-center shadow-lg shadow-indigo-300"
         >
           <Text className="text-white font-bold text-base">
