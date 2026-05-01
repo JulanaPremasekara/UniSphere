@@ -125,11 +125,11 @@ export default function Profile() {
         </View>
 
         <View className="px-6 mt-12">
-          <Text className="text-gray-400 font-bold text-[11px] uppercase tracking-[2px] ml-4 mb-5">Account Settings</Text>
+          <Text className="text-gray-400 font-bold text-[11px] uppercase tracking-[2px] ml-4 mb-5"> More Details</Text>
           <VStack space="md">
             <ProfileMenuItem icon={Mail} label="Email Address" value={user?.email || 'No email provided'} />
             <ProfileMenuItem icon={Calendar} label="Registered Events" onPress={() => router.push('/events/registrations')} />
-            <ProfileMenuItem icon={Bell} label="Notifications" />
+            {/*<ProfileMenuItem icon={Bell} label="Notifications" />*/}
             <ProfileMenuItem icon={ShieldCheck} label="Privacy & Security" />
             <TouchableOpacity onPress={logout} className="flex-row items-center bg-red-50 p-5 rounded-[28px] mt-8 border border-red-100">
               <LogOut size={22} color="#EF4444" />

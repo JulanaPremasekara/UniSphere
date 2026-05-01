@@ -5,18 +5,6 @@ import { Alert, Image, Linking, Text, TouchableOpacity, View } from "react-nativ
 type Props = {
   itemId: string;
   category: string;
-<<<<<<< HEAD
-  user: {
-    image: string;
-    name: string;
-    phone: string;
-  };
-};
-
-// 2. Destructure everything from the first argument (props)
-export default function LostUserActions({ itemId, category, user }: Props) {
-  
-=======
   ownerid: string;
 };
 
@@ -43,7 +31,7 @@ export default function LostUserActions({ itemId, category, ownerid }: Props) {
         const user = await getuserById(ownerid);
         setCreatedUser(user);
       } catch (error) {
-        
+
         setCreatedUser(null);
       } finally {
         setLoadingOwner(false);
@@ -53,7 +41,6 @@ export default function LostUserActions({ itemId, category, ownerid }: Props) {
     fetchOwner();
   }, [ownerid]);
 
->>>>>>> ebd0d3e7008898aa5547a74dfdd9ae4dd817d543
   const handleCall = () => {
     if (!createdUser?.phone) {
       Alert.alert("Error", "Phone number not available");
