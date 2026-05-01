@@ -1,12 +1,13 @@
 import { useRouter } from "expo-router";
 import { Calendar, Clock, MapPin, Plus } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Modal,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
-  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -16,11 +17,13 @@ import SearchInput from "../components/SearchInput";
 import SectionHeader from "../components/SectionHeader";
 import FilterChips from "../components/FilterChips";
 import { useUser } from "@/hooks/useUser";
+import apiClient from "../services/api";
 
-type StudyFilter = "ALL" | "MATHEMATICS" | "COMPUTER SCIENCE";
+type StudyFilter = "ALL" | "GENERAL" | "MATHEMATICS" | "COMPUTER SCIENCE";
 
 const filterOptions: StudyFilter[] = [
   "ALL",
+  "GENERAL",
   "MATHEMATICS",
   "COMPUTER SCIENCE",
 ];
@@ -29,39 +32,60 @@ export default function StudyGroupFeed() {
   const router = useRouter();
 
   const { userId } = useUser();
-  const [loginModalVisible, setLoginModalVisible] = useState(false);
 
+  const [groups, setGroups] = useState<any[]>([]);
+  const [filteredGroups, setFilteredGroups] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [loginModalVisible, setLoginModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<StudyFilter>("ALL");
 
-  const groups = [
-    {
-      id: "1",
-      subject: "Calculus III: Multivariable Integration",
-      time: "2:00 PM",
-      location: "Central Library, Room 402",
-      tag: "MATHEMATICS",
-    },
-    {
-      id: "2",
-      subject: "Data Structures & Algorithms Mock Interviews",
-      time: "4:30 PM",
-      location: "Engineering Hall",
-      tag: "COMPUTER SCIENCE",
-    },
-  ];
+  useEffect(() => {
+    const fetchStudyGroups = async () => {
+      try {
+        setLoading(true);
 
-  const filteredGroups = groups.filter((group) => {
-    const matchesSearch =
-      group.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      group.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      group.tag.toLowerCase().includes(searchQuery.toLowerCase());
+        const response = await apiClient.get("/studyGroups");
 
-    const matchesFilter =
-      selectedFilter === "ALL" || group.tag === selectedFilter;
+        const data = response.data.data || response.data;
 
-    return matchesSearch && matchesFilter;
-  });
+        if (Array.isArray(data)) {
+          setGroups(data);
+          setFilteredGroups(data);
+        }
+      } catch (error) {
+        console.error("Error fetching study groups:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudyGroups();
+  }, []);
+
+  useEffect(() => {
+    let filtered = [...groups];
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+
+      filtered = filtered.filter(
+        (group) =>
+          group.subject?.toLowerCase().includes(query) ||
+          group.location?.toLowerCase().includes(query) ||
+          group.tag?.toLowerCase().includes(query)
+      );
+    }
+
+    if (selectedFilter !== "ALL") {
+      filtered = filtered.filter(
+        (group) => group.tag?.toUpperCase() === selectedFilter
+      );
+    }
+
+    setFilteredGroups(filtered);
+  }, [searchQuery, selectedFilter, groups]);
 
   const handlePressGroup = (id: string) => {
     if (!userId) {
@@ -104,6 +128,17 @@ export default function StudyGroupFeed() {
     </View>
   );
 
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#4F46E5" />
+        <Text className="text-center text-gray-400 mt-4">
+          Finding study groups...
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-white">
       <View className="flex-1">
@@ -121,13 +156,13 @@ export default function StudyGroupFeed() {
             <View>
               {filteredGroups.map((group) => (
                 <TouchableOpacity
-                  key={group.id}
-                  onPress={() => handlePressGroup(group.id)}
+                  key={group._id || group.id}
+                  onPress={() => handlePressGroup(group._id || group.id)}
                   className="bg-white rounded-[35px] mb-8 overflow-hidden border border-gray-100 shadow-sm p-6"
                 >
                   <View className="bg-indigo-100 self-start px-4 py-2 rounded-full mb-4">
                     <Text className="text-indigo-700 font-black text-[10px] uppercase">
-                      {group.tag}
+                      {group.tag || "GENERAL"}
                     </Text>
                   </View>
 
