@@ -85,7 +85,7 @@ const FormField = ({
 
           {IconComp && (
             <InputSlot className="pr-2">
-              <IconComp size={22} color="#1F2937" />
+              <IconComp size={22} color="#4F46E5" />
             </InputSlot>
           )}
         </Input>
@@ -112,7 +112,7 @@ const ToggleField = ({
           key={opt}
           onPress={() => onSelect(opt)}
           className={`flex-1 p-3 rounded-[18px] items-center justify-center ${
-            selected === opt ? "bg-emerald-600" : "bg-gray-100"
+            selected === opt ? "bg-indigo-600" : "bg-gray-100"
           }`}
         >
           <Text
@@ -131,13 +131,13 @@ const ToggleField = ({
 const CheckboxField = ({ label, value, onChange, className = "" }: any) => (
   <TouchableOpacity
     className={`flex-row items-center p-3 rounded-[18px] ${className} ${
-      value ? "bg-emerald-50" : "bg-gray-50"
+      value ? "bg-indigo-50" : "bg-gray-50"
     }`}
     onPress={() => onChange(!value)}
   >
     <View
       className={`w-6 h-6 rounded-lg mr-3 items-center justify-center ${
-        value ? "bg-emerald-600" : "bg-gray-200"
+        value ? "bg-indigo-600" : "bg-gray-200"
       }`}
     >
       {value && <Text className="text-white font-bold">✓</Text>}
@@ -408,13 +408,18 @@ export default function CreateHousing() {
         style={{ paddingTop: Platform.OS === "ios" ? 60 : 50 }}
       >
         <View className="flex-row justify-between items-center">
-          <Text className="text-2xl font-bold text-emerald-900">
-            {isEditing ? "Edit Listing" : "Post a Room"}
-          </Text>
+          <View>
+            <Text className="text-[10px] font-extrabold uppercase tracking-[2px] text-indigo-300 mb-1">
+              {isEditing ? "Edit Listing" : "Housing Submission"}
+            </Text>
+            <Text className="text-4xl font-extrabold text-slate-900">
+              {isEditing ? "Edit Room" : "Post a Room"}
+            </Text>
+          </View>
 
           <TouchableOpacity
             onPress={() => router.back()}
-            className="bg-gray-100 p-2 rounded-full"
+            className="bg-gray-100 p-3 rounded-full"
           >
             <X size={24} color="#6B7280" />
           </TouchableOpacity>
@@ -423,7 +428,8 @@ export default function CreateHousing() {
 
       <ScrollView
         className="flex-1 px-6 pb-4"
-        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 120 }}
       >
         <Text className="text-lg font-bold text-gray-900 mt-8 mb-5">
           Basic Information
@@ -538,11 +544,11 @@ export default function CreateHousing() {
         <TouchableOpacity
           onPress={pickImage}
           disabled={isPicking}
-          className="bg-emerald-50 border-2 border-dashed border-emerald-300 rounded-[20px] p-8 items-center justify-center mb-4"
+          className="bg-indigo-50 border-2 border-dashed border-indigo-300 rounded-[24px] p-8 items-center justify-center mb-4"
         >
-          <Camera size={40} color="#059669" />
+          <Camera size={40} color="#4F46E5" />
 
-          <Text className="text-emerald-700 font-bold text-lg mt-2">
+          <Text className="text-indigo-700 font-bold text-lg mt-2">
             {isPicking ? "Picking..." : "Tap to Upload Photos"}
           </Text>
 
@@ -615,8 +621,8 @@ export default function CreateHousing() {
         <TouchableOpacity
           onPress={handlePublish}
           disabled={isPublishing}
-          className={`p-4 rounded-[20px] items-center justify-center ${
-            isPublishing ? "bg-gray-300" : "bg-emerald-600"
+          className={`p-4 rounded-[24px] items-center justify-center ${
+            isPublishing ? "bg-gray-300" : "bg-indigo-600"
           }`}
         >
           <Text className="text-white font-bold text-lg">
@@ -641,8 +647,8 @@ export default function CreateHousing() {
           className="flex-1 bg-black/60 justify-center items-center px-6"
         >
           <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
-            <View className="bg-emerald-50 p-6 rounded-full mb-6">
-              <CheckCircle2 size={50} color="#059669" />
+            <View className="bg-indigo-50 p-6 rounded-full mb-6">
+              <CheckCircle2 size={50} color="#4F46E5" />
             </View>
 
             <Text className="text-2xl font-black text-gray-900 mb-2">
@@ -655,7 +661,7 @@ export default function CreateHousing() {
 
             <TouchableOpacity
               onPress={closeSuccessModal}
-              className="bg-emerald-600 px-8 py-4 rounded-[20px]"
+              className="bg-indigo-600 px-8 py-4 rounded-[20px]"
             >
               <Text className="text-white font-bold">Done</Text>
             </TouchableOpacity>

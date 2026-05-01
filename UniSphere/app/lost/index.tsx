@@ -23,12 +23,7 @@ import Footer from "../components/Footer";
 import { Calendar, Plus } from "lucide-react-native";
 import { useUser } from "@/hooks/useUser";
 
-type LostItemsFilter =
-  | "ALL"
-  | "LOST"
-  | "FOUND"
-  | "ELECTRONICS"
-  | "PERSON";
+type LostItemsFilter = "ALL" | "LOST" | "FOUND" | "ELECTRONICS" | "PERSON";
 
 const filterOptions: LostItemsFilter[] = [
   "ALL",
@@ -50,7 +45,7 @@ export default function LostIndexScreen() {
     isError,
     error,
   } = useLostItemsListQuery();
-  
+
   const customFilter = useCallback(
     (item: LostItem) => {
       if (selectedFilter === "ALL") {
@@ -62,7 +57,7 @@ export default function LostIndexScreen() {
         item.category.toUpperCase() === selectedFilter
       );
     },
-    [selectedFilter]
+    [selectedFilter],
   );
 
   const filteredItems = useFilteredList<LostItem>({
@@ -82,9 +77,7 @@ export default function LostIndexScreen() {
 
   const renderHeader = () => (
     <View>
-      <AppHeader
-        title="UniSphere"
-      />
+      <AppHeader title="UniSphere" />
 
       <SearchInput
         value={searchText}
@@ -106,7 +99,12 @@ export default function LostIndexScreen() {
   );
 
   const renderItem = ({ item }: { item: LostItem }) => (
-    <LostItemCard item={item} onPress={handlePressItem} />
+    <LostItemCard
+      item={item}
+      onPress={() =>
+        !userId ? setLoginModalVisible(true) : handlePressItem(item.id)
+      }
+    />
   );
 
   if (isLoading) {
@@ -130,23 +128,35 @@ export default function LostIndexScreen() {
     );
   }
 
- return (
-  <SafeAreaView edges={["top"]} className="flex-1 bg-white">
-    <View className="flex-1">
-      <FlatList
-        data={filteredItems}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        ListHeaderComponent={renderHeader}
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingTop: 16,
-          paddingBottom: 160,
-        }}
-        showsVerticalScrollIndicator={false}
-      />
+  return (
+    <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+      <View className="flex-1">
+        <FlatList
+          data={filteredItems}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          ListHeaderComponent={renderHeader}
+          ListEmptyComponent={
+            <View className="mt-20 items-center">
+              <Text className="text-lg font-bold text-gray-700">
+                No items found
+              </Text>
 
-      {/* <TouchableOpacity
+              <Text className="text-sm text-gray-400 mt-2 text-center px-10">
+                Try adjusting your search or filter to find what you're looking
+                for.
+              </Text>
+            </View>
+          }
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingTop: 16,
+            paddingBottom: 160,
+          }}
+          showsVerticalScrollIndicator={false}
+        />
+
+        {/* <TouchableOpacity
         onPress={handleCreateReport}
         activeOpacity={0.9}
         className="absolute bottom-24 right-6 h-14 w-14 items-center justify-center rounded-full bg-indigo-600 shadow-lg"
@@ -154,25 +164,63 @@ export default function LostIndexScreen() {
         <Text className="text-3xl font-bold text-white">+</Text>
       </TouchableOpacity> */}
 
-      <TouchableOpacity onPress={() => !userId ? setLoginModalVisible(true) : handleCreateReport()} className="absolute bottom-28 right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg">
-        <Plus color="white" size={32} />
-      </TouchableOpacity>
-
-      <Footer />
-      <Modal animationType="fade" transparent={true} visible={loginModalVisible} onRequestClose={() => setLoginModalVisible(false)}>
-        <TouchableOpacity activeOpacity={1} onPress={() => setLoginModalVisible(false)} className="flex-1 bg-black/60 justify-center items-center px-6">
-          <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
-            <View className="bg-indigo-50 p-6 rounded-full mb-6"><Calendar size={40} color="#4F46E5" /></View>
-            <Text className="text-2xl font-black text-gray-900 mb-2">Login Required</Text>
-            <Text className="text-gray-500 text-center text-lg mb-8 leading-relaxed">Please sign in to your UniSphere account to create and share new events with the campus.</Text>
-            <View className="flex-row gap-4 w-full">
-              <TouchableOpacity onPress={() => setLoginModalVisible(false)} className="flex-1 bg-gray-50 p-5 rounded-3xl"><Text className="text-gray-900 font-bold text-center text-lg">Cancel</Text></TouchableOpacity>
-              <TouchableOpacity onPress={() => { setLoginModalVisible(false); router.push('/login'); }} className="flex-1 bg-indigo-600 p-5 rounded-3xl shadow-lg shadow-indigo-200"><Text className="text-white font-bold text-center text-lg">Sign In</Text></TouchableOpacity>
-            </View>
-          </View>
+        <TouchableOpacity
+          onPress={() =>
+            !userId ? setLoginModalVisible(true) : handleCreateReport()
+          }
+          className="absolute bottom-28 right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+        >
+          <Plus color="white" size={32} />
         </TouchableOpacity>
-      </Modal>
-    </View>
-  </SafeAreaView>
-);
+
+        <Footer />
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={loginModalVisible}
+          onRequestClose={() => setLoginModalVisible(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => setLoginModalVisible(false)}
+            className="flex-1 bg-black/60 justify-center items-center px-6"
+          >
+            <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
+              <View className="bg-indigo-50 p-6 rounded-full mb-6">
+                <Calendar size={40} color="#4F46E5" />
+              </View>
+              <Text className="text-2xl font-black text-gray-900 mb-2">
+                Login Required
+              </Text>
+              <Text className="text-gray-500 text-center text-lg mb-8 leading-relaxed">
+                Please sign in to your UniSphere account to create and share new
+                events with the campus.
+              </Text>
+              <View className="flex-row gap-4 w-full">
+                <TouchableOpacity
+                  onPress={() => setLoginModalVisible(false)}
+                  className="flex-1 bg-gray-50 p-5 rounded-3xl"
+                >
+                  <Text className="text-gray-900 font-bold text-center text-lg">
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setLoginModalVisible(false);
+                    router.push("/login");
+                  }}
+                  className="flex-1 bg-indigo-600 p-5 rounded-3xl shadow-lg shadow-indigo-200"
+                >
+                  <Text className="text-white font-bold text-center text-lg">
+                    Sign In
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      </View>
+    </SafeAreaView>
+  );
 }

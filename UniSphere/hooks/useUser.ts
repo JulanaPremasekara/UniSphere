@@ -20,9 +20,24 @@ export const useUser = () => {
     }
   };
 
+  const getuserById = async (id:string) => {
+    try{
+      setLoading(true);
+      const res = await apiClient.get(`/users/${id}`);
+      setError(null);
+      return res.data.user;
+    }catch{
+      setError("Failed to fetch user by ID");
+      setUser(null);
+    }finally{
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
+    
     fetchUser();
   }, []);
 
-  return { user, userId: user?._id, loading, error, refreshUser: fetchUser };
+  return { user, userId: user?._id, loading, error, refreshUser: fetchUser,getuserById };
 };

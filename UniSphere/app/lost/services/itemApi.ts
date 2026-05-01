@@ -25,6 +25,11 @@ export const createLostItem = async (formData: FormData) => {
   return response.data;
 };
 
+export const markItemAsResolved = async (itemId: string) => {
+  const response = await apiClient.patch(`/lost/${itemId}/resolve`);
+  return response.data;
+}
+
 export const deleteLostItem = async (itemId: string) => {
     const response = await apiClient.delete(`/lost/${itemId}`);
     return response.data;

@@ -38,7 +38,7 @@ export default function EditListingScreen() {
     const fetchProduct = async () => {
       try {
         const response = await apiClient.get(`/api/marketplace/${id}`);
-        const data = response.data;
+        const data = response.data.data;
         setTitle(data.title);
         setPrice(data.price.toString());
         setDescription(data.description);
