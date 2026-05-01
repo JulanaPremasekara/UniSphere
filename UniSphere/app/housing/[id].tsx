@@ -29,49 +29,64 @@ interface HousingDetail {
 
 export default function HousingDetail() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const params = useLocalSearchParams();
+  const housingId = typeof params.id === 'string' ? params.id : undefined;
   const { userId } = useUser();
   const [housing, setHousing] = useState<HousingDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasFetched, setHasFetched] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [contactModalVisible, setContactModalVisible] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      (async () => {
-        try {
-          setLoading(true);
-          const { data: { success, housing: h } } = await apiClient.get(`/housing/${id}`);
-          if (success) {
-            setHousing({
-              id: h._id || id,
-              title: h.title,
-              description: h.description,
-              address: h.address,
-              roomType: h.roomType,
-              rentPrice: h.rentPrice,
-              deposit: h.deposit,
-              availableFrom: h.availableFrom,
-              availabilityStatus: h.availabilityStatus,
-              furnished: h.furnished,
-              wifi: h.wifi,
-              parking: h.parking,
-              images: h.images,
-              contactName: h.contactName,
-              contactPhone: h.contactPhone,
-              contactEmail: h.contactEmail,
-              postedBy: h.postedBy,
-              isMine: h.postedBy === userId,
-            });
-          }
-        } catch (error) {
-          Alert.alert("Error", "Could not load housing details.");
-        } finally {
-          setLoading(false);
+    if (!housingId) return;
+
+    (async () => {
+      try {
+        setLoading(true);
+        setNotFound(false);
+        setHasFetched(false);
+
+        const { data } = await apiClient.get(`/housing/${housingId}`);
+
+        if (data.success && data.data) {
+          const h = data.data;
+          setHousing({
+            id: typeof h._id === 'string' ? h._id : typeof h.id === 'string' ? h.id : housingId,
+            title: h.title,
+            description: h.description,
+            address: h.address,
+            roomType: h.roomType,
+            rentPrice: h.rentPrice,
+            deposit: h.deposit,
+            availableFrom: h.availableFrom,
+            availabilityStatus: h.availabilityStatus,
+            furnished: h.furnished,
+            wifi: h.wifi,
+            parking: h.parking,
+            images: h.images || [],
+            contactName: h.contactName,
+            contactPhone: h.contactPhone,
+            contactEmail: h.contactEmail,
+            postedBy: typeof h.postedBy === 'object' ? h.postedBy?._id : h.postedBy,
+            isMine: (typeof h.postedBy === 'object' ? h.postedBy?._id : h.postedBy) === userId,
+          });
+          setNotFound(false);
+        } else {
+          setHousing(null);
+          setNotFound(true);
         }
-      })();
-    }
-  }, [id, userId]);
+      } catch (error) {
+        setHousing(null);
+        setNotFound(true);
+        Alert.alert("Error", "Could not load housing details.");
+      } finally {
+        setLoading(false);
+        setHasFetched(true);
+      }
+    })();
+  }, [housingId, userId]);
 
   if (loading) {
     return (
@@ -81,13 +96,21 @@ export default function HousingDetail() {
     );
   }
 
-  if (!housing) {
+  if (!housing && (notFound || hasFetched)) {
     return (
       <View className="flex-1 bg-white justify-center items-center">
         <Text className="text-gray-600 text-lg">Listing not found</Text>
         <TouchableOpacity onPress={() => router.back()} className="mt-4 bg-emerald-600 px-6 py-3 rounded-[20px]">
           <Text className="text-white font-bold">Go Back</Text>
         </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (!housing) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#059669" />
       </View>
     );
   }
