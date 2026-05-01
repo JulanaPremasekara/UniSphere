@@ -195,33 +195,9 @@ export default function EventDetail() {
               ))}
             </View>
           )}
+        </View>
 
-          {isOwner ? (
-            <View className="mx-5 my-6 p-6 bg-gray-100 rounded-[40px]">
-              <Text className="text-[10px] font-bold text-gray-400 text-center tracking-[2px] mb-5 uppercase">
-                Admin Controls
-              </Text>
-
-              <TouchableOpacity className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3">
-                <Text className="font-bold text-gray-800">Mark Completed</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleEdit}
-                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3"
-              >
-                <Text className="font-bold text-gray-800">Edit Event</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleDelete}
-                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center"
-              >
-                <Text className="font-bold text-red-500">Remove Event</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View className="mt-8 mb-10">
+        <View className="mt-8 mb-10 px-5">
               <TouchableOpacity
                 onPress={() =>
                   !isRegistered && !registering && setConfirmModalVisible(true)
@@ -241,12 +217,10 @@ export default function EventDetail() {
                     : "RSVP / Register"}
                 </Text>
               </TouchableOpacity>
-            </View>
-          )}
-        </View>
-
-        <Footer />
+      </View>
       </ScrollView>
+
+      <Footer />
 
       <Modal
         animationType="fade"

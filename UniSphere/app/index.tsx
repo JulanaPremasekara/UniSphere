@@ -4,7 +4,9 @@ import { Search, ShoppingBasket, Users, Calendar, GraduationCap, UtensilsCrossed
 import { useRouter } from 'expo-router';
 import Footer from './components/Footer';
 import { useEvents } from '../hooks/useEvents';
-import Header from './components/Header';
+import AppHeader from "./components/AppHeader";
+import { AppStorage } from './services/storage';
+import { Modal } from 'react-native';
 
 // Defined routes inside the category object for cleaner navigation logic
 const categories = [
@@ -13,12 +15,33 @@ const categories = [
   { name: 'Events', icon: Calendar, color: '#F0F9FF', iconColor: '#0369A1', route: '/events' },
   { name: 'Lost &\n Found', icon: HelpCircle, color: '#FFF7ED', iconColor: '#C2410C', route: '/lost' },
   { name: 'Housing', icon: HomeIcon, color: '#ECFDF5', iconColor: '#047857', route: '/housing' },
-  { name: 'Tutors', icon: BookOpen, color: '#FEF2F2', iconColor: '#B91C1C', route: '/Tutors' },
+  { name: 'Tutors', icon: BookOpen, color: '#FEF2F2', iconColor: '#B91C1C', route: '/tutors' },
 ];
 
 export default function Home() {
   const router = useRouter();
   const { events, loading } = useEvents();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const token = await AppStorage.getItem("userToken");
+      if (!token) {
+        setShowWelcome(true);
+        setTimeout(() => {
+          setShowWelcome(false);
+          router.replace("/login");
+        }, 3000);
+      }
+    };
+    checkUser();
+  }, []);
+
+  const renderHeader = () => (
+    <View>
+      <AppHeader title="UniSphere" subtitle="Campus Connection" />
+    </View>
+  );
 
   const FeaturedEventCard = ({ event, onPress }: any) => (
     <TouchableOpacity 
@@ -49,7 +72,7 @@ export default function Home() {
 
   return (
     <View className="flex-1 bg-white">
-      <Header title="UniSphere" />
+      {renderHeader()}
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 8, paddingBottom: 30 }}>
         {/* Search Bar */}
@@ -84,7 +107,7 @@ export default function Home() {
         </View>
 
         {/* Featured Events Header */}
-        <View className="px-6 flex-row justify-between items-end mt-[-55]">
+        <View className="px-6 flex-row justify-between items-end mt-8 mb-4">
           <Text className="text-2xl font-bold text-gray-900">Featured Events</Text>
           <TouchableOpacity onPress={() => router.push('/events')}>
             <Text className="text-indigo-600 font-bold text-base">View all</Text>
@@ -95,7 +118,7 @@ export default function Home() {
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false} 
-          className="mt-0 pl-6" 
+          className="mt-2 pl-6" 
           contentContainerStyle={{ paddingRight: 24 }}
         >
           {loading ? (
@@ -120,6 +143,26 @@ export default function Home() {
       </ScrollView>
 
       <Footer />
+      
+      <Modal visible={showWelcome} animationType="fade" transparent={false}>
+        <View className="flex-1 bg-indigo-600 items-center justify-center px-10">
+          <View className="bg-white/20 p-8 rounded-full mb-8">
+            <GraduationCap size={80} color="white" strokeWidth={1.5} />
+          </View>
+          <Text className="text-4xl font-black text-white text-center mb-4">
+            Welcome to UniSphere
+          </Text>
+          <Text className="text-indigo-100 text-center text-lg leading-relaxed font-medium">
+            Your all-in-one campus hub for events, marketplace, and community connections.
+          </Text>
+          <View className="absolute bottom-20">
+            <ActivityIndicator color="white" size="large" />
+            <Text className="text-indigo-200 mt-4 font-bold uppercase tracking-widest text-xs text-center">
+              Getting things ready...
+            </Text>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

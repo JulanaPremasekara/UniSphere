@@ -30,6 +30,7 @@ export default function ProductDetailScreen() {
 
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const fetchProduct = useCallback(async () => {
     try {

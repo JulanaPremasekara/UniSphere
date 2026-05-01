@@ -15,7 +15,7 @@
       "nativewind/types"
     ],
     "target": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "skipLibCheck": true
   },
   "include": [
