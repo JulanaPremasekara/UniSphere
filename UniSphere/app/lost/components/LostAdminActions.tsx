@@ -2,19 +2,44 @@ import { router } from "expo-router";
 
 import React from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
-import { useDeleteLostItemMutation } from "../hooks/useLostItems";
+import {
+  useDeleteLostItemMutation,
+  useMarkItemAsResolvedMutation,
+} from "../hooks/useLostItems";
 
 type Props = {
   itemId: string;
 };
 
 export default function LostAdminActions({ itemId }: Props) {
-  
   const deleteMutation = useDeleteLostItemMutation();
-  
+  const markResolvedMutation = useMarkItemAsResolvedMutation();
+
   const handleEdit = () => {
     router.push(`/lost/create?itemId=${itemId}`);
-  }
+  };
+
+  const handleMarkResolved = () => {
+    Alert.alert(
+      "Mark as Resolved",
+      "Are you sure you want to mark this item as resolved?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Mark Resolved",
+          style: "default",
+          onPress: async () => {
+            try {
+              await markResolvedMutation.mutateAsync(itemId);
+              router.back();
+            } catch (error) {
+              Alert.alert("Error", "Failed to mark item as resolved.");
+            }
+          },
+        },
+      ],
+    );
+  };
 
   const handleDelete = () => {
     Alert.alert("Delete Item", "This action cannot be undone!", [
@@ -40,15 +65,24 @@ export default function LostAdminActions({ itemId }: Props) {
         Admin Controls
       </Text>
 
-      <TouchableOpacity  className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3">
+      <TouchableOpacity
+        onPress={handleMarkResolved}
+        className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3"
+      >
         <Text className="font-bold text-gray-800">Mark Resolved</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={handleEdit} className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3">
+      <TouchableOpacity
+        onPress={handleEdit}
+        className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3"
+      >
         <Text className="font-bold text-gray-800">Edit Details</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={handleDelete} className="w-full bg-white p-5 rounded-3xl shadow-sm items-center">
+      <TouchableOpacity
+        onPress={handleDelete}
+        className="w-full bg-white p-5 rounded-3xl shadow-sm items-center"
+      >
         <Text className="font-bold text-red-500">Remove Post</Text>
       </TouchableOpacity>
     </View>
