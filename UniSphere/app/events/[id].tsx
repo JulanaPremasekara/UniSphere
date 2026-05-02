@@ -97,7 +97,11 @@ export default function EventDetail() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-white">
-      <ScrollView showsVerticalScrollIndicator={false} className="bg-white">
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        className="bg-white"
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+      >
         <View className="flex-row justify-between items-center px-5 pt-14 pb-4 bg-white">
           <View className="flex-row items-center gap-4">
             <TouchableOpacity onPress={() => router.back()}>
@@ -197,27 +201,30 @@ export default function EventDetail() {
           )}
         </View>
 
-        <View className="mt-8 mb-10 px-5">
-              <TouchableOpacity
-                onPress={() =>
-                  !isRegistered && !registering && setConfirmModalVisible(true)
-                }
-                disabled={isRegistered || registering}
-                className={`${
-                  isRegistered ? "bg-indigo-400" : "bg-indigo-600"
-                } py-5 rounded-3xl flex-row items-center justify-center`}
-              >
-                {isRegistered && <CheckCheck color="white" size={20} />}
+        {/* Spacer to push the button to the bottom if content is short */}
+        <View className="flex-1" />
 
-                <Text className="text-white font-bold text-lg ml-2">
-                  {registering
-                    ? "Registering..."
-                    : isRegistered
-                    ? "Registered"
-                    : "RSVP / Register"}
-                </Text>
-              </TouchableOpacity>
-      </View>
+        <View className="mt-10 mb-4 px-5">
+          <TouchableOpacity
+            onPress={() =>
+              !isRegistered && !registering && setConfirmModalVisible(true)
+            }
+            disabled={isRegistered || registering}
+            className={`${
+              isRegistered ? "bg-indigo-400" : "bg-indigo-600"
+            } py-5 rounded-3xl flex-row items-center justify-center`}
+          >
+            {isRegistered && <CheckCheck color="white" size={20} />}
+
+            <Text className="text-white font-bold text-lg ml-2">
+              {registering
+                ? "Registering..."
+                : isRegistered
+                ? "Registered"
+                : "RSVP / Register"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       <Footer />
