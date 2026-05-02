@@ -69,9 +69,9 @@ export default function LostDetailScreen() {
               <TouchableOpacity>
                 <Text className="text-xl text-gray-400">🔗</Text>
               </TouchableOpacity>
-              <TouchableOpacity>
+              {/*<TouchableOpacity>
                 <Text className="text-xl text-gray-400">⋮</Text>
-              </TouchableOpacity>
+              </TouchableOpacity>*/}
             </View>
           </View>
           <View className="p-5">

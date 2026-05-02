@@ -1,63 +1,74 @@
 {
-  "expo": {
-    "name": "UniSphere",
-    "slug": "UniSphere",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "unisphere",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/images/icon.png"
-      },
-      "edgeToEdgeEnabled": false,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.oshe.UniSphere"
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/icon.png"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
-        }
-      ],
-      "expo-secure-store",
-      "expo-web-browser"
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "55d23a5d-cfae-47ad-9487-79533f4b3928"
+"expo": {
+"name": "UniSphere",
+"slug": "UniSphere",
+"version": "1.0.0",
+"orientation": "portrait",
+"icon": "./assets/images/icon.png",
+"scheme": "unisphere",
+"userInterfaceStyle": "automatic",
+"newArchEnabled": true,
+
+"ios": {
+  "supportsTablet": true
+},
+
+"android": {
+  "adaptiveIcon": {
+    "backgroundColor": "#FFFFFF",
+    "foregroundImage": "./assets/images/icon.png"
+  },
+  "edgeToEdgeEnabled": false,
+  "predictiveBackGestureEnabled": false,
+  "package": "com.oshe.UniSphere"
+},
+
+"web": {
+  "bundler": "metro",
+  "output": "static",
+  "favicon": "./assets/images/icon.png"
+},
+
+"plugins": [
+  "expo-router",
+  [
+    "expo-splash-screen",
+    {
+      "image": "./assets/images/icon.png",
+      "imageWidth": 200,
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff",
+      "dark": {
+        "backgroundColor": "#000000"
       }
-    },
-    "owner": "oshe",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/55d23a5d-cfae-47ad-9487-79533f4b3928"
     }
+  ],
+  "expo-secure-store",
+  "expo-web-browser"
+],
+
+"experiments": {
+  "typedRoutes": true,
+  "reactCompiler": true
+},
+
+"extra": {
+  "router": {},
+  "eas": {
+    "projectId": "55d23a5d-cfae-47ad-9487-79533f4b3928"
   }
+},
+
+"owner": "oshe",
+
+"runtimeVersion": {
+  "policy": "appVersion"
+},
+
+"updates": {
+  "url": "https://u.expo.dev/55d23a5d-cfae-47ad-9487-79533f4b3928",
+  "fallbackToCacheTimeout": 0
+}
+
+}
 }

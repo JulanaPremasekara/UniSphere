@@ -275,9 +275,9 @@ export default function TutorProfile() {
             </TouchableOpacity>
           )} */}
         </View>
-
-        <Footer />
       </ScrollView>
+
+      <Footer />
     </SafeAreaView>
   );
 }

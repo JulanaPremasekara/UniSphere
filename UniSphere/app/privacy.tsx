@@ -39,16 +39,14 @@ export default function PrivacyPolicy() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-white">
-      {/* Fixed Header */}
       <View className="flex-row justify-between items-center px-6 pb-4 bg-white border-b border-gray-50" style={{ paddingTop: Platform.OS === 'ios' ? 20 : 60 }}>
         <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 w-12 h-12 justify-center items-start">
           <ChevronLeft size={28} color="#1E1B4B" />
         </TouchableOpacity>
         <Text className="text-xl font-bold text-indigo-900">Privacy & Policy</Text>
-        <View className="w-12" /> {/* Spacer */}
+        <View className="w-12" />
       </View>
 
-      {/* Scrollable Content */}
       <ScrollView 
         showsVerticalScrollIndicator={false} 
         contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 30, paddingBottom: 40 }}
@@ -84,7 +82,6 @@ export default function PrivacyPolicy() {
         </View>
       </ScrollView>
 
-      {/* Fixed Footer */}
       <Footer />
     </SafeAreaView>
   );
