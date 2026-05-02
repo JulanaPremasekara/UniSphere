@@ -82,9 +82,11 @@ export default function Home() {
   useEffect(() => {
     const checkUser = async () => {
       const token = await AppStorage.getItem("userToken");
+      const hasSeenWelcome = await AppStorage.getItem("hasSeenWelcome");
 
-      if (!token) {
+      if (!token && !hasSeenWelcome) {
         setShowWelcome(true);
+        await AppStorage.setItem("hasSeenWelcome", "true");
 
         setTimeout(() => {
           setShowWelcome(false);
@@ -145,30 +147,29 @@ export default function Home() {
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-white">
       <View className="flex-1">
+        {renderHeader()}
+
+        {/* Static Search Bar */}
+        <View className="px-6 mt-2 mb-4">
+          <View className="flex-row items-center bg-gray-100 rounded-full px-5 h-14">
+            <Search size={20} color="#9CA3AF" />
+
+            <TextInput
+              placeholder="Find courses, events, or groups..."
+              className="flex-1 ml-3 text-gray-600 text-base"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             paddingTop: 8,
-            paddingBottom: 140,
+            paddingBottom: 20,
           }}
         >
-          {renderHeader()}
-
-          {/* Search Bar */}
-          <View className="px-6 mt-2">
-            <View className="flex-row items-center bg-gray-100 rounded-full px-5 h-14">
-              <Search size={20} color="#9CA3AF" />
-
-              <TextInput
-                placeholder="Find courses, events, or groups..."
-                className="flex-1 ml-3 text-gray-600 text-base"
-                placeholderTextColor="#9CA3AF"
-              />
-            </View>
-          </View>
-
           {/* Categories Grid */}
-          <View className="flex-row flex-wrap justify-between px-5 mt-5">
+          <View className="flex-row flex-wrap justify-between px-5 mt-2">
             {categories.map((item, index) => (
               <TouchableOpacity
                 key={index}
@@ -188,7 +189,7 @@ export default function Home() {
           </View>
 
           {/* Featured Events Header */}
-          <View className="px-6 flex-row justify-between items-end mt-8 mb-4">
+          <View className="px-6 flex-row justify-between items-end mt-[-60]">
             <Text className="text-2xl font-bold text-gray-900">
               Featured Events
             </Text>
@@ -236,25 +237,25 @@ export default function Home() {
         <Footer />
 
         <Modal visible={showWelcome} animationType="fade" transparent={false}>
-          <View className="flex-1 bg-indigo-600 items-center justify-center px-10">
-            <View className="bg-white/20 p-8 rounded-full mb-8">
-              <GraduationCap size={80} color="white" strokeWidth={1.5} />
+          <View className="flex-1 bg-white items-center justify-center px-10">
+            <View className="bg-indigo-50 p-10 rounded-[45px] mb-10 shadow-sm">
+              <GraduationCap size={100} color="#4F46E5" strokeWidth={1.5} />
             </View>
 
-            <Text className="text-4xl font-black text-white text-center mb-4">
+            <Text className="text-4xl font-black text-gray-900 text-center mb-5">
               Welcome to UniSphere
             </Text>
 
-            <Text className="text-indigo-100 text-center text-lg leading-relaxed font-medium">
+            <Text className="text-gray-500 text-center text-lg leading-relaxed font-medium px-4">
               Your all-in-one campus hub for events, marketplace, and community
               connections.
             </Text>
 
-            <View className="absolute bottom-20">
-              <ActivityIndicator color="white" size="large" />
+            <View className="absolute bottom-20 items-center">
+              <ActivityIndicator color="#4F46E5" size="large" />
 
-              <Text className="text-indigo-200 mt-4 font-bold uppercase tracking-widest text-xs text-center">
-                Getting things ready...
+              <Text className="text-indigo-600 mt-6 font-bold uppercase tracking-[3px] text-[10px] text-center">
+                Initializing your experience
               </Text>
             </View>
           </View>
