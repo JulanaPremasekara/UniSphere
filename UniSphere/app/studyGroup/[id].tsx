@@ -18,6 +18,7 @@ import { HStack } from "@/components/ui/hstack";
 import apiClient from "../services/api";
 import Footer from "../components/Footer";
 import { useUser } from "@/hooks/useUser";
+import axios from "axios";
 
 export default function StudyGroupDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -33,8 +34,6 @@ export default function StudyGroupDetailScreen() {
       setLoading(true);
 
       const response = await apiClient.get(`/studyGroups/${id}`);
-
-      console.log("Study group response:", response.data);
 
       const groupData =
         response.data?.data?.data || response.data?.data || response.data;
@@ -67,12 +66,28 @@ export default function StudyGroupDetailScreen() {
     try {
       const res = await apiClient.patch(`/studyGroups/${group._id}/join`);
 
-      const updatedGroup = res.data?.data?.data || res.data?.data || res.data;
+      const response = res.data;
 
-      setGroup(updatedGroup);
+      if (!response.success) {
+        Alert.alert("Notice", response.message || "Something went wrong");
+        return;
+      }
+
+      setGroup(response.data);
+      Alert.alert("Success", response.message || "Joined successfully!");
     } catch (error) {
       console.error("Join failed:", error);
-      Alert.alert("Error", "Could not join study group.");
+
+      let message = "Something went wrong";
+
+      
+      if (axios.isAxiosError(error)) {
+        message = error.response?.data?.message || error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
+      Alert.alert("Error", message);
     }
   };
 
@@ -160,127 +175,131 @@ export default function StudyGroupDetailScreen() {
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-white">
       <View className="flex-1">
-      <ScrollView showsVerticalScrollIndicator={false} className="bg-white" contentContainerStyle={{ paddingBottom: 120 }}>
-        <View className="flex-row justify-between items-center px-5 pt-14 pb-4 bg-white">
-          <View className="flex-row items-center gap-4">
-            <TouchableOpacity onPress={() => router.back()}>
-              <ChevronLeft size={28} color="#4B5563" />
-            </TouchableOpacity>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          className="bg-white"
+          contentContainerStyle={{ paddingBottom: 120 }}
+        >
+          <View className="flex-row justify-between items-center px-5 pt-14 pb-4 bg-white">
+            <View className="flex-row items-center gap-4">
+              <TouchableOpacity onPress={() => router.back()}>
+                <ChevronLeft size={28} color="#4B5563" />
+              </TouchableOpacity>
 
-            <Text className="text-lg font-bold text-indigo-600">
-              Study Group
-            </Text>
-          </View>
-        </View>
-
-        <View className="p-5">
-          <View className="relative rounded-[30px] overflow-hidden">
-            <Image
-              source={{
-                uri:
-                  group.image ||
-                  "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
-              }}
-              className="w-full h-64"
-              resizeMode="cover"
-            />
-
-            <View className="absolute top-4 left-4 bg-white/90 px-3 py-1.5 rounded-full">
-              <Text className="text-[10px] font-black text-indigo-900 uppercase">
-                {group.tag || "GENERAL"}
+              <Text className="text-lg font-bold text-indigo-600">
+                Study Group
               </Text>
             </View>
           </View>
 
-          <View className="flex-row items-center mt-4 mb-2 gap-2">
-            <View className="w-2 h-2 rounded-full bg-emerald-500" />
-            <Text className="text-xs font-bold text-emerald-500 uppercase">
-              Status: Open
-            </Text>
-          </View>
+          <View className="p-5">
+            <View className="relative rounded-[30px] overflow-hidden">
+              <Image
+                source={{
+                  uri:
+                    group.image ||
+                    "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
+                }}
+                className="w-full h-64"
+                resizeMode="cover"
+              />
 
-          <Text className="text-3xl font-extrabold text-gray-800 leading-tight">
-            {group.subject || "Untitled Study Group"}
-          </Text>
-
-          <View className="mt-4 gap-y-2">
-            <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
-              <Text className="mr-2">📍</Text>
-              <Text className="text-sm text-gray-600 font-medium">
-                {group.location || "No location added"}
-              </Text>
-            </View>
-
-            <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
-              <Text className="mr-2">⏰</Text>
-              <Text className="text-sm text-gray-600 font-medium">
-                {group.time || "No time added"}
-              </Text>
-            </View>
-
-            <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
-              <Text className="mr-2">👥</Text>
-              <Text className="text-sm text-gray-600 font-medium">
-                {group.participants || 0} / {group.maxParticipants || 0}{" "}
-                Participants
-              </Text>
-            </View>
-          </View>
-
-          {learningGoals.length > 0 && (
-            <View className="mt-6">
-              <Text className="text-base font-bold text-gray-800 mb-2">
-                Learning Goals
-              </Text>
-
-              {learningGoals.map((goal, index) => (
-                <Text key={index} className="text-sm text-gray-500 leading-6">
-                  • {goal}
+              <View className="absolute top-4 left-4 bg-white/90 px-3 py-1.5 rounded-full">
+                <Text className="text-[10px] font-black text-indigo-900 uppercase">
+                  {group.tag || "GENERAL"}
                 </Text>
-              ))}
+              </View>
             </View>
-          )}
 
-          {isOwner ? (
-            <View className="mx-1 my-8 p-6 bg-gray-100 rounded-[40px]">
-              <Text className="text-[10px] font-bold text-gray-400 text-center tracking-[2px] mb-5 uppercase">
-                Admin Controls
+            <View className="flex-row items-center mt-4 mb-2 gap-2">
+              <View className="w-2 h-2 rounded-full bg-emerald-500" />
+              <Text className="text-xs font-bold text-emerald-500 uppercase">
+                Status: Open
               </Text>
-
-              <TouchableOpacity
-                onPress={handleEdit}
-                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3"
-              >
-                <Text className="font-bold text-gray-800">Edit Session</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleDelete}
-                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center"
-              >
-                <Text className="font-bold text-red-500">Remove Session</Text>
-              </TouchableOpacity>
             </View>
-          ) : (
-            <View className="mt-8 mb-10">
-              <Button
-                onPress={handleJoin}
-                className="bg-indigo-600 rounded-3xl h-16 shadow-lg shadow-indigo-100"
-              >
-                <HStack space="sm" className="items-center">
-                  <Users size={22} color="white" />
-                  <ButtonText className="text-white font-bold text-lg">
-                    Join Study Group
-                  </ButtonText>
-                </HStack>
-              </Button>
+
+            <Text className="text-3xl font-extrabold text-gray-800 leading-tight">
+              {group.subject || "Untitled Study Group"}
+            </Text>
+
+            <View className="mt-4 gap-y-2">
+              <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
+                <Text className="mr-2">📍</Text>
+                <Text className="text-sm text-gray-600 font-medium">
+                  {group.location || "No location added"}
+                </Text>
+              </View>
+
+              <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
+                <Text className="mr-2">⏰</Text>
+                <Text className="text-sm text-gray-600 font-medium">
+                  {group.time || "No time added"}
+                </Text>
+              </View>
+
+              <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
+                <Text className="mr-2">👥</Text>
+                <Text className="text-sm text-gray-600 font-medium">
+                  {group.participants || 0} / {group.maxParticipants || 0}{" "}
+                  Participants
+                </Text>
+              </View>
             </View>
-          )}
-        </View> 
-      </ScrollView>
-          <View className="absolute bottom-0 left-0 right-0">
-                    <Footer />
-                  </View>
+
+            {learningGoals.length > 0 && (
+              <View className="mt-6">
+                <Text className="text-base font-bold text-gray-800 mb-2">
+                  Learning Goals
+                </Text>
+
+                {learningGoals.map((goal, index) => (
+                  <Text key={index} className="text-sm text-gray-500 leading-6">
+                    • {goal}
+                  </Text>
+                ))}
+              </View>
+            )}
+
+            {isOwner ? (
+              <View className="mx-1 my-8 p-6 bg-gray-100 rounded-[40px]">
+                <Text className="text-[10px] font-bold text-gray-400 text-center tracking-[2px] mb-5 uppercase">
+                  Admin Controls
+                </Text>
+
+                <TouchableOpacity
+                  onPress={handleEdit}
+                  className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3"
+                >
+                  <Text className="font-bold text-gray-800">Edit Session</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={handleDelete}
+                  className="w-full bg-white p-5 rounded-3xl shadow-sm items-center"
+                >
+                  <Text className="font-bold text-red-500">Remove Session</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View className="mt-8 mb-10">
+                <Button
+                  onPress={handleJoin}
+                  className="bg-indigo-600 rounded-3xl h-16 shadow-lg shadow-indigo-100"
+                >
+                  <HStack space="sm" className="items-center">
+                    <Users size={22} color="white" />
+                    <ButtonText className="text-white font-bold text-lg">
+                      Join Study Group
+                    </ButtonText>
+                  </HStack>
+                </Button>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+        <View className="absolute bottom-0 left-0 right-0">
+          <Footer />
+        </View>
       </View>
     </SafeAreaView>
   );

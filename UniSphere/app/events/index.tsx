@@ -64,7 +64,7 @@ export default function Home() {
 
   const renderHeader = () => (
     <View>
-      <AppHeader title="UniSphere" />
+      <AppHeader title="UniSphere" subtitle="Campus Connection" />
 
       <SearchInput
         value={searchQuery}

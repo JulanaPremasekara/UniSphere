@@ -37,11 +37,10 @@ const AppHeader = ({
         </View>
       </View>
       
-      <View className="flex-1 items-center px-3">
-        <Text className="text-xl font-extrabold text-indigo-900 tracking-tight">{title}</Text>
-        {subtitle ? (
-          <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{subtitle}</Text>
-        ) : null}
+      <View className="flex-row items-start pb-4">
+        <Text className="text-2xl font-extrabold text-indigo-900 tracking-tight">
+          {title}
+        </Text>
       </View>
 
       {user ? (
