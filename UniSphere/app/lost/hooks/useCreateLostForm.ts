@@ -32,17 +32,23 @@ const initialFormState: LostFormState = {
 };
 
 type UseLostFormParams = {
-  itemId?: string;
+  itemId?: string | string[];
 };
 
 export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
-  const isEditMode = !!itemId;
+  const normalizedItemId = Array.isArray(itemId)
+    ? itemId[0]
+    : typeof itemId === "string" && itemId.trim() !== ""
+    ? itemId.trim()
+    : undefined;
+
+  const isEditMode = Boolean(normalizedItemId);
 
   const [form, setForm] = useState<LostFormState>(initialFormState);
   const [errors, setErrors] = useState<FormErrors>({});
 
   const { data: existingItem, isLoading: isLoadingItem } =
-    useLostItemDetailQuery(itemId || "");
+    useLostItemDetailQuery(normalizedItemId || "");
 
   const createMutation = useCreateLostItemMutation();
   const updateMutation = useUpdateLostItemMutation();
@@ -115,8 +121,13 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
       const filename =
         form.image.split("/").pop() || `lost-item-${Date.now()}.jpg`;
 
-      const match = /\.(\w+)$/.exec(filename);
-      const type = match ? `image/${match[1]}` : "image/jpeg";
+      let ext = filename.split(".").pop()?.toLowerCase() || "jpg";
+
+      if (ext === "jpg") {
+        ext = "jpeg";
+      }
+
+      const type = `image/${ext}`;
 
       formData.append("image", {
         uri: form.image,
@@ -145,9 +156,9 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
     try {
       const formData = buildFormData();
 
-      if (isEditMode && itemId) {
+      if (isEditMode && normalizedItemId) {
         await updateMutation.mutateAsync({
-          itemId,
+          itemId: normalizedItemId,
           itemData: formData,
         });
 
