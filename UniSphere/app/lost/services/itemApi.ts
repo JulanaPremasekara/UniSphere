@@ -41,6 +41,10 @@ export const deleteLostItem = async (itemId: string) => {
 }
 
 export const updateLostItem = async (itemId: string, formData: FormData) => {
-    const response = await apiClient.put(`/lost/${itemId}`, formData);
+    const response = await apiClient.put(`/lost/${itemId}`, formData,{
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
     return response.data;
 }
