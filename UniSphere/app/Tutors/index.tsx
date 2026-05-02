@@ -128,28 +128,7 @@ export default function FindTutor() {
     router.push("/Tutors/setup" as any);
   };
 
-  const renderHeader = () => (
-    <View>
-      <AppHeader title="UniSphere" />
 
-      <SearchInput
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        placeholder="Search subjects..."
-      />
-
-      <FilterChips
-        options={filterOptions}
-        selectedValue={selectedFilter}
-        onSelect={setSelectedFilter}
-      />
-
-      <SectionHeader
-        title="Find Tutors"
-        subtitle="Connect with skilled tutors across your campus."
-      />
-    </View>
-  );
 
   const renderItem = ({ item: tutor }: { item: any }) => (
     <TouchableOpacity
@@ -205,11 +184,34 @@ export default function FindTutor() {
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-white">
       <View className="flex-1">
+        <AppHeader title="UniSphere" />
+
+        <View className="px-5">
+          <SearchInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Search subjects..."
+          />
+        </View>
+
         <FlatList
           data={filteredTutors}
           keyExtractor={(item) => item._id}
           renderItem={renderItem}
-          ListHeaderComponent={renderHeader}
+          ListHeaderComponent={
+            <View>
+              <FilterChips
+                options={filterOptions}
+                selectedValue={selectedFilter}
+                onSelect={setSelectedFilter}
+              />
+
+              <SectionHeader
+                title="Find Tutors"
+                subtitle="Connect with skilled tutors across your campus."
+              />
+            </View>
+          }
           ListEmptyComponent={
             <View className="mt-10 items-center">
               <Text className="text-gray-400">No tutors found.</Text>
@@ -218,7 +220,7 @@ export default function FindTutor() {
           contentContainerStyle={{
             paddingHorizontal: 20,
             paddingTop: 16,
-            paddingBottom: 160,
+            paddingBottom: 20,
           }}
           showsVerticalScrollIndicator={false}
         />

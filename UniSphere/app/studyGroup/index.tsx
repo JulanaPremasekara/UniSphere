@@ -105,28 +105,7 @@ export default function StudyGroupFeed() {
     router.push("/studyGroup/create" as any);
   };
 
-  const renderHeader = () => (
-    <View>
-      <AppHeader title="UniSphere" />
 
-      <SearchInput
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        placeholder="Find study groups..."
-      />
-
-      <FilterChips
-        options={filterOptions}
-        selectedValue={selectedFilter}
-        onSelect={setSelectedFilter}
-      />
-
-      <SectionHeader
-        title="Study Groups"
-        subtitle="Connect with peers and master your courses together."
-      />
-    </View>
-  );
 
   if (loading) {
     return (
@@ -142,15 +121,34 @@ export default function StudyGroupFeed() {
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-white">
       <View className="flex-1">
+        <AppHeader title="UniSphere" />
+
+        <View className="px-5">
+          <SearchInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Find study groups..."
+          />
+        </View>
+
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             paddingHorizontal: 20,
-            paddingTop: 16,
-            paddingBottom: 160,
+            paddingTop: 8,
+            paddingBottom: 20,
           }}
         >
-          {renderHeader()}
+          <FilterChips
+            options={filterOptions}
+            selectedValue={selectedFilter}
+            onSelect={setSelectedFilter}
+          />
+
+          <SectionHeader
+            title="Study Groups"
+            subtitle="Connect with peers and master your courses together."
+          />
 
           {filteredGroups.length > 0 ? (
             <View>

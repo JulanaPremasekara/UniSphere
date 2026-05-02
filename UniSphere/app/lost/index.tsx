@@ -75,28 +75,7 @@ export default function LostIndexScreen() {
     router.push("/lost/create" as any);
   };
 
-  const renderHeader = () => (
-    <View>
-      <AppHeader title="UniSphere" />
 
-      <SearchInput
-        value={searchText}
-        onChangeText={setSearchText}
-        placeholder="Search for lost items..."
-      />
-
-      <FilterChips
-        options={filterOptions}
-        selectedValue={selectedFilter}
-        onSelect={setSelectedFilter}
-      />
-
-      <SectionHeader
-        title="Lost & Found"
-        subtitle="Reconnecting community members with their belongings."
-      />
-    </View>
-  );
 
   const renderItem = ({ item }: { item: LostItem }) => (
     <LostItemCard
@@ -131,11 +110,34 @@ export default function LostIndexScreen() {
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-white">
       <View className="flex-1">
+        <AppHeader title="UniSphere" />
+
+        <View className="px-5">
+          <SearchInput
+            value={searchText}
+            onChangeText={setSearchText}
+            placeholder="Search for lost items..."
+          />
+        </View>
+
         <FlatList
           data={filteredItems}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
-          ListHeaderComponent={renderHeader}
+          ListHeaderComponent={
+            <View>
+              <FilterChips
+                options={filterOptions}
+                selectedValue={selectedFilter}
+                onSelect={setSelectedFilter}
+              />
+
+              <SectionHeader
+                title="Lost & Found"
+                subtitle="Reconnecting community members with their belongings."
+              />
+            </View>
+          }
           ListEmptyComponent={
             <View className="mt-20 items-center">
               <Text className="text-lg font-bold text-gray-700">
@@ -151,7 +153,7 @@ export default function LostIndexScreen() {
           contentContainerStyle={{
             paddingHorizontal: 20,
             paddingTop: 16,
-            paddingBottom: 160,
+            paddingBottom: 20,
           }}
           showsVerticalScrollIndicator={false}
         />

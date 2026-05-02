@@ -148,28 +148,7 @@ export default function MarketplaceIndex() {
     router.push("/marketplace/create" as any);
   };
 
-  const renderHeader = () => (
-    <View>
-      <AppHeader title="UniSphere" />
 
-      <SearchInput
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        placeholder="Find items..."
-      />
-
-      <FilterChips
-        options={filterOptions}
-        selectedValue={selectedFilter}
-        onSelect={setSelectedFilter}
-      />
-
-      <SectionHeader
-        title="Marketplace"
-        subtitle="Buy, sell, and discover useful items around campus."
-      />
-    </View>
-  );
 
   if (loading && !refreshing) {
     return (
@@ -182,6 +161,16 @@ export default function MarketplaceIndex() {
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-white">
       <View className="flex-1">
+        <AppHeader title="UniSphere" />
+
+        <View className="px-5">
+          <SearchInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Find items..."
+          />
+        </View>
+
         <ScrollView
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -191,11 +180,20 @@ export default function MarketplaceIndex() {
           <View
             style={{
               paddingHorizontal: 20,
-              paddingTop: 16,
-              paddingBottom: 160,
+              paddingTop: 8,
+              paddingBottom: 20,
             }}
           >
-            {renderHeader()}
+            <FilterChips
+              options={filterOptions}
+              selectedValue={selectedFilter}
+              onSelect={setSelectedFilter}
+            />
+
+            <SectionHeader
+              title="Marketplace"
+              subtitle="Buy, sell, and discover useful items around campus."
+            />
 
             {filteredProducts.length > 0 ? (
               <View>

@@ -26,13 +26,16 @@ const FilterChips = <T extends string>({
           <TouchableOpacity
             key={option}
             onPress={() => onSelect(option)}
-            className={`rounded-full px-4 py-2.5 ${
-              isActive ? "bg-indigo-600" : "bg-slate-100"
+            activeOpacity={0.8}
+            className={`rounded-full px-8 h-8 border items-center justify-center ${
+              isActive 
+                ? "bg-indigo-600 border-indigo-600" 
+                : "bg-white border-gray-200"
             }`}
           >
             <Text
-              className={`text-[13px] font-bold ${
-                isActive ? "text-white" : "text-slate-500"
+              className={`text-[11px] font-bold uppercase tracking-widest ${
+                isActive ? "text-white" : "text-gray-400"
               }`}
             >
               {option}
