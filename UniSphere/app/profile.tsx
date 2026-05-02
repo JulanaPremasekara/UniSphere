@@ -130,7 +130,11 @@ export default function Profile() {
             <ProfileMenuItem icon={Mail} label="Email Address" value={user?.email || 'No email provided'} />
             <ProfileMenuItem icon={Calendar} label="Registered Events" onPress={() => router.push('/events/registrations')} />
             {/*<ProfileMenuItem icon={Bell} label="Notifications" />*/}
-            <ProfileMenuItem icon={ShieldCheck} label="Privacy & Security" />
+            <ProfileMenuItem 
+              icon={ShieldCheck} 
+              label="Privacy & Security" 
+              onPress={() => router.push('./privacy')} 
+            />
             <TouchableOpacity onPress={logout} className="flex-row items-center bg-red-50 p-5 rounded-[28px] mt-8 border border-red-100">
               <LogOut size={22} color="#EF4444" />
               <Text className="ml-4 font-bold text-red-600 text-lg">Log Out</Text>

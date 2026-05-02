@@ -16,7 +16,7 @@
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/images/icon.png"
       },
-      "edgeToEdgeEnabled": true,
+      "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
       "package": "com.oshe.UniSphere"
     },

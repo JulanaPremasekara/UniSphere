@@ -69,7 +69,7 @@ const categories = [
     icon: BookOpen,
     color: "#FEF2F2",
     iconColor: "#B91C1C",
-    route: "/Tutors",
+    route: "/tutors",
   },
 ];
 
