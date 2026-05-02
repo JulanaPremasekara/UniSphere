@@ -25,6 +25,16 @@ import apiClient from "../services/api";
 
 const TAGS = ["GENERAL", "MATHEMATICS", "COMPUTER SCIENCE"];
 
+type FormErrors = {
+  subject?: string;
+  location?: string;
+  time?: string;
+  maxParticipants?: string;
+  tag?: string;
+  learningGoals?: string;
+  image?: string;
+};
+
 export default function CreateStudyGroup() {
   const router = useRouter();
   const { editId } = useLocalSearchParams();
@@ -33,6 +43,7 @@ export default function CreateStudyGroup() {
 
   const [loading, setLoading] = useState(false);
   const [screenLoading, setScreenLoading] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const [subject, setSubject] = useState("");
   const [location, setLocation] = useState("");
@@ -41,8 +52,14 @@ export default function CreateStudyGroup() {
   const [tag, setTag] = useState("GENERAL");
   const [learningGoals, setLearningGoals] = useState("");
   const [image, setImage] = useState<string | null>(null);
-
   const [newImageSelected, setNewImageSelected] = useState(false);
+
+  const clearError = (field: keyof FormErrors) => {
+    setErrors((prev) => ({
+      ...prev,
+      [field]: undefined,
+    }));
+  };
 
   const parseLearningGoalsForInput = (goals: any): string => {
     if (!goals) return "";
@@ -91,6 +108,7 @@ export default function CreateStudyGroup() {
         setTag(data.tag || "GENERAL");
         setLearningGoals(parseLearningGoalsForInput(data.learningGoals));
         setImage(data.image || null);
+        setNewImageSelected(false);
       } catch (error) {
         console.error("Failed to load study group:", error);
         Alert.alert("Error", "Could not load study group details.");
@@ -111,21 +129,35 @@ export default function CreateStudyGroup() {
     if (!result.canceled) {
       setImage(result.assets[0].uri);
       setNewImageSelected(true);
+      clearError("image");
     }
   };
 
   const handleSave = async () => {
-    if (!subject.trim() || !location.trim() || !time.trim() || !maxParticipants.trim()) {
-      return Alert.alert("Required", "Please fill all required fields.");
+    setErrors({});
+
+    const localErrors: FormErrors = {};
+
+    if (!subject.trim()) localErrors.subject = "Subject is required.";
+    if (!location.trim()) localErrors.location = "Location is required.";
+    if (!time.trim()) localErrors.time = "Time is required.";
+    if (!maxParticipants.trim()) {
+      localErrors.maxParticipants = "Max participants is required.";
     }
 
     const maxParticipantsNumber = Number(maxParticipants);
 
-    if (Number.isNaN(maxParticipantsNumber) || maxParticipantsNumber < 1) {
-      return Alert.alert(
-        "Invalid",
-        "Max participants must be a valid number greater than 0."
-      );
+    if (
+      maxParticipants.trim() &&
+      (Number.isNaN(maxParticipantsNumber) || maxParticipantsNumber < 1)
+    ) {
+      localErrors.maxParticipants =
+        "Max participants must be a valid number greater than 0.";
+    }
+
+    if (Object.keys(localErrors).length > 0) {
+      setErrors(localErrors);
+      return;
     }
 
     setLoading(true);
@@ -151,12 +183,11 @@ export default function CreateStudyGroup() {
         const match = /\.(\w+)$/.exec(filename);
         const type = match ? `image/${match[1]}` : "image/jpeg";
 
-        // @ts-ignore
         formData.append("image", {
           uri: image,
           name: filename,
-          
-        });
+          type,
+        } as any);
       }
 
       if (isEdit) {
@@ -174,13 +205,36 @@ export default function CreateStudyGroup() {
       }
 
       router.replace("/studyGroup");
-    } catch (error) {
-      console.error("Save study group error:", error);
+    } catch (error: any) {
+      const backendErrors = error.response?.data?.errors;
+
+      if (Array.isArray(backendErrors)) {
+        const fieldErrors: FormErrors = {};
+
+        backendErrors.forEach((err: { field: string; message: string }) => {
+          if (
+            err.field === "subject" ||
+            err.field === "location" ||
+            err.field === "time" ||
+            err.field === "maxParticipants" ||
+            err.field === "tag" ||
+            err.field === "learningGoals" ||
+            err.field === "image"
+          ) {
+            fieldErrors[err.field as keyof FormErrors] = err.message;
+          }
+        });
+
+        setErrors(fieldErrors);
+        return;
+      }
+
       Alert.alert(
         "Error",
-        isEdit
-          ? "Could not update study group."
-          : "Could not create study group."
+        error.response?.data?.message ||
+          (isEdit
+            ? "Could not update study group."
+            : "Could not create study group.")
       );
     } finally {
       setLoading(false);
@@ -197,6 +251,9 @@ export default function CreateStudyGroup() {
       </Box>
     );
   }
+
+  const inputBase =
+    "bg-gray-50 p-5 rounded-2xl text-lg font-bold text-gray-900 border";
 
   const FormContent = (
     <Box className="flex-1 pt-12 bg-white">
@@ -217,52 +274,116 @@ export default function CreateStudyGroup() {
         keyboardShouldPersistTaps="handled"
       >
         <VStack space="xl" className="mt-4">
-          <TouchableOpacity
-            onPress={pickImage}
-            className="h-64 bg-gray-100 rounded-[40px] border-2 border-dashed border-gray-200 items-center justify-center overflow-hidden"
-          >
-            {image ? (
-              <Image source={{ uri: image }} className="w-full h-full" />
-            ) : (
-              <VStack className="items-center">
-                <Camera size={40} color="#9CA3AF" />
-                <Text className="text-gray-600 mt-2">Add Photo</Text>
-              </VStack>
+          <VStack>
+            <TouchableOpacity
+              onPress={pickImage}
+              className={`h-64 bg-gray-100 rounded-[40px] border-2 border-dashed items-center justify-center overflow-hidden ${
+                errors.image ? "border-red-400" : "border-gray-200"
+              }`}
+            >
+              {image ? (
+                <Image source={{ uri: image }} className="w-full h-full" />
+              ) : (
+                <VStack className="items-center">
+                  <Camera size={40} color="#9CA3AF" />
+                  <Text className="text-gray-600 mt-2">Add Photo</Text>
+                </VStack>
+              )}
+            </TouchableOpacity>
+
+            {errors.image && (
+              <Text className="mt-1 text-xs font-medium text-red-500">
+                {errors.image}
+              </Text>
             )}
-          </TouchableOpacity>
+          </VStack>
 
-          <TextInput
-            placeholder="Subject"
-            placeholderTextColor="#9CA3AF"
-            value={subject}
-            onChangeText={setSubject}
-            className="bg-gray-50 p-5 rounded-2xl text-lg font-bold text-gray-900 border border-gray-100"
-          />
+          <VStack>
+            <TextInput
+              placeholder="Subject"
+              placeholderTextColor="#9CA3AF"
+              value={subject}
+              onChangeText={(text) => {
+                setSubject(text);
+                clearError("subject");
+              }}
+              className={`${inputBase} ${
+                errors.subject ? "border-red-400" : "border-gray-100"
+              }`}
+            />
 
-          <TextInput
-            placeholder="Location"
-            placeholderTextColor="#9CA3AF"
-            value={location}
-            onChangeText={setLocation}
-            className="bg-gray-50 p-5 rounded-2xl text-lg font-bold text-gray-900 border border-gray-100"
-          />
+            {errors.subject && (
+              <Text className="mt-1 text-xs font-medium text-red-500">
+                {errors.subject}
+              </Text>
+            )}
+          </VStack>
 
-          <TextInput
-            placeholder="Time (e.g. 2026-05-10T14:30:00Z)"
-            placeholderTextColor="#9CA3AF"
-            value={time}
-            onChangeText={setTime}
-            className="bg-gray-50 p-5 rounded-2xl text-lg font-bold text-gray-900 border border-gray-100"
-          />
+          <VStack>
+            <TextInput
+              placeholder="Location"
+              placeholderTextColor="#9CA3AF"
+              value={location}
+              onChangeText={(text) => {
+                setLocation(text);
+                clearError("location");
+              }}
+              className={`${inputBase} ${
+                errors.location ? "border-red-400" : "border-gray-100"
+              }`}
+            />
 
-          <TextInput
-            placeholder="Max Participants"
-            placeholderTextColor="#9CA3AF"
-            value={maxParticipants}
-            onChangeText={setMaxParticipants}
-            keyboardType="numeric"
-            className="bg-gray-50 p-5 rounded-2xl text-lg font-bold text-indigo-600 border border-gray-100"
-          />
+            {errors.location && (
+              <Text className="mt-1 text-xs font-medium text-red-500">
+                {errors.location}
+              </Text>
+            )}
+          </VStack>
+
+          <VStack>
+            <TextInput
+              placeholder="Time (e.g. 2026-05-10T14:30:00Z)"
+              placeholderTextColor="#9CA3AF"
+              value={time}
+              onChangeText={(text) => {
+                setTime(text);
+                clearError("time");
+              }}
+              className={`${inputBase} ${
+                errors.time ? "border-red-400" : "border-gray-100"
+              }`}
+            />
+
+            {errors.time && (
+              <Text className="mt-1 text-xs font-medium text-red-500">
+                {errors.time}
+              </Text>
+            )}
+          </VStack>
+
+          <VStack>
+            <TextInput
+              placeholder="Max Participants"
+              placeholderTextColor="#9CA3AF"
+              value={maxParticipants}
+              onChangeText={(text) => {
+                setMaxParticipants(text);
+                clearError("maxParticipants");
+              }}
+              keyboardType="numeric"
+              className={`${inputBase} ${
+                errors.maxParticipants
+                  ? "border-red-400"
+                  : "border-gray-100"
+              }`}
+            />
+
+            {errors.maxParticipants && (
+              <Text className="mt-1 text-xs font-medium text-red-500">
+                {errors.maxParticipants}
+              </Text>
+            )}
+          </VStack>
 
           <VStack space="xs">
             <Text className="text-[11px] font-black text-gray-500 uppercase ml-2">
@@ -273,7 +394,10 @@ export default function CreateStudyGroup() {
               {TAGS.map((t) => (
                 <TouchableOpacity
                   key={t}
-                  onPress={() => setTag(t)}
+                  onPress={() => {
+                    setTag(t);
+                    clearError("tag");
+                  }}
                   className={`px-5 py-3 rounded-full border mb-2 ${
                     tag === t
                       ? "bg-indigo-600 border-indigo-600"
@@ -290,16 +414,36 @@ export default function CreateStudyGroup() {
                 </TouchableOpacity>
               ))}
             </HStack>
+
+            {errors.tag && (
+              <Text className="mt-1 text-xs font-medium text-red-500">
+                {errors.tag}
+              </Text>
+            )}
           </VStack>
 
-          <TextInput
-            placeholder="Learning Goals (comma separated)"
-            placeholderTextColor="#9CA3AF"
-            value={learningGoals}
-            onChangeText={setLearningGoals}
-            multiline
-            className="bg-gray-50 p-5 rounded-2xl text-base text-gray-900 border border-gray-100 min-h-[100px]"
-          />
+          <VStack>
+            <TextInput
+              placeholder="Learning Goals (comma separated)"
+              placeholderTextColor="#9CA3AF"
+              value={learningGoals}
+              onChangeText={(text) => {
+                setLearningGoals(text);
+                clearError("learningGoals");
+              }}
+              multiline
+              textAlignVertical="top"
+              className={`bg-gray-50 p-5 rounded-2xl text-base text-gray-900 border min-h-[100px] ${
+                errors.learningGoals ? "border-red-400" : "border-gray-100"
+              }`}
+            />
+
+            {errors.learningGoals && (
+              <Text className="mt-1 text-xs font-medium text-red-500">
+                {errors.learningGoals}
+              </Text>
+            )}
+          </VStack>
         </VStack>
       </ScrollView>
 
