@@ -21,7 +21,12 @@ export const getAllLostItems = async () => {
 };
 
 export const createLostItem = async (formData: FormData) => {
-  const response = await apiClient.post("/lost", formData);
+  const response = await apiClient.post("/lost", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
   return response.data;
 };
 

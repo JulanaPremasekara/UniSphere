@@ -17,8 +17,10 @@ type LostFormState = {
   category: string;
   location: string;
   features: string;
-  image: ImagePicker.ImagePickerAsset | null;
+  image: string | null;
 };
+
+type FormErrors = Partial<Record<keyof LostFormState, string>>;
 
 const initialFormState: LostFormState = {
   reportType: "LOST",
@@ -37,6 +39,7 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
   const isEditMode = !!itemId;
 
   const [form, setForm] = useState<LostFormState>(initialFormState);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const { data: existingItem, isLoading: isLoadingItem } =
     useLostItemDetailQuery(itemId || "");
@@ -56,13 +59,7 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
       category: existingItem.category || "Electronics",
       location: existingItem.location || "",
       features: existingItem.features || "",
-      image: existingItem.image
-        ? ({
-            uri: existingItem.image,
-            fileName: "existing-image.jpg",
-            mimeType: "image/jpeg",
-          } as ImagePicker.ImagePickerAsset)
-        : null,
+      image: existingItem.image || null,
     });
   }, [isEditMode, existingItem]);
 
@@ -74,10 +71,16 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
       ...prev,
       [field]: value,
     }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [field]: undefined,
+    }));
   };
 
   const resetForm = () => {
     setForm(initialFormState);
+    setErrors({});
   };
 
   const pickImage = async () => {
@@ -89,13 +92,13 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 0.8,
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      updateField("image", result.assets[0]);
+      updateField("image", result.assets[0].uri);
     }
   };
 
@@ -108,13 +111,17 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
     formData.append("category", form.category);
     formData.append("status", form.reportType.toLowerCase());
 
-    // Only send image if user picked a NEW local image.
-    // Existing image URL starts with http, so we don't re-upload it.
-    if (form.image?.uri && !form.image.uri.startsWith("http")) {
+    if (form.image && !form.image.startsWith("http")) {
+      const filename =
+        form.image.split("/").pop() || `lost-item-${Date.now()}.jpg`;
+
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : "image/jpeg";
+
       formData.append("image", {
-        uri: form.image.uri,
-        name: form.image.fileName || `lost-item-${Date.now()}.jpg`,
-        type: form.image.mimeType || "image/jpeg",
+        uri: form.image,
+        name: filename,
+        type,
       } as any);
     }
 
@@ -122,8 +129,16 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
   };
 
   const submitForm = async () => {
+    setErrors({});
+
     if (!form.title.trim() || !form.location.trim() || !form.features.trim()) {
-      Alert.alert("Missing details", "Please fill in all required fields.");
+      const localErrors: FormErrors = {};
+
+      if (!form.title.trim()) localErrors.title = "Title is required.";
+      if (!form.location.trim()) localErrors.location = "Location is required.";
+      if (!form.features.trim()) localErrors.features = "Features are required.";
+
+      setErrors(localErrors);
       return;
     }
 
@@ -145,18 +160,40 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
 
       router.back();
       resetForm();
-    } catch (error) {
-      console.error("Submit failed:", error);
+    } catch (error: any) {
+      const backendErrors = error.response?.data?.errors;
+
+      if (Array.isArray(backendErrors)) {
+        const fieldErrors: FormErrors = {};
+
+        backendErrors.forEach((err: { field: string; message: string }) => {
+          if (
+            err.field === "title" ||
+            err.field === "category" ||
+            err.field === "location" ||
+            err.field === "features" ||
+            err.field === "image" ||
+            err.field === "reportType"
+          ) {
+            fieldErrors[err.field as keyof LostFormState] = err.message;
+          }
+        });
+
+        setErrors(fieldErrors);
+        return;
+      }
 
       Alert.alert(
         "Error",
-        isEditMode ? "Failed to update report." : "Failed to submit report."
+        error.response?.data?.message ||
+          (isEditMode ? "Failed to update report." : "Failed to submit report.")
       );
     }
   };
 
   return {
     form,
+    errors,
     updateField,
     pickImage,
     submitForm,
