@@ -172,35 +172,49 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
       router.back();
       resetForm();
     } catch (error: any) {
-      const backendErrors = error.response?.data?.errors;
+  console.log("SUBMIT ERROR:", error);
+  console.log("ERROR RESPONSE:", error.response?.data);
 
-      if (Array.isArray(backendErrors)) {
-        const fieldErrors: FormErrors = {};
+  const backendErrors = error.response?.data?.errors;
 
-        backendErrors.forEach((err: { field: string; message: string }) => {
-          if (
-            err.field === "title" ||
-            err.field === "category" ||
-            err.field === "location" ||
-            err.field === "features" ||
-            err.field === "image" ||
-            err.field === "reportType"
-          ) {
-            fieldErrors[err.field as keyof LostFormState] = err.message;
-          }
-        });
+  if (Array.isArray(backendErrors)) {
+    const fieldErrors: FormErrors = {};
 
-        setErrors(fieldErrors);
-        return;
+    backendErrors.forEach((err: { field: string; message: string }) => {
+      if (
+        err.field === "title" ||
+        err.field === "category" ||
+        err.field === "location" ||
+        err.field === "features" ||
+        err.field === "image" ||
+        err.field === "reportType"
+      ) {
+        fieldErrors[err.field as keyof LostFormState] = err.message;
       }
+    });
 
-      Alert.alert(
-        "Error",
-        error.response?.data?.message ||
-          (isEditMode ? "Failed to update report." : "Failed to submit report.")
-      );
-    }
-  };
+    setErrors(fieldErrors);
+    return;
+  }
+
+  const status = error.response?.status;
+  const backendMessage = error.response?.data?.message;
+  const axiosMessage = error.message;
+
+  let reason = backendMessage || axiosMessage || "Unknown error";
+
+  if (status) {
+    reason = `Status ${status}: ${reason}`;
+  }
+
+  Alert.alert(
+    "Error",
+    isEditMode
+      ? `Failed to update report.\n\nReason: ${reason}`
+      : `Failed to submit report.\n\nReason: ${reason}`
+  );
+}
+  }
 
   return {
     form,
