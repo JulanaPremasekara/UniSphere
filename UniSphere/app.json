@@ -52,6 +52,12 @@
         "projectId": "55d23a5d-cfae-47ad-9487-79533f4b3928"
       }
     },
-    "owner": "oshe"
+    "owner": "oshe",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/55d23a5d-cfae-47ad-9487-79533f4b3928"
+    }
   }
 }

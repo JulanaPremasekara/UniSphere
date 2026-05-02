@@ -160,6 +160,7 @@ export default function Home() {
               placeholderTextColor="#9CA3AF"
             />
           </View>
+        </View>
 
         <ScrollView
           showsVerticalScrollIndicator={false}
