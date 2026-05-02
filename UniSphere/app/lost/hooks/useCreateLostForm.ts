@@ -2,6 +2,7 @@ import { Alert } from "react-native";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system/legacy";
 
 import {
   useCreateLostItemMutation,
@@ -46,6 +47,7 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
 
   const [form, setForm] = useState<LostFormState>(initialFormState);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [newImageSelected, setNewImageSelected] = useState(false);
 
   const { data: existingItem, isLoading: isLoadingItem } =
     useLostItemDetailQuery(normalizedItemId || "");
@@ -67,6 +69,8 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
       features: existingItem.features || "",
       image: existingItem.image || null,
     });
+
+    setNewImageSelected(false);
   }, [isEditMode, existingItem]);
 
   const updateField = <K extends keyof LostFormState>(
@@ -87,6 +91,22 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
   const resetForm = () => {
     setForm(initialFormState);
     setErrors({});
+    setNewImageSelected(false);
+  };
+
+  const getUploadableImageUri = async (uri: string) => {
+    if (uri.startsWith("file://")) return uri;
+
+    const fileName = uri.split("/").pop() || `lost-item-${Date.now()}.jpg`;
+    const cleanFileName = fileName.includes(".") ? fileName : `${fileName}.jpg`;
+    const newPath = `${FileSystem.cacheDirectory}${cleanFileName}`;
+
+    await FileSystem.copyAsync({
+      from: uri,
+      to: newPath,
+    });
+
+    return newPath;
   };
 
   const pickImage = async () => {
@@ -105,10 +125,11 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
 
     if (!result.canceled && result.assets.length > 0) {
       updateField("image", result.assets[0].uri);
+      setNewImageSelected(true);
     }
   };
 
-  const buildFormData = () => {
+  const buildFormData = async () => {
     const formData = new FormData();
 
     formData.append("title", form.title.trim());
@@ -117,9 +138,11 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
     formData.append("category", form.category);
     formData.append("status", form.reportType.toLowerCase());
 
-    if (form.image && !form.image.startsWith("http")) {
+    if (form.image && newImageSelected && !form.image.startsWith("http")) {
+      const uploadUri = await getUploadableImageUri(form.image);
+
       const filename =
-        form.image.split("/").pop() || `lost-item-${Date.now()}.jpg`;
+        uploadUri.split("/").pop() || `lost-item-${Date.now()}.jpg`;
 
       let ext = filename.split(".").pop()?.toLowerCase() || "jpg";
 
@@ -127,12 +150,10 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
         ext = "jpeg";
       }
 
-      const type = `image/${ext}`;
-
       formData.append("image", {
-        uri: form.image,
+        uri: uploadUri,
         name: filename,
-        type,
+        type: `image/${ext}`,
       } as any);
     }
 
@@ -154,7 +175,7 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
     }
 
     try {
-      const formData = buildFormData();
+      const formData = await buildFormData();
 
       if (isEditMode && normalizedItemId) {
         await updateMutation.mutateAsync({
@@ -172,49 +193,49 @@ export const useLostForm = ({ itemId }: UseLostFormParams = {}) => {
       router.back();
       resetForm();
     } catch (error: any) {
-  console.log("SUBMIT ERROR:", error);
-  console.log("ERROR RESPONSE:", error.response?.data);
+      console.log("SUBMIT ERROR:", error);
+      console.log("ERROR RESPONSE:", error.response?.data);
 
-  const backendErrors = error.response?.data?.errors;
+      const backendErrors = error.response?.data?.errors;
 
-  if (Array.isArray(backendErrors)) {
-    const fieldErrors: FormErrors = {};
+      if (Array.isArray(backendErrors)) {
+        const fieldErrors: FormErrors = {};
 
-    backendErrors.forEach((err: { field: string; message: string }) => {
-      if (
-        err.field === "title" ||
-        err.field === "category" ||
-        err.field === "location" ||
-        err.field === "features" ||
-        err.field === "image" ||
-        err.field === "reportType"
-      ) {
-        fieldErrors[err.field as keyof LostFormState] = err.message;
+        backendErrors.forEach((err: { field: string; message: string }) => {
+          if (
+            err.field === "title" ||
+            err.field === "category" ||
+            err.field === "location" ||
+            err.field === "features" ||
+            err.field === "image" ||
+            err.field === "reportType"
+          ) {
+            fieldErrors[err.field as keyof LostFormState] = err.message;
+          }
+        });
+
+        setErrors(fieldErrors);
+        return;
       }
-    });
 
-    setErrors(fieldErrors);
-    return;
-  }
+      const status = error.response?.status;
+      const backendMessage = error.response?.data?.message;
+      const axiosMessage = error.message;
 
-  const status = error.response?.status;
-  const backendMessage = error.response?.data?.message;
-  const axiosMessage = error.message;
+      let reason = backendMessage || axiosMessage || "Unknown error";
 
-  let reason = backendMessage || axiosMessage || "Unknown error";
+      if (status) {
+        reason = `Status ${status}: ${reason}`;
+      }
 
-  if (status) {
-    reason = `Status ${status}: ${reason}`;
-  }
-
-  Alert.alert(
-    "Error",
-    isEditMode
-      ? `Failed to update report.\n\nReason: ${reason}`
-      : `Failed to submit report.\n\nReason: ${reason}`
-  );
-}
-  }
+      Alert.alert(
+        "Error",
+        isEditMode
+          ? `Failed to update report.\n\nReason: ${reason}`
+          : `Failed to submit report.\n\nReason: ${reason}`
+      );
+    }
+  };
 
   return {
     form,
