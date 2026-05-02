@@ -35,6 +35,7 @@ export const useProfile = () => {
 
   const logout = async () => {
     await AppStorage.removeItem('userToken');
+    await AppStorage.removeItem('hasSeenWelcome');
     setUser(null);
     router.replace('/login');
   };

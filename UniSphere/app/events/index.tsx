@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  FlatList,
   Alert,
   ActivityIndicator,
   Modal,
@@ -62,28 +63,7 @@ export default function Home() {
       e.title.toLowerCase().startsWith(searchQuery.toLowerCase())
   );
 
-  const renderHeader = () => (
-    <View>
-      <AppHeader title="UniSphere" />
 
-      <SearchInput
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        placeholder="Search events..."
-      />
-
-      <FilterChips
-        options={filterOptions}
-        selectedValue={activeFilter}
-        onSelect={setActiveFilter}
-      />
-
-      <SectionHeader
-        title={searchQuery ? "Search Results" : "Campus Feed"}
-        subtitle="Discover and share events happening around you."
-      />
-    </View>
-  );
 
   if (loading) {
     return (
@@ -96,44 +76,58 @@ export default function Home() {
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-white">
       <View className="flex-1">
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingTop: 16,
-            paddingBottom: 140,
-            flexGrow: 1,
-          }}
-        >
-          {renderHeader()}
+        <AppHeader title="UniSphere" />
 
-          {filteredEvents.length > 0 ? (
-            filteredEvents.map((item: Event) => (
-              <EventCard
-                key={item.id}
-                item={item}
-                onPress={() => router.push(`/events/${item.id}`)}
-                onEdit={
-                  item.isMine
-                    ? () =>
-                        router.push({
-                          pathname: "/events/create",
-                          params: { editId: item.id },
-                        })
-                    : undefined
-                }
-                onDelete={
-                  item.isMine
-                    ? () => {
-                        setEventToDelete(item.id);
-                        setDeleteModalVisible(true);
-                      }
-                    : undefined
-                }
+        <View className="px-5">
+          <SearchInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Search events..."
+          />
+        </View>
+
+        <FlatList
+          data={filteredEvents}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <EventCard
+              item={item}
+              onPress={() => router.push(`/events/${item.id}`)}
+              onEdit={
+                item.isMine
+                  ? () =>
+                      router.push({
+                        pathname: "/events/create",
+                        params: { editId: item.id },
+                      })
+                  : undefined
+              }
+              onDelete={
+                item.isMine
+                  ? () => {
+                      setEventToDelete(item.id);
+                      setDeleteModalVisible(true);
+                    }
+                  : undefined
+              }
+            />
+          )}
+          ListHeaderComponent={
+            <View>
+              <FilterChips
+                options={filterOptions}
+                selectedValue={activeFilter}
+                onSelect={setActiveFilter}
               />
-            ))
-          ) : (
-            <View className="flex-1 items-center justify-center py-20">
+
+              <SectionHeader
+                title={searchQuery ? "Search Results" : "Campus Feed"}
+                subtitle="Discover and share events happening around you."
+              />
+            </View>
+          }
+          ListEmptyComponent={
+            <View className="items-center justify-center py-20">
               <View className="bg-gray-100 p-8 rounded-full mb-4">
                 <Search size={48} color="#9CA3AF" />
               </View>
@@ -146,8 +140,15 @@ export default function Home() {
                 There are currently no events matching your search or criteria.
               </Text>
             </View>
-          )}
-        </ScrollView>
+          }
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingTop: 8,
+            paddingBottom: 20,
+            flexGrow: 1,
+          }}
+          showsVerticalScrollIndicator={false}
+        />
 
         <TouchableOpacity
           onPress={() =>
