@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { Search, X } from "lucide-react-native";
 import { useRouter } from "expo-router";
@@ -53,38 +54,23 @@ export default function GlobalSearch() {
           apiClient.get("/studyGroups"),
         ]);
 
-        const [
-          eventsResult,
-          marketplaceResult,
-          lostResult,
-          housingResult,
-          tutorsResult,
-          studyGroupsResult,
-        ] = results;
-
         const events =
-          eventsResult.status === "fulfilled" ? toArray(eventsResult.value) : [];
+          results[0].status === "fulfilled" ? toArray(results[0].value) : [];
 
         const marketplace =
-          marketplaceResult.status === "fulfilled"
-            ? toArray(marketplaceResult.value)
-            : [];
+          results[1].status === "fulfilled" ? toArray(results[1].value) : [];
 
         const lost =
-          lostResult.status === "fulfilled" ? toArray(lostResult.value) : [];
+          results[2].status === "fulfilled" ? toArray(results[2].value) : [];
 
         const housing =
-          housingResult.status === "fulfilled"
-            ? toArray(housingResult.value)
-            : [];
+          results[3].status === "fulfilled" ? toArray(results[3].value) : [];
 
         const tutors =
-          tutorsResult.status === "fulfilled" ? toArray(tutorsResult.value) : [];
+          results[4].status === "fulfilled" ? toArray(results[4].value) : [];
 
         const studyGroups =
-          studyGroupsResult.status === "fulfilled"
-            ? toArray(studyGroupsResult.value)
-            : [];
+          results[5].status === "fulfilled" ? toArray(results[5].value) : [];
 
         const normalizedItems: GlobalSearchItem[] = [
           ...events.map((item: any) => ({
@@ -153,7 +139,10 @@ export default function GlobalSearch() {
     if (!searchText) return [];
 
     return items.filter((item) => {
-      const searchableText = `${item.type} ${item.title} ${item.subtitle || ""}`;
+      const searchableText = `${item.type} ${item.title} ${
+        item.subtitle || ""
+      }`;
+
       return searchableText.toLowerCase().includes(searchText);
     });
   }, [query, items]);
@@ -164,7 +153,7 @@ export default function GlobalSearch() {
   };
 
   return (
-    <View className="px-6 mt-2 mb-4 z-50">
+    <View className="px-6 mt-2 mb-4 z-[999]">
       <View className="flex-row items-center bg-gray-100 rounded-full px-5 h-14">
         <Search size={20} color="#9CA3AF" />
 
@@ -184,42 +173,58 @@ export default function GlobalSearch() {
       </View>
 
       {query.length > 0 && (
-        <View className="mt-3 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-          {loading ? (
-            <View className="py-6 items-center">
-              <ActivityIndicator color="#4F46E5" />
-              <Text className="text-gray-400 mt-2 text-sm">Searching...</Text>
-            </View>
-          ) : filteredResults.length > 0 ? (
-            filteredResults.slice(0, 8).map((item) => (
-              <TouchableOpacity
-                key={`${item.type}-${item.id}`}
-                onPress={() => handleResultPress(item.route)}
-                className="px-5 py-4 border-b border-gray-100"
-              >
-                <Text className="text-[10px] font-bold text-indigo-600 uppercase">
-                  {item.type}
-                </Text>
+        <View className="absolute top-16 left-0 right-0 z-[999] px-6">
+          <ScrollView
+            className="bg-white rounded-3xl border border-gray-100 shadow-sm"
+            style={{ maxHeight: 300 }}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            nestedScrollEnabled
+          >
+            {loading ? (
+              <View className="py-6 items-center">
+                <ActivityIndicator color="#4F46E5" />
 
-                <Text
-                  className="text-base font-bold text-gray-900 mt-1"
-                  numberOfLines={1}
+                <Text className="text-gray-400 mt-2 text-sm">
+                  Searching...
+                </Text>
+              </View>
+            ) : filteredResults.length > 0 ? (
+              filteredResults.slice(0, 20).map((item) => (
+                <TouchableOpacity
+                  key={`${item.type}-${item.id}`}
+                  onPress={() => handleResultPress(item.route)}
+                  className="px-5 py-4 border-b border-gray-100"
                 >
-                  {item.title}
-                </Text>
-
-                {item.subtitle ? (
-                  <Text className="text-sm text-gray-500 mt-1" numberOfLines={1}>
-                    {item.subtitle}
+                  <Text className="text-[10px] font-bold text-indigo-600 uppercase">
+                    {item.type}
                   </Text>
-                ) : null}
-              </TouchableOpacity>
-            ))
-          ) : (
-            <View className="py-6 items-center">
-              <Text className="text-gray-400 font-medium">No results found</Text>
-            </View>
-          )}
+
+                  <Text
+                    className="text-base font-bold text-gray-900 mt-1"
+                    numberOfLines={1}
+                  >
+                    {item.title}
+                  </Text>
+
+                  {item.subtitle ? (
+                    <Text
+                      className="text-sm text-gray-500 mt-1"
+                      numberOfLines={1}
+                    >
+                      {item.subtitle}
+                    </Text>
+                  ) : null}
+                </TouchableOpacity>
+              ))
+            ) : (
+              <View className="py-6 items-center">
+                <Text className="text-gray-400 font-medium">
+                  No results found
+                </Text>
+              </View>
+            )}
+          </ScrollView>
         </View>
       )}
     </View>
