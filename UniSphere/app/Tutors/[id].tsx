@@ -68,7 +68,7 @@ export default function TutorProfile() {
     await apiClient.patch(`/tutors/${id}/status`, { isOnline: false }); // Using apiClient for consistency
     
     Alert.alert("Success", "Status updated successfully.");
-    router.replace("/tutors"); 
+    router.replace("/Tutors"); 
   } catch (error: any) {
     console.log("Error Detail:", error.response?.data || error.message);
     Alert.alert("Error", "Validation still failing. See console.");
@@ -78,22 +78,40 @@ export default function TutorProfile() {
 };
 
   const handleDelete = () => {
-    Alert.alert("Delete Profile", "This action cannot be undone!", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await apiClient.delete(`/tutors/${id}`);
-            router.replace("/tutors");
-          } catch (error) {
-            Alert.alert("Error", "Failed to delete profile.");
-          }
-        },
+  Alert.alert("Delete Profile", "This action cannot be undone!", [
+    { text: "Cancel", style: "cancel" },
+    {
+      text: "Delete",
+      style: "destructive",
+      onPress: async () => {
+        try {
+          setLoading(true);
+
+          const response = await apiClient.delete(`/tutors/${id}`);
+
+          console.log("Delete success:", response.data);
+
+          Alert.alert("Success", "Tutor profile deleted successfully.", [
+            {
+              text: "OK",
+              onPress: () => router.replace("/Tutors"),
+            },
+          ]);
+        } catch (error: any) {
+          console.log("Delete error:", error.response?.data || error.message);
+
+          const backendMessage =
+            error.response?.data?.message ||
+            "Failed to delete profile. Please try again.";
+
+          Alert.alert("Error", backendMessage);
+        } finally {
+          setLoading(false);
+        }
       },
-    ]);
-  };
+    },
+  ]);
+};
 
   if (loading) {
     return (
