@@ -81,11 +81,7 @@ const handleSaveProfile = async () => {
     }
 
     try {
-      const response = await apiClient.post(`/tutors/setup`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await apiClient.post(`/tutors/setup`, formData,);
       
       if (response.status === 201 || response.status === 200) {
         Alert.alert("Success", "Tutor profile created successfully!");
