@@ -28,7 +28,7 @@ export default function SettingsScreen() {
     await apiClient.patch(`/tutors/${id}/status`, { isOnline: false }); // Using apiClient for consistency
     
     Alert.alert("Success", "Status updated successfully.");
-    router.replace("/tutors"); 
+    router.replace("/Tutors"); 
   } catch (error: any) {
     console.log("Error Detail:", error.response?.data || error.message);
     Alert.alert("Error", "Validation still failing. See console.");
@@ -55,7 +55,7 @@ export default function SettingsScreen() {
               await apiClient.delete(`/tutors/${id}`); // Using apiClient for consistency
               
               Alert.alert("Deleted", "Your profile has been removed.");
-              router.replace("/tutors");
+              router.replace("/Tutors");
             } catch (error) {
               console.error("Delete Error:", error);
               Alert.alert("Error", "Failed to delete account.");
