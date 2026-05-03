@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Box } from "@/components/ui/box";
@@ -45,6 +45,7 @@ const filterOptions: TutorFilter[] = [
 
 export default function FindTutor() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const [tutorList, setTutorList] = useState<any[]>([]);
   const [filteredTutors, setFilteredTutors] = useState<any[]>([]);
@@ -228,8 +229,8 @@ export default function FindTutor() {
         <TouchableOpacity
           onPress={handleCreateTutor}
           activeOpacity={0.8}
-          className="absolute bottom-28 right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
-          style={{ elevation: 5 }}
+          className="absolute right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+          style={{ bottom: 90 + Math.max(insets.bottom, 16), elevation: 5 }}
         >
           <Plus color="white" size={32} />
         </TouchableOpacity>

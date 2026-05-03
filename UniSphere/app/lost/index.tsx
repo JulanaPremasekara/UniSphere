@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context"; // ✅ Modern
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"; // ✅ Modern
 import { router } from "expo-router";
 
 import AppHeader from "../components/AppHeader";
@@ -34,6 +34,7 @@ const filterOptions: LostItemsFilter[] = [
 ];
 
 export default function LostIndexScreen() {
+  const insets = useSafeAreaInsets();
   const [searchText, setSearchText] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<LostItemsFilter>("ALL");
   const { userId, user } = useUser();
@@ -170,7 +171,8 @@ export default function LostIndexScreen() {
           onPress={() =>
             !userId ? setLoginModalVisible(true) : handleCreateReport()
           }
-          className="absolute bottom-28 right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+          className="absolute right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+          style={{ bottom: 90 + Math.max(insets.bottom, 16) }}
         >
           <Plus color="white" size={32} />
         </TouchableOpacity>

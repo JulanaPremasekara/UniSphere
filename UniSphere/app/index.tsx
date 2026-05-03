@@ -77,6 +77,7 @@ export default function Home() {
   const { events, loading } = useEvents();
 
   const [showWelcome, setShowWelcome] = useState(false);
+  const [searchActive, setSearchActive] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -148,110 +149,107 @@ export default function Home() {
       <View className="flex-1">
         {renderHeader()}
 
-        <GlobalSearch />
+        <GlobalSearch onSearchActiveChange={setSearchActive} />
 
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingTop: 8,
-              paddingBottom: 20,
-            }}
-          >
-            {/* Categories Grid */}
-            <View className="flex-row flex-wrap justify-between px-5 mt-2">
-              {categories.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={{ backgroundColor: item.color }}
-                  onPress={() => router.push(item.route as any)}
-                  className="w-[47%] aspect-square rounded-[40px] items-center justify-center mb-4"
-                >
-                  <View className="bg-white p-3 rounded-2xl mb-2 shadow-sm">
-                    <item.icon size={29} color={item.iconColor} />
-                  </View>
+        <ScrollView
+          scrollEnabled={!searchActive}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingTop: 8,
+            paddingBottom: 20,
+          }}
+        >
+          <View className="flex-row flex-wrap justify-between px-5 mt-2">
+            {categories.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={{ backgroundColor: item.color }}
+                onPress={() => router.push(item.route as any)}
+                className="w-[47%] aspect-square rounded-[40px] items-center justify-center mb-4"
+              >
+                <View className="bg-white p-3 rounded-2xl mb-2 shadow-sm">
+                  <item.icon size={29} color={item.iconColor} />
+                </View>
 
-                  <Text className="font-bold text-gray-800 text-[14px] text-center px-2 leading-[16px]">
-                    {item.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* Featured Events Header */}
-            <View className="px-6 flex-row justify-between items-end mt-[-60]">
-              <Text className="text-2xl font-bold text-gray-900">
-                Featured Events
-              </Text>
-
-              <TouchableOpacity onPress={() => router.push("/events")}>
-                <Text className="text-indigo-600 font-bold text-base">
-                  View all
+                <Text className="font-bold text-gray-800 text-[14px] text-center px-2 leading-[16px]">
+                  {item.name}
                 </Text>
               </TouchableOpacity>
-            </View>
+            ))}
+          </View>
 
-            {/* Horizontal Events Scroll */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              className="mt-2 pl-6"
-              contentContainerStyle={{ paddingRight: 24 }}
-            >
-              {loading ? (
-                <View className="w-[300px] h-64 items-center justify-center">
-                  <ActivityIndicator size="large" color="#4338CA" />
-                </View>
-              ) : (
-                events
-                  .slice(0, 5)
-                  .map((event: any) => (
-                    <FeaturedEventCard
-                      key={event.id}
-                      event={event}
-                      onPress={() => router.push(`/events/${event.id}`)}
-                    />
-                  ))
-              )}
+          <View className="px-6 flex-row justify-between items-end mt-[-60]">
+            <Text className="text-2xl font-bold text-gray-900">
+              Featured Events
+            </Text>
 
-              {!loading && events.length === 0 && (
-                <View className="w-[300px] h-64 bg-gray-50 rounded-[35px] border border-dashed border-gray-200 items-center justify-center">
-                  <Calendar size={32} color="#9CA3AF" />
+            <TouchableOpacity onPress={() => router.push("/events")}>
+              <Text className="text-indigo-600 font-bold text-base">
+                View all
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-                  <Text className="text-gray-400 font-bold mt-2">
-                    No featured events
-                  </Text>
-                </View>
-              )}
-            </ScrollView>
-          </ScrollView>
-
-          <Footer />
-
-          <Modal visible={showWelcome} animationType="fade" transparent={false}>
-            <View className="flex-1 bg-white items-center justify-center px-10">
-              <View className="bg-indigo-50 p-10 rounded-[45px] mb-10 shadow-sm">
-                <GraduationCap size={100} color="#4F46E5" strokeWidth={1.5} />
+          <ScrollView
+            horizontal
+            scrollEnabled={!searchActive}
+            showsHorizontalScrollIndicator={false}
+            className="mt-2 pl-6"
+            contentContainerStyle={{ paddingRight: 24 }}
+          >
+            {loading ? (
+              <View className="w-[300px] h-64 items-center justify-center">
+                <ActivityIndicator size="large" color="#4338CA" />
               </View>
+            ) : (
+              events.slice(0, 5).map((event: any) => (
+                <FeaturedEventCard
+                  key={event.id}
+                  event={event}
+                  onPress={() => router.push(`/events/${event.id}`)}
+                />
+              ))
+            )}
 
-              <Text className="text-4xl font-black text-gray-900 text-center mb-5">
-                Welcome to UniSphere
-              </Text>
+            {!loading && events.length === 0 && (
+              <View className="w-[300px] h-64 bg-gray-50 rounded-[35px] border border-dashed border-gray-200 items-center justify-center">
+                <Calendar size={32} color="#9CA3AF" />
 
-              <Text className="text-gray-500 text-center text-lg leading-relaxed font-medium px-4">
-                Your all-in-one campus hub for events, marketplace, and
-                community connections.
-              </Text>
-
-              <View className="absolute bottom-20 items-center">
-                <ActivityIndicator color="#4F46E5" size="large" />
-
-                <Text className="text-indigo-600 mt-6 font-bold uppercase tracking-[3px] text-[10px] text-center">
-                  Initializing your experience
+                <Text className="text-gray-400 font-bold mt-2">
+                  No featured events
                 </Text>
               </View>
+            )}
+          </ScrollView>
+        </ScrollView>
+
+        <Footer />
+
+        <Modal visible={showWelcome} animationType="fade" transparent={false}>
+          <View className="flex-1 bg-white items-center justify-center px-10">
+            <View className="bg-indigo-50 p-10 rounded-[45px] mb-10 shadow-sm">
+              <GraduationCap size={100} color="#4F46E5" strokeWidth={1.5} />
             </View>
-          </Modal>
-        </View>
+
+            <Text className="text-4xl font-black text-gray-900 text-center mb-5">
+              Welcome to UniSphere
+            </Text>
+
+            <Text className="text-gray-500 text-center text-lg leading-relaxed font-medium px-4">
+              Your all-in-one campus hub for events, marketplace, and community
+              connections.
+            </Text>
+
+            <View className="absolute bottom-20 items-center">
+              <ActivityIndicator color="#4F46E5" size="large" />
+
+              <Text className="text-indigo-600 mt-6 font-bold uppercase tracking-[3px] text-[10px] text-center">
+                Initializing your experience
+              </Text>
+            </View>
+          </View>
+        </Modal>
+      </View>
     </SafeAreaView>
   );
 }

@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Calendar, Plus } from "lucide-react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
@@ -40,6 +40,7 @@ const filterOptions: MarketFilter[] = [
 
 export default function MarketplaceIndex() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState<any[]>([]);
@@ -242,7 +243,8 @@ export default function MarketplaceIndex() {
 
         <TouchableOpacity
           onPress={handleCreateProduct}
-          className="absolute bottom-28 right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+          className="absolute right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+          style={{ bottom: 90 + Math.max(insets.bottom, 16) }}
         >
           <Plus size={32} color="white" />
         </TouchableOpacity>

@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity, Platform, Pressable, Dimensions } from 'react-native';
-import { MapPin, MoreVertical, Edit2, Trash2 } from 'lucide-react-native';
+import { Edit2, MapPin, MoreVertical, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
+import { Dimensions, Platform, Pressable, Text, TouchableOpacity, View } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 

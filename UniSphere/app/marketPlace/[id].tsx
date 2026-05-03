@@ -36,18 +36,10 @@ export default function ProductDetailScreen() {
     try {
       const response = await apiClient.get(`/api/marketplace/${id}`);
       setProduct(response.data.data);
-<<<<<<< HEAD
       console.log("Fetched product:", product);
 
     } catch (error) { console.error(error); } 
     finally { setLoading(false); }
-=======
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
->>>>>>> d6bf418fc1e71503ae7815a782fc642cdfacb241
   }, [id]);
 
   useFocusEffect(
