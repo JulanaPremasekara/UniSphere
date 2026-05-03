@@ -51,8 +51,9 @@ export default function GlobalSearch({
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<GlobalSearchItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
 
-  const searchActive = query.trim().length > 0;
+  const searchActive = showResults && query.trim().length > 0;
 
   useEffect(() => {
     onSearchActiveChange?.(searchActive);
@@ -166,14 +167,19 @@ export default function GlobalSearch({
       .slice(0, 20);
   }, [query, items]);
 
+  const closeResults = () => {
+    setShowResults(false);
+    onSearchActiveChange?.(false);
+  };
+
   const clearSearch = () => {
     setQuery("");
-    onSearchActiveChange?.(false);
+    closeResults();
   };
 
   const handleResultPress = (route: string) => {
     Keyboard.dismiss();
-    clearSearch();
+    closeResults();
     router.push(route as any);
   };
 
@@ -186,7 +192,11 @@ export default function GlobalSearch({
 
           <TextInput
             value={query}
-            onChangeText={setQuery}
+            onChangeText={(text) => {
+              setQuery(text);
+              setShowResults(true);
+            }}
+            onFocus={() => setShowResults(true)}
             placeholder="Search UniSphere..."
             className="flex-1 ml-3 text-gray-700 text-base"
             placeholderTextColor="#9CA3AF"
@@ -216,7 +226,7 @@ export default function GlobalSearch({
         >
           {/* Backdrop Layer (Darkened background) */}
           <Pressable
-            onPress={clearSearch}
+            onPress={closeResults}
             style={{ 
               position: 'absolute', 
               top: 0, 
