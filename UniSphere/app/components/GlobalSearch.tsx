@@ -123,7 +123,7 @@ export default function GlobalSearch({
             type: "Tutor",
             title: item.name || "Unnamed Tutor",
             subtitle: item.subject || "",
-            route: `/Tutors/${item._id || item.id}`,
+            route: `/tutors/${item._id || item.id}`,
           })),
           ...studyGroups.map((item: any) => ({
             id: item._id || item.id,

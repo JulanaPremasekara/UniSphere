@@ -149,7 +149,9 @@ export default function Home() {
       <View className="flex-1">
         {renderHeader()}
 
-        <GlobalSearch onSearchActiveChange={setSearchActive} />
+        <View style={{ zIndex: 9999, elevation: 9999 }}>
+          <GlobalSearch onSearchActiveChange={setSearchActive} />
+        </View>
 
         <ScrollView
           scrollEnabled={!searchActive}
@@ -223,7 +225,7 @@ export default function Home() {
           </ScrollView>
         </ScrollView>
 
-        <Footer />
+        {!searchActive && <Footer />}
 
         <Modal visible={showWelcome} animationType="fade" transparent={false}>
           <View className="flex-1 bg-white items-center justify-center px-10">
