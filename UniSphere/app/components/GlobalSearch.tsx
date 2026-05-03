@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
+  FlatList,
   Keyboard,
 } from "react-native";
 import { Search, X } from "lucide-react-native";
@@ -231,10 +232,7 @@ export default function GlobalSearch({
           >
             <View 
               className="bg-white rounded-3xl border border-gray-100 shadow-2xl overflow-hidden"
-              style={{ 
-                elevation: 1001,
-                maxHeight: 400 
-              }}
+              style={{ elevation: 1001 }}
             >
               {loading ? (
                 <View className="py-8 items-center bg-white">
@@ -242,16 +240,16 @@ export default function GlobalSearch({
                   <Text className="text-gray-400 mt-2 text-sm">Searching...</Text>
                 </View>
               ) : filteredResults.length > 0 ? (
-                <ScrollView
+                <FlatList
+                  data={filteredResults}
+                  keyExtractor={(item) => `${item.type}-${item.id}`}
                   keyboardShouldPersistTaps="always"
                   nestedScrollEnabled={true}
                   showsVerticalScrollIndicator={true}
+                  style={{ maxHeight: 350 }}
                   contentContainerStyle={{ paddingBottom: 10 }}
-                  bounces={true}
-                >
-                  {filteredResults.map((item) => (
+                  renderItem={({ item }) => (
                     <TouchableOpacity
-                      key={`${item.type}-${item.id}`}
                       activeOpacity={0.7}
                       onPress={() => handleResultPress(item.route)}
                       className="px-5 py-4 border-b border-gray-100 bg-white"
@@ -276,8 +274,8 @@ export default function GlobalSearch({
                         </Text>
                       ) : null}
                     </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                  )}
+                />
               ) : (
                 <View className="py-10 items-center bg-white">
                   <Text className="text-gray-400 font-medium">No results found</Text>
