@@ -187,7 +187,12 @@ export default function GlobalSearch({
     <View>
       {/* Search Bar - Always on Home Screen */}
       <View className="px-6 mt-2 mb-4">
-        <View className="flex-row items-center bg-gray-100 rounded-full px-5 h-14">
+        <Pressable 
+          onPress={() => {
+            if (query.trim().length > 0) setShowResults(true);
+          }}
+          className="flex-row items-center bg-gray-100 rounded-full px-5 h-14"
+        >
           <Search size={20} color="#9CA3AF" />
 
           <TextInput
@@ -196,7 +201,9 @@ export default function GlobalSearch({
               setQuery(text);
               setShowResults(true);
             }}
-            onFocus={() => setShowResults(true)}
+            onFocus={() => {
+              if (query.trim().length > 0) setShowResults(true);
+            }}
             placeholder="Search UniSphere..."
             className="flex-1 ml-3 text-gray-700 text-base"
             placeholderTextColor="#9CA3AF"
@@ -208,7 +215,7 @@ export default function GlobalSearch({
               <X size={18} color="#9CA3AF" />
             </TouchableOpacity>
           )}
-        </View>
+        </Pressable>
       </View>
 
       {/* Search Results Overlay (Absolute View instead of Modal to fix focus loss) */}
