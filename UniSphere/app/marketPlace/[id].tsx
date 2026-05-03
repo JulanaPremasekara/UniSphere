@@ -18,7 +18,9 @@ export default function ProductDetailScreen() {
   const fetchProduct = useCallback(async () => {
     try {
       const response = await apiClient.get(`/api/marketplace/${id}`);
-      setProduct(response.data);
+      setProduct(response.data.data);
+      console.log("Fetched product:", product);
+
     } catch (error) { console.error(error); } 
     finally { setLoading(false); }
   }, [id]);
