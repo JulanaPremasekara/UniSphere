@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import apiClient from "../app/services/api";
 
 export interface Housing {
@@ -15,9 +15,10 @@ export const useHousing = () => {
   const [housings, setHousings] = useState<Housing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isInitialMount = useRef(true);
 
   const formatHousing = (h: any, currentUserId?: string): Housing => ({
-    id: h._id,
+    id: typeof h._id === 'string' ? h._id : typeof h.id === 'string' ? h.id : '',
     title: h.title,
     location: h.address,
     rentPrice: h.rentPrice,
@@ -28,7 +29,9 @@ export const useHousing = () => {
 
   const fetchHousings = useCallback(async () => {
     try {
-      setLoading(true);
+      if (isInitialMount.current) {
+        setLoading(true);
+      }
 
       const [userRes, housingsRes] = await Promise.all([
         apiClient.get("/users/me").catch(() => ({ data: { user: null } })),
@@ -48,9 +51,14 @@ export const useHousing = () => {
       setError(null);
     } catch (err: any) {
       setError(err.message || "Failed to fetch housings");
-      setHousings([]);
+      if (isInitialMount.current) {
+        setHousings([]);
+      }
     } finally {
-      setLoading(false);
+      if (isInitialMount.current) {
+        setLoading(false);
+        isInitialMount.current = false;
+      }
     }
   }, []);
 

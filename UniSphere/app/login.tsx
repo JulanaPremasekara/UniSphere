@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { ChevronLeftIcon, Icon } from '@/components/ui/icon';
 import LoginForm from './components/form'; 
 import { GraduationCap } from 'lucide-react-native';
 import { useAuth } from '../hooks/useAuth';
+import { AppStorage } from './services/storage';
 
 export default function Login() {
   const router = useRouter();
@@ -14,10 +15,15 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const { login, isLoading, errorMessage } = useAuth();
 
+  useEffect(() => {
+    // Mark welcome as seen when reaching login to avoid loops
+    AppStorage.setItem("hasSeenWelcome", "true");
+  }, []);
+
   return (
     <ScrollView className="flex-1 bg-white" contentContainerStyle={{ flexGrow: 1 }}>
       <View className="px-8 pt-16 pb-8">
-        <TouchableOpacity onPress={() => router.back()} className="mb-8 p-2 -ml-2 w-12" activeOpacity={0.7}>
+        <TouchableOpacity onPress={() => router.replace('/')} className="mb-8 p-2 -ml-2 w-12" activeOpacity={0.7}>
           <Icon as={ChevronLeftIcon} size="xl" className="text-gray-900" />
         </TouchableOpacity>
 

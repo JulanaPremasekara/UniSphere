@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { MapPin, DollarSign, Edit, Trash2 } from 'lucide-react-native';
+import React from "react";
+import { View, Text, TouchableOpacity, Image } from "react-native";
+import { MapPin } from "lucide-react-native";
 
 interface HousingCardProps {
   item: {
@@ -13,72 +13,61 @@ interface HousingCardProps {
     isMine: boolean;
   };
   onPress: () => void;
-  onEdit?: () => void;
-  onDelete?: () => void;
 }
 
-export default function HousingCard({ item, onPress, onEdit, onDelete }: HousingCardProps) {
+export default function HousingCard({ item, onPress }: HousingCardProps) {
   return (
-    <TouchableOpacity 
-      activeOpacity={0.9} 
-      onPress={onPress} 
-      className="bg-white rounded-[20px] border border-gray-100 shadow-sm mb-4 overflow-hidden"
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={onPress}
+      className="bg-white rounded-[30px] border border-gray-100 shadow-sm mb-6 overflow-hidden"
     >
       {/* Image */}
       <View className="relative">
         {item.images && item.images.length > 0 ? (
-          <Image 
-            source={{ uri: item.images[0] }} 
-            className="w-full h-40" 
+          <Image
+            source={{ uri: item.images[0] }}
+            className="w-full h-48"
+            resizeMode="cover"
           />
         ) : (
-          <View className="w-full h-40 bg-gray-200 justify-center items-center">
+          <View className="w-full h-48 bg-gray-200 justify-center items-center">
             <Text className="text-gray-400">No image</Text>
           </View>
         )}
-        <View className="absolute top-3 right-3 bg-emerald-600 px-3 py-1 rounded-full">
-          <Text className="text-white text-xs font-bold uppercase">{item.roomType}</Text>
+
+        {/* Room Type Badge (indigo style like Lost) */}
+        <View className="absolute top-4 left-4 bg-white/90 px-3 py-1.5 rounded-full">
+          <Text className="text-[10px] font-black text-indigo-900 uppercase">
+            {item.roomType}
+          </Text>
         </View>
       </View>
 
       {/* Content */}
-      <View className="p-4">
-        <Text className="text-lg font-bold text-gray-900 mb-2" numberOfLines={1}>
+      <View className="p-5">
+        {/* Title */}
+        <Text
+          className="text-xl font-extrabold text-gray-900 mb-2"
+          numberOfLines={1}
+        >
           {item.title}
         </Text>
-        
+
         {/* Location */}
-        <View className="flex-row items-center gap-2 mb-3">
-          <MapPin size={16} color="#6B7280" />
-          <Text className="text-gray-600 text-sm" numberOfLines={1}>
+        <View className="flex-row items-center bg-gray-50 px-3 py-2 rounded-2xl self-start mb-4">
+          <MapPin size={14} color="#6B7280" />
+          <Text className="text-gray-600 text-xs font-medium ml-2">
             {item.location}
           </Text>
         </View>
 
-        {/* Price & Actions */}
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center gap-1">
-            <DollarSign size={18} color="#059669" />
-            <Text className="text-emerald-600 font-bold text-lg">
-              {item.rentPrice}/mo
-            </Text>
-          </View>
-
-          {/* Edit/Delete for own listings */}
-          {item.isMine && (
-            <View className="flex-row gap-2">
-              {onEdit && (
-                <TouchableOpacity onPress={onEdit} className="bg-blue-100 p-2 rounded-full">
-                  <Edit size={16} color="#0369A1" />
-                </TouchableOpacity>
-              )}
-              {onDelete && (
-                <TouchableOpacity onPress={onDelete} className="bg-red-100 p-2 rounded-full">
-                  <Trash2 size={16} color="#DC2626" />
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
+        {/* Price */}
+        <View className="flex-row justify-between items-center">
+          <Text className="text-indigo-600 font-black text-lg">
+            LKR {item.rentPrice}
+            <Text className="text-gray-400 text-sm font-medium"> /month</Text>
+          </Text>
         </View>
       </View>
     </TouchableOpacity>

@@ -21,8 +21,10 @@ const categories = [
 
 export default function CreateLostReportScreen() {
   const { itemId } = useLocalSearchParams<{ itemId?: string }>();
+
   const {
     form,
+    errors,
     updateField,
     pickImage,
     submitForm,
@@ -33,7 +35,10 @@ export default function CreateLostReportScreen() {
 
   if (isLoadingItem) {
     return (
-      <SafeAreaView edges={["top"]} className="flex-1 items-center justify-center bg-white">
+      <SafeAreaView
+        edges={["top"]}
+        className="flex-1 items-center justify-center bg-white"
+      >
         <Text className="text-slate-500">Loading item...</Text>
       </SafeAreaView>
     );
@@ -133,38 +138,63 @@ export default function CreateLostReportScreen() {
                 ))}
               </View>
             </ScrollView>
+
+            {errors.category && (
+              <Text className="mt-1 text-xs font-medium text-red-500">
+                {errors.category}
+              </Text>
+            )}
           </View>
 
           <View className="mb-5">
             <Text className="mb-2 text-sm font-semibold text-slate-600">
               Item Title
             </Text>
+
             <TextInput
               value={form.title}
               onChangeText={(text) => updateField("title", text)}
               placeholder="e.g. Mac book"
               placeholderTextColor="#CBD5E1"
-              className="rounded-2xl bg-slate-100 px-4 py-4 text-sm text-slate-900"
+              className={`rounded-2xl bg-slate-100 px-4 py-4 text-sm text-slate-900 ${
+                errors.title ? "border border-red-400" : ""
+              }`}
             />
+
+            {errors.title && (
+              <Text className="mt-1 text-xs font-medium text-red-500">
+                {errors.title}
+              </Text>
+            )}
           </View>
 
           <View className="mb-5">
             <Text className="mb-2 text-sm font-semibold text-slate-600">
               Last Seen / Found Location
             </Text>
+
             <TextInput
               value={form.location}
               onChangeText={(text) => updateField("location", text)}
               placeholder="e.g. Library Second Floor"
               placeholderTextColor="#CBD5E1"
-              className="rounded-2xl bg-slate-100 px-4 py-4 text-sm text-slate-900"
+              className={`rounded-2xl bg-slate-100 px-4 py-4 text-sm text-slate-900 ${
+                errors.location ? "border border-red-400" : ""
+              }`}
             />
+
+            {errors.location && (
+              <Text className="mt-1 text-xs font-medium text-red-500">
+                {errors.location}
+              </Text>
+            )}
           </View>
 
           <View className="mb-5">
             <Text className="mb-2 text-sm font-semibold text-slate-600">
               Distinguishing Features
             </Text>
+
             <TextInput
               value={form.features}
               onChangeText={(text) => updateField("features", text)}
@@ -172,8 +202,16 @@ export default function CreateLostReportScreen() {
               placeholderTextColor="#CBD5E1"
               multiline
               textAlignVertical="top"
-              className="min-h-[120px] rounded-2xl bg-slate-100 px-4 py-4 text-sm text-slate-900"
+              className={`min-h-[120px] rounded-2xl bg-slate-100 px-4 py-4 text-sm text-slate-900 ${
+                errors.features ? "border border-red-400" : ""
+              }`}
             />
+
+            {errors.features && (
+              <Text className="mt-1 text-xs font-medium text-red-500">
+                {errors.features}
+              </Text>
+            )}
           </View>
 
           <View className="mb-8">
@@ -184,12 +222,14 @@ export default function CreateLostReportScreen() {
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={pickImage}
-              className="overflow-hidden rounded-3xl border border-dashed border-slate-300 bg-slate-50"
+              className={`overflow-hidden rounded-3xl border border-dashed bg-slate-50 ${
+                errors.image ? "border-red-400" : "border-slate-300"
+              }`}
             >
               {form.image ? (
                 <View className="items-center justify-center p-3">
                   <Image
-                    source={{ uri: form.image.uri }}
+                    source={{ uri: form.image}}
                     className="h-52 w-full rounded-2xl"
                     resizeMode="cover"
                   />
@@ -206,6 +246,12 @@ export default function CreateLostReportScreen() {
                 </View>
               )}
             </TouchableOpacity>
+
+            {errors.image && (
+              <Text className="mt-2 text-xs font-medium text-red-500">
+                {errors.image}
+              </Text>
+            )}
           </View>
 
           <TouchableOpacity
@@ -222,8 +268,8 @@ export default function CreateLostReportScreen() {
                   ? "Updating..."
                   : "Submitting..."
                 : isEditMode
-                  ? "Update Report ➜"
-                  : "Post Report ➜"}
+                ? "Update Report ➜"
+                : "Post Report ➜"}
             </Text>
           </TouchableOpacity>
 

@@ -35,12 +35,13 @@ export const useProfile = () => {
 
   const logout = async () => {
     await AppStorage.removeItem('userToken');
+    await AppStorage.removeItem('hasSeenWelcome');
     setUser(null);
     router.replace('/login');
   };
 
-  const updateProfile = async (formData: any) => {
-    if ((formData.password && formData.password.length < 6) || formData.password !== formData.confirmPassword) {
+  const updateProfile = async (formData: any, imageAsset?: any, shouldNavigateBack: boolean = true) => {
+    if (formData.password && ((formData.password.length > 0 && formData.password.length < 6) || formData.password !== formData.confirmPassword)) {
       setErrorMessage("Passwords do not match or are too short.");
       return false;
     }
@@ -50,25 +51,59 @@ export const useProfile = () => {
     setSuccessMessage(null);
 
     try {
-      const response = await apiClient.put('/users/update', {
-        name: formData.name,
-        phone: formData.phone,
-        year: formData.year,
-        major: formData.major,
-        password: formData.password || undefined
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('phone', formData.phone);
+      data.append('year', formData.year);
+      data.append('major', formData.major);
+      if (formData.password) data.append('password', formData.password);
+
+      if (imageAsset) {
+        data.append('image', {
+          uri: imageAsset.uri,
+          name: imageAsset.fileName || `profile-${Date.now()}.jpg`,
+          type: imageAsset.mimeType || 'image/jpeg'
+        } as any);
+      }
+
+      const response = await apiClient.put('/users/update', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       if (response.data.success) {
         setSuccessMessage("Profile updated successfully!");
-        if (Platform.OS !== 'web') {
-          Alert.alert("Success", "Profile updated successfully!", [{ text: "OK", onPress: () => router.back() }]);
-        } else {
-          setTimeout(() => router.back(), 1500);
+        setUser(response.data.user);
+        
+        if (shouldNavigateBack) {
+          if (Platform.OS !== 'web') {
+            Alert.alert("Success", "Profile updated successfully!", [{ text: "OK", onPress: () => router.back() }]);
+          } else {
+            setTimeout(() => router.back(), 1500);
+          }
         }
         return true;
       }
     } catch (error: any) {
       setErrorMessage(error.response?.data?.message || "Update failed. Check your network.");
+    } finally {
+      setIsUpdating(false);
+    }
+    return false;
+  };
+
+  const deleteProfileImage = async () => {
+    setIsUpdating(true);
+    try {
+      const response = await apiClient.delete('/users/profile-image');
+      if (response.data.success) {
+        setUser(response.data.user);
+        setSuccessMessage("Profile image removed.");
+        return true;
+      }
+    } catch (error: any) {
+      setErrorMessage("Failed to remove image.");
     } finally {
       setIsUpdating(false);
     }
@@ -101,6 +136,7 @@ export const useProfile = () => {
     successMessage,
     logout,
     updateProfile,
+    deleteProfileImage,
     deleteAccount,
     refreshProfile: fetchProfile
   };

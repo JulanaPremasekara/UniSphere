@@ -293,6 +293,7 @@ const FormField = ({
   multiline = false,
   className = "",
   updateForm,
+  error,
 }: any) => {
   const isNumeric = [
     "startDate",
@@ -303,11 +304,15 @@ const FormField = ({
   ].includes(field);
   return (
     <View className={className}>
-      <Text className="text-[13px] font-bold text-gray-800 uppercase tracking-[1.5px] ml-1 mb-3">
-        {label}
-      </Text>
+      <View className="flex-row justify-between items-center mb-3">
+        <Text className="text-[13px] font-bold text-gray-800 uppercase tracking-[1.5px] ml-1">
+          {label}
+        </Text>
+      </View>
       {multiline ? (
-        <View className="bg-gray-50 rounded-[22px] p-5 min-h-[120px]">
+        <View
+          className={`bg-gray-50 rounded-[22px] p-5 min-h-[120px] border ${error ? "border-red-500" : "border-transparent"}`}
+        >
           <TextInput
             multiline
             placeholder={place}
@@ -319,7 +324,9 @@ const FormField = ({
           />
         </View>
       ) : (
-        <Input className="h-16 rounded-[22px] bg-gray-50 border-transparent px-5">
+        <Input
+          className={`h-16 rounded-[22px] bg-gray-50 border px-5 ${error ? "border-red-500" : "border-transparent"}`}
+        >
           <InputField
             placeholder={place}
             keyboardType={isNumeric ? "number-pad" : "default"}
@@ -339,6 +346,11 @@ const FormField = ({
           )}
         </Input>
       )}
+      {error && (
+        <Text className="text-red-500 text-[10px] font-bold mt-1 ml-2 uppercase">
+          {error}
+        </Text>
+      )}
     </View>
   );
 };
@@ -350,12 +362,14 @@ const RowField = ({
   field1,
   icon1,
   onIconPress1,
+  error1,
   label2,
   place2,
   val2,
   field2,
   icon2,
   onIconPress2,
+  error2,
   updateForm,
 }: any) => (
   <View className="flex-row gap-4">
@@ -366,6 +380,7 @@ const RowField = ({
       field={field1}
       icon={icon1}
       onIconPress={onIconPress1}
+      error={error1}
       className="flex-1"
       updateForm={updateForm}
     />
@@ -376,6 +391,7 @@ const RowField = ({
       field={field2}
       icon={icon2}
       onIconPress={onIconPress2}
+      error={error2}
       className="w-1/3"
       updateForm={updateForm}
     />
@@ -404,6 +420,7 @@ export default function CreateEvent() {
     description: "",
     tags: tags,
   });
+  const [errors, setErrors] = useState<any>({});
   const [showCalendar, setShowCalendar] = useState(false);
   const [calendarField, setCalendarField] = useState<"startDate" | "endDate">(
     "startDate",
@@ -524,6 +541,18 @@ export default function CreateEvent() {
         ? alert(`${title}\n\n${message}`)
         : Alert.alert(title, message);
 
+    const newErrors: any = {};
+    ["title", "startDate", "startTime", "endDate", "endTime", "location", "description"].forEach(f => {
+      if (!form[f as keyof typeof form]) newErrors[f] = "Required";
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      showAlert("Missing Fields", "Please fill in all required fields.");
+      return;
+    }
+    setErrors({});
+
     try {
       setIsPublishing(true);
       const sDate = parseDate(form.startDate, form.startTime),
@@ -582,6 +611,7 @@ export default function CreateEvent() {
     }
 
     setForm((prev) => ({ ...prev, [field]: formattedText }));
+    if (errors[field]) setErrors(({ [field]: _, ...rest }: any) => rest);
   };
 
   return (
@@ -646,6 +676,7 @@ export default function CreateEvent() {
               val={form.title}
               field="title"
               updateForm={updateForm}
+              error={errors.title}
             />
             <RowField
               label1="Start Date"
@@ -654,12 +685,14 @@ export default function CreateEvent() {
               field1="startDate"
               icon1={CalendarIcon}
               onIconPress1={() => openCalendar("startDate")}
+              error1={errors.startDate}
               label2="Time"
               place2="00:00"
               val2={form.startTime}
               field2="startTime"
               icon2={Clock}
               onIconPress2={() => openTimePicker("startTime")}
+              error2={errors.startTime}
               updateForm={updateForm}
             />
             <RowField
@@ -669,12 +702,14 @@ export default function CreateEvent() {
               field1="endDate"
               icon1={CalendarIcon}
               onIconPress1={() => openCalendar("endDate")}
+              error1={errors.endDate}
               label2="Time"
               place2="00:00"
               val2={form.endTime}
               field2="endTime"
               icon2={Clock}
               onIconPress2={() => openTimePicker("endTime")}
+              error2={errors.endTime}
               updateForm={updateForm}
             />
             <FormField
@@ -684,6 +719,7 @@ export default function CreateEvent() {
               field="location"
               icon={MapPin}
               updateForm={updateForm}
+              error={errors.location}
             />
             <FormField
               label="About the Event"
@@ -692,6 +728,7 @@ export default function CreateEvent() {
               field="description"
               multiline={true}
               updateForm={updateForm}
+              error={errors.description}
             />
 
             <View>

@@ -8,7 +8,7 @@ type SectionHeaderProps = {
 
 const SectionHeader = ({ title, subtitle }: SectionHeaderProps) => {
   return (
-    <View className="mb-6">
+    <View className="mb-2">
       <Text className="mb-2 text-4xl font-extrabold text-slate-900">
         {title}
       </Text>

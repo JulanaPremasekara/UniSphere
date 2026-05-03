@@ -1,27 +1,65 @@
-import React, { useState, useCallback } from "react";
-import { Image, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from "react-native";
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+  Modal,
+  View,
+} from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
-import { ChevronLeft, Plus, Search, X } from "lucide-react-native";
+import { Calendar, Plus } from "lucide-react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { Box } from "@/components/ui/box";
-import { HStack } from "@/components/ui/hstack";
-import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { VStack } from "@/components/ui/vstack";
-import apiClient from "../services/api"; 
+
+import apiClient from "../services/api";
+import AppHeader from "../components/AppHeader";
+import SearchInput from "../components/SearchInput";
+import SectionHeader from "../components/SectionHeader";
+import Footer from "../components/Footer";
+import FilterChips from "../components/FilterChips";
+import { useUser } from "@/hooks/useUser";
+
+type MarketFilter =
+  | "ALL"
+  | "CHEAP"
+  | "EXPENSIVE"
+  | "NEW"
+  | "USED";
+
+const filterOptions: MarketFilter[] = [
+  "ALL",
+  "CHEAP",
+  "EXPENSIVE",
+  "NEW",
+  "USED",
+];
 
 export default function MarketplaceIndex() {
   const router = useRouter();
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState<any[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<MarketFilter>("ALL");
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  const { userId } = useUser();
+  const [loginModalVisible, setLoginModalVisible] = useState(false);
+
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await apiClient.get('/api/marketplace');
+      const response = await apiClient.get("/api/marketplace");
       const data = response.data.data || response.data;
-      setProducts(Array.isArray(data) ? data : []); 
+      const list = Array.isArray(data) ? data : [];
+
+      setProducts(list);
+      setFilteredProducts(list);
     } catch (error) {
       console.error("Error fetching marketplace items:", error);
     } finally {
@@ -41,95 +79,228 @@ export default function MarketplaceIndex() {
     fetchProducts();
   };
 
-  const filteredProducts = products.filter(item => {
-    return item.title?.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  // 🔥 FILTER LOGIC (same pattern as tutor)
+  useEffect(() => {
+    let filtered = [...products];
+
+    // SEARCH
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+
+      filtered = filtered.filter((item) =>
+        item.title?.toLowerCase().includes(query)
+      );
+    }
+
+    // FILTER
+    if (selectedFilter !== "ALL") {
+      filtered = filtered.filter((item) => {
+        if (selectedFilter === "CHEAP") {
+          return item.price < 5000;
+        }
+
+        if (selectedFilter === "EXPENSIVE") {
+          return item.price >= 5000;
+        }
+
+        if (selectedFilter === "NEW") {
+          return item.condition?.toUpperCase() === "NEW";
+        }
+
+        if (selectedFilter === "USED") {
+          return item.condition?.toUpperCase() === "USED";
+        }
+
+        return true;
+      });
+    }
+
+    setFilteredProducts(filtered);
+  }, [searchQuery, selectedFilter, products]);
+
+  const handlePressProduct = (item: any) => {
+    if (!userId) {
+      setLoginModalVisible(true);
+      return;
+    }
+
+    if (
+      item.userId === userId ||
+      item.ownerId === userId ||
+      item.createdBy === userId
+    ) {
+      router.push("/marketplace/create" as any);
+      return;
+    }
+
+    router.push({
+      pathname: "/marketplace/[id]",
+      params: { id: item._id },
+    });
+  };
+
+  const handleCreateProduct = () => {
+    if (!userId) {
+      setLoginModalVisible(true);
+      return;
+    }
+
+    router.push("/marketplace/create" as any);
+  };
+
+
+
+  if (loading && !refreshing) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#4F46E5" />
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <Box className="flex-1 bg-white">
-      {/* HEADER SECTION */}
-      <Box className="pt-12 px-6 pb-4">
-        {/* Top Row: Back Button and Centered Title */}
-        <Box className="relative flex-row items-center justify-center h-12">
-          <TouchableOpacity 
-            onPress={() => router.replace("/")} 
-            className="absolute left-0 z-10"
+    <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+      <View className="flex-1">
+        <AppHeader title="UniSphere" />
+
+        <View className="px-5">
+          <SearchInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Find items..."
+          />
+        </View>
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <View
+            style={{
+              paddingHorizontal: 20,
+              paddingTop: 8,
+              paddingBottom: 20,
+            }}
           >
-            <ChevronLeft size={28} color="#1f2937" />
-          </TouchableOpacity>
-          
-          <Text className="text-2xl font-black text-indigo-800">UniSphere</Text>
-        </Box>
-
-        {/* Marketplace Subtitle: Smaller and Centered */}
-        
-      </Box>
-
-      <ScrollView 
-        showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        <VStack className="px-6 pb-20">
-          
-          {/* SEARCH BOX */}
-          <Input className="bg-gray-100 border-none rounded-2xl h-14 px-4 mb-8 mt-4">
-            <InputSlot className="pl-3">
-              <InputIcon as={Search} color="#6B7280" />
-            </InputSlot>
-            <InputField 
-              placeholder="Find items..." 
-              placeholderTextColor="#9CA3AF"
-              className="text-gray-900 font-medium"
-              value={searchQuery}
-              onChangeText={(text) => setSearchQuery(text)}
+            <FilterChips
+              options={filterOptions}
+              selectedValue={selectedFilter}
+              onSelect={setSelectedFilter}
             />
-            {searchQuery.length > 0 && (
-              <InputSlot className="pr-3" onPress={() => setSearchQuery("")}>
-                <InputIcon as={X} color="#9CA3AF" size="sm" />
-              </InputSlot>
-            )}
-          </Input>
 
-          {/* PRODUCT GRID */}
-          {loading && !refreshing ? (
-            <ActivityIndicator size="large" color="#4F46E5" className="mt-10" />
-          ) : (
-            <HStack className="flex-wrap justify-between">
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map((item) => (
-                  <TouchableOpacity 
+            <SectionHeader
+              title="Marketplace"
+              subtitle="Buy, sell, and discover useful items around campus."
+            />
+
+            {filteredProducts.length > 0 ? (
+              <View>
+                {filteredProducts.map((item) => (
+                  <TouchableOpacity
                     key={item._id}
-                    className="w-[48%] mb-6"
-                    onPress={() => router.push({ pathname: "/marketplace/[id]", params: { id: item._id } })}
+                    onPress={() => handlePressProduct(item)}
+                    className="bg-white rounded-[35px] mb-8 overflow-hidden"
                   >
-                    <Box className="relative aspect-square rounded-[30px] overflow-hidden bg-gray-100 mb-2 border border-gray-50">
-                      <Image 
-                        source={{ uri: item.image || "https://via.placeholder.com/150" }} 
-                        className="w-full h-full" 
+                    <Box className="relative w-full h-[340px] rounded-[35px] overflow-hidden bg-gray-50 border border-gray-100">
+                      <Image
+                        source={{
+                          uri:
+                            item.image ||
+                            "https://via.placeholder.com/150",
+                        }}
+                        className="w-full h-full"
                         resizeMode="cover"
                       />
                     </Box>
-                    <Text className="font-bold text-gray-800" numberOfLines={1}>{item.title}</Text>
-                    <Text className="text-indigo-600 font-black">${item.price}</Text>
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <Box className="w-full py-10 items-center">
-                  <Text className="text-gray-400 font-medium">No items found</Text>
-                </Box>
-              )}
-            </HStack>
-          )}
-        </VStack>
-      </ScrollView>
 
-      {/* FLOATING ACTION BUTTON */}
-      <TouchableOpacity 
-        onPress={() => router.push("/marketplace/create")}
-        className="absolute bottom-8 right-6 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-xl"
-      >
-        <Plus size={32} color="white" />
-      </TouchableOpacity>
-    </Box>
+                    <View className="flex-row justify-between items-center px-4 pt-5">
+                      <Text
+                        className="text-2xl font-black text-gray-900 flex-1 mr-2"
+                        numberOfLines={1}
+                      >
+                        {item.title}
+                      </Text>
+
+                      <Text className="text-indigo-600 font-black text-xl">
+                        ${item.price}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ) : (
+              <Box className="w-full py-10 items-center">
+                <Text className="text-gray-400 font-medium">
+                  No items found
+                </Text>
+              </Box>
+            )}
+          </View>
+        </ScrollView>
+
+        <TouchableOpacity
+          onPress={handleCreateProduct}
+          className="absolute bottom-28 right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+        >
+          <Plus size={32} color="white" />
+        </TouchableOpacity>
+
+        <Footer />
+
+        {/* LOGIN MODAL (unchanged) */}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={loginModalVisible}
+          onRequestClose={() => setLoginModalVisible(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => setLoginModalVisible(false)}
+            className="flex-1 bg-black/60 justify-center items-center px-6"
+          >
+            <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
+              <View className="bg-indigo-50 p-6 rounded-full mb-6">
+                <Calendar size={40} color="#4F46E5" />
+              </View>
+
+              <Text className="text-2xl font-black text-gray-900 mb-2">
+                Login Required
+              </Text>
+
+              <Text className="text-gray-500 text-center text-lg mb-8 leading-relaxed">
+                Please sign in to your UniSphere account to view marketplace
+                items or create a new listing.
+              </Text>
+
+              <View className="flex-row gap-4 w-full">
+                <TouchableOpacity
+                  onPress={() => setLoginModalVisible(false)}
+                  className="flex-1 bg-gray-50 p-5 rounded-3xl"
+                >
+                  <Text className="text-gray-900 font-bold text-center text-lg">
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    setLoginModalVisible(false);
+                    router.push("/login" as any);
+                  }}
+                  className="flex-1 bg-indigo-600 p-5 rounded-3xl shadow-lg shadow-indigo-200"
+                >
+                  <Text className="text-white font-bold text-center text-lg">
+                    Sign In
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      </View>
+    </SafeAreaView>
   );
 }

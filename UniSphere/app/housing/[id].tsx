@@ -1,10 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Platform, Image, ActivityIndicator, Alert, Modal, Linking } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, MapPin, DollarSign, Calendar, Wifi, Home, Zap, Phone, Mail, Edit, MessageCircle, ChevronRight, ChevronLeft } from 'lucide-react-native';
-import Footer from '../components/Footer';
-import apiClient from '../services/api';
-import { useUser } from '../../hooks/useUser';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Linking,
+} from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Calendar,
+  Wifi,
+  Home,
+  Zap,
+  Phone,
+  Mail,
+  MessageCircle,
+} from "lucide-react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import Footer from "../components/Footer";
+import apiClient from "../services/api";
+import { useUser } from "../../hooks/useUser";
 
 interface HousingDetail {
   id: string;
@@ -29,66 +52,106 @@ interface HousingDetail {
 
 export default function HousingDetail() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const params = useLocalSearchParams();
+  const housingId = typeof params.id === "string" ? params.id : undefined;
+
   const { userId } = useUser();
+
   const [housing, setHousing] = useState<HousingDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasFetched, setHasFetched] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [contactModalVisible, setContactModalVisible] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      (async () => {
-        try {
-          setLoading(true);
-          const { data: { success, housing: h } } = await apiClient.get(`/housing/${id}`);
-          if (success) {
-            setHousing({
-              id: h._id || id,
-              title: h.title,
-              description: h.description,
-              address: h.address,
-              roomType: h.roomType,
-              rentPrice: h.rentPrice,
-              deposit: h.deposit,
-              availableFrom: h.availableFrom,
-              availabilityStatus: h.availabilityStatus,
-              furnished: h.furnished,
-              wifi: h.wifi,
-              parking: h.parking,
-              images: h.images,
-              contactName: h.contactName,
-              contactPhone: h.contactPhone,
-              contactEmail: h.contactEmail,
-              postedBy: h.postedBy,
-              isMine: h.postedBy === userId,
-            });
-          }
-        } catch (error) {
-          Alert.alert("Error", "Could not load housing details.");
-        } finally {
-          setLoading(false);
+    if (!housingId) return;
+
+    (async () => {
+      try {
+        setLoading(true);
+        setNotFound(false);
+        setHasFetched(false);
+
+        const { data } = await apiClient.get(`/housing/${housingId}`);
+
+        if (data.success && data.data) {
+          const h = data.data;
+          const postedBy =
+            typeof h.postedBy === "object" ? h.postedBy?._id : h.postedBy;
+
+          setHousing({
+            id:
+              typeof h._id === "string"
+                ? h._id
+                : typeof h.id === "string"
+                ? h.id
+                : housingId,
+            title: h.title,
+            description: h.description,
+            address: h.address,
+            roomType: h.roomType,
+            rentPrice: h.rentPrice,
+            deposit: h.deposit,
+            availableFrom: h.availableFrom,
+            availabilityStatus: h.availabilityStatus,
+            furnished: h.furnished,
+            wifi: h.wifi,
+            parking: h.parking,
+            images: h.images || [],
+            contactName: h.contactName,
+            contactPhone: h.contactPhone,
+            contactEmail: h.contactEmail,
+            postedBy,
+            isMine: postedBy === userId,
+          });
+
+          setNotFound(false);
+        } else {
+          setHousing(null);
+          setNotFound(true);
         }
-      })();
-    }
-  }, [id, userId]);
+      } catch (error) {
+        setHousing(null);
+        setNotFound(true);
+        Alert.alert("Error", "Could not load housing details.");
+      } finally {
+        setLoading(false);
+        setHasFetched(true);
+      }
+    })();
+  }, [housingId, userId]);
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <ActivityIndicator size="large" color="#059669" />
-      </View>
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#4F46E5" />
+      </SafeAreaView>
+    );
+  }
+
+  if (!housing && (notFound || hasFetched)) {
+    return (
+      <SafeAreaView className="flex-1 bg-white justify-center items-center px-6">
+        <Text className="text-lg font-bold text-gray-800">
+          Listing not found
+        </Text>
+
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="mt-4 bg-indigo-600 px-6 py-3 rounded-full"
+        >
+          <Text className="text-white font-bold">Go Back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
     );
   }
 
   if (!housing) {
     return (
-      <View className="flex-1 bg-white justify-center items-center">
-        <Text className="text-gray-600 text-lg">Listing not found</Text>
-        <TouchableOpacity onPress={() => router.back()} className="mt-4 bg-emerald-600 px-6 py-3 rounded-[20px]">
-          <Text className="text-white font-bold">Go Back</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#4F46E5" />
+      </SafeAreaView>
     );
   }
 
@@ -97,190 +160,334 @@ export default function HousingDetail() {
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + housing.images.length) % housing.images.length);
+    setCurrentImageIndex(
+      (prev) => (prev - 1 + housing.images.length) % housing.images.length
+    );
   };
 
-  const handleContact = (type: 'phone' | 'email') => {
-    if (type === 'phone' && housing.contactPhone) {
+  const handleContact = (type: "phone" | "email") => {
+    if (type === "phone" && housing.contactPhone) {
       Linking.openURL(`tel:${housing.contactPhone}`);
-    } else if (type === 'email' && housing.contactEmail) {
+    } else if (type === "email" && housing.contactEmail) {
       Linking.openURL(`mailto:${housing.contactEmail}`);
     }
   };
 
-  return (
-    <View className="flex-1 bg-white">
-      <View className="px-6 pt-4 pb-4" style={{ paddingTop: Platform.OS === 'ios' ? 60 : 50 }}>
-        <View className="flex-row justify-between items-center">
-          <TouchableOpacity onPress={() => router.back()} className="bg-gray-100 p-2 rounded-full">
-            <ArrowLeft size={24} color="#1F2937" />
-          </TouchableOpacity>
-          {housing.isMine && (
-            <TouchableOpacity onPress={() => router.push({ pathname: "/housing/create", params: { editId: housing.id } })} className="bg-emerald-600 px-4 py-2 rounded-full">
-              <View className="flex-row items-center gap-2">
-                <Edit size={16} color="white" />
-                <Text className="text-white font-bold text-sm">Edit</Text>
-              </View>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
+  const handleEdit = () => {
+    router.push({
+      pathname: "/housing/create",
+      params: { editId: housing.id },
+    });
+  };
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }}>
-        {/* Image Carousel */}
-        {housing.images.length > 0 && (
-          <View className="relative mb-6">
-            <Image source={{ uri: housing.images[currentImageIndex] }} className="w-full h-64" />
+  const handleDelete = () => {
+    Alert.alert("Delete Listing", "This action cannot be undone!", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await apiClient.delete(`/housing/${housing.id}`);
+            router.replace("/housing");
+          } catch {
+            Alert.alert("Error", "Failed to delete housing listing.");
+          }
+        },
+      },
+    ]);
+  };
+
+  return (
+    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-white">
+      <ScrollView showsVerticalScrollIndicator={false} className="bg-white">
+        <View className="flex-row justify-between items-center px-5 pt-14 pb-4 bg-white">
+          <View className="flex-row items-center gap-4">
+            <TouchableOpacity onPress={() => router.back()}>
+              <ChevronLeft size={28} color="#4B5563" />
+            </TouchableOpacity>
+
+            <Text className="text-lg font-bold text-indigo-600">Housing</Text>
+          </View>
+        </View>
+
+        <View className="p-5">
+          <View className="relative rounded-[30px] overflow-hidden">
+            {housing.images.length > 0 ? (
+              <Image
+                source={{ uri: housing.images[currentImageIndex] }}
+                className="w-full h-64"
+                resizeMode="cover"
+              />
+            ) : (
+              <View className="w-full h-64 bg-gray-100 items-center justify-center">
+                <Text className="text-gray-400">No image</Text>
+              </View>
+            )}
+
+            <View className="absolute top-4 left-4 bg-white/90 px-3 py-1.5 rounded-full">
+              <Text className="text-[10px] font-black text-indigo-900 uppercase">
+                {housing.roomType}
+              </Text>
+            </View>
+
             {housing.images.length > 1 && (
               <>
-                <TouchableOpacity onPress={prevImage} className="absolute left-4 top-1/2 bg-black/50 p-2 rounded-full">
+                <TouchableOpacity
+                  onPress={prevImage}
+                  className="absolute left-4 top-1/2 bg-black/40 p-2 rounded-full"
+                >
                   <ChevronLeft size={24} color="white" />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={nextImage} className="absolute right-4 top-1/2 bg-black/50 p-2 rounded-full">
+
+                <TouchableOpacity
+                  onPress={nextImage}
+                  className="absolute right-4 top-1/2 bg-black/40 p-2 rounded-full"
+                >
                   <ChevronRight size={24} color="white" />
                 </TouchableOpacity>
+
                 <View className="absolute bottom-4 left-0 right-0 flex-row justify-center gap-2">
                   {housing.images.map((_, idx) => (
-                    <View key={idx} className={`w-2 h-2 rounded-full ${idx === currentImageIndex ? 'bg-emerald-600' : 'bg-white/50'}`} />
+                    <View
+                      key={idx}
+                      className={`w-2 h-2 rounded-full ${
+                        idx === currentImageIndex
+                          ? "bg-indigo-600"
+                          : "bg-white/60"
+                      }`}
+                    />
                   ))}
                 </View>
               </>
             )}
           </View>
-        )}
 
-        <View className="px-6">
-          {/* Title & Room Type */}
-          <View className="mb-4">
-            <Text className="text-3xl font-bold text-gray-900 mb-2">{housing.title}</Text>
-            <View className="flex-row items-center gap-2">
-              <View className="bg-emerald-100 px-3 py-1 rounded-full">
-                <Text className="text-emerald-700 text-sm font-bold">{housing.roomType}</Text>
+          <View className="flex-row items-center mt-4 mb-2 gap-2">
+            <View className="w-2 h-2 rounded-full bg-indigo-500" />
+            <Text className="text-xs font-bold text-indigo-500 uppercase tracking-tighter">
+              Status: {housing.availabilityStatus}
+            </Text>
+          </View>
+
+          <View className="flex-row justify-between items-start gap-4">
+            <Text className="text-3xl font-extrabold text-gray-800 leading-tight flex-1">
+              {housing.title}
+            </Text>
+
+            <Text className="text-2xl font-black text-indigo-600">
+              LKR {housing.rentPrice}
+            </Text>
+          </View>
+
+          <View className="mt-4 gap-y-2">
+            <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
+              <MapPin size={17} color="#4F46E5" />
+              <Text className="ml-2 text-sm text-gray-600 font-medium">
+                {housing.address}
+              </Text>
+            </View>
+
+            {housing.availableFrom && (
+              <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
+                <Calendar size={17} color="#4F46E5" />
+                <Text className="ml-2 text-sm text-gray-600 font-medium">
+                  Available from{" "}
+                  {new Date(housing.availableFrom).toLocaleDateString()}
+                </Text>
               </View>
-              <View className="bg-blue-100 px-3 py-1 rounded-full">
-                <Text className="text-blue-700 text-sm font-bold">{housing.availabilityStatus}</Text>
+            )}
+
+            {housing.deposit && (
+              <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
+                <Text className="text-indigo-600 font-bold">Deposit</Text>
+                <Text className="ml-2 text-sm text-gray-600 font-medium">
+                  LKR {housing.deposit}
+                </Text>
               </View>
-            </View>
+            )}
           </View>
 
-          {/* Price Section */}
-          <View className="bg-emerald-50 rounded-[20px] p-4 mb-6">
-            <View className="flex-row items-end gap-2 mb-2">
-              <Text className="text-emerald-600 text-sm font-bold">RENT PRICE</Text>
-              <DollarSign size={16} color="#059669" />
-            </View>
-            <Text className="text-3xl font-bold text-emerald-700">${housing.rentPrice}/month</Text>
-            {housing.deposit && <Text className="text-gray-600 text-sm mt-2">Deposit: ${housing.deposit}</Text>}
+          <View className="mt-6">
+            <Text className="text-base font-bold text-gray-800 mb-2">
+              About
+            </Text>
+
+            <Text className="text-sm text-gray-500 leading-5">
+              {housing.description}
+            </Text>
           </View>
 
-          {/* Location */}
-          <View className="flex-row gap-3 mb-6 p-4 bg-gray-50 rounded-[20px]">
-            <MapPin size={24} color="#059669" />
-            <View className="flex-1">
-              <Text className="text-xs font-bold text-gray-500 uppercase mb-1">Location</Text>
-              <Text className="text-gray-800 font-semibold text-base">{housing.address}</Text>
-            </View>
-          </View>
+          <View className="mt-6">
+            <Text className="text-base font-bold text-gray-800 mb-3">
+              Features
+            </Text>
 
-          {/* Description */}
-          <View className="mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-3">About</Text>
-            <Text className="text-gray-600 text-base leading-relaxed">{housing.description}</Text>
-          </View>
-
-          {/* Features */}
-          <View className="mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-4">Features</Text>
-            <View className="grid grid-cols-3 gap-3">
+            <View className="flex-row flex-wrap gap-3">
               {[
-                { icon: Home, label: 'Furnished', value: housing.furnished },
-                { icon: Wifi, label: 'WiFi', value: housing.wifi },
-                { icon: Zap, label: 'Parking', value: housing.parking },
+                { icon: Home, label: "Furnished", value: housing.furnished },
+                { icon: Wifi, label: "WiFi", value: housing.wifi },
+                { icon: Zap, label: "Parking", value: housing.parking },
               ].map((feature, idx) => (
-                <View key={idx} className={`p-4 rounded-[15px] items-center ${feature.value ? 'bg-emerald-100' : 'bg-gray-100'}`}>
-                  <feature.icon size={24} color={feature.value ? '#059669' : '#9CA3AF'} />
-                  <Text className={`text-xs font-bold mt-2 ${feature.value ? 'text-emerald-700' : 'text-gray-500'}`}>{feature.label}</Text>
+                <View
+                  key={idx}
+                  className={`px-4 py-3 rounded-2xl flex-row items-center ${
+                    feature.value ? "bg-indigo-50" : "bg-gray-100"
+                  }`}
+                >
+                  <feature.icon
+                    size={18}
+                    color={feature.value ? "#4F46E5" : "#9CA3AF"}
+                  />
+                  <Text
+                    className={`ml-2 text-xs font-bold ${
+                      feature.value ? "text-indigo-700" : "text-gray-500"
+                    }`}
+                  >
+                    {feature.label}
+                  </Text>
                 </View>
               ))}
             </View>
           </View>
 
-          {/* Availability */}
-          {housing.availableFrom && (
-            <View className="flex-row gap-3 mb-6 p-4 bg-blue-50 rounded-[20px]">
-              <Calendar size={24} color="#0369A1" />
-              <View className="flex-1">
-                <Text className="text-xs font-bold text-blue-600 uppercase mb-1">Available From</Text>
-                <Text className="text-blue-900 font-semibold">{new Date(housing.availableFrom).toLocaleDateString()}</Text>
-              </View>
-            </View>
-          )}
+          
+          {housing.isMine ? (
+            <View className="mx-5 my-6 p-6 bg-gray-100 rounded-[40px]">
+              <Text className="text-[10px] font-bold text-gray-400 text-center tracking-[2px] mb-5 uppercase">
+                Admin Controls
+              </Text>
 
-          {/* Contact Info */}
-          <View className="mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-4">Posted By</Text>
-            <View className="bg-gray-50 rounded-[20px] p-4">
-              <Text className="text-gray-800 font-bold text-base mb-4">{housing.contactName}</Text>
+              {/* <TouchableOpacity className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3">
+                <Text className="font-bold text-gray-800">
+                  Mark Unavailable
+                </Text>
+              </TouchableOpacity> */}
+
+              <TouchableOpacity
+                onPress={handleEdit}
+                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3"
+              >
+                <Text className="font-bold text-gray-800">Edit Listing</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleDelete}
+                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center"
+              >
+                <Text className="font-bold text-red-500">Remove Listing</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View className="mt-6">
+            <Text className="text-base font-bold text-gray-800 mb-3">
+              Posted By
+            </Text>
+
+            <View className="bg-gray-50 rounded-[25px] p-5">
+              <Text className="text-gray-800 font-bold text-base mb-3">
+                {housing.contactName}
+              </Text>
+
               <View className="flex-row gap-2">
                 {housing.contactPhone && (
-                  <TouchableOpacity onPress={() => handleContact('phone')} className="flex-1 bg-blue-600 rounded-[12px] py-3 flex-row items-center justify-center gap-2">
+                  <TouchableOpacity
+                    onPress={() => handleContact("phone")}
+                    className="flex-1 bg-indigo-600 rounded-2xl py-3 flex-row items-center justify-center"
+                  >
                     <Phone size={18} color="white" />
-                    <Text className="text-white font-bold text-sm">Call</Text>
+                    <Text className="text-white font-bold text-sm ml-2">
+                      Call
+                    </Text>
                   </TouchableOpacity>
                 )}
+
                 {housing.contactEmail && (
-                  <TouchableOpacity onPress={() => handleContact('email')} className="flex-1 bg-emerald-600 rounded-[12px] py-3 flex-row items-center justify-center gap-2">
+                  <TouchableOpacity
+                    onPress={() => handleContact("email")}
+                    className="flex-1 bg-indigo-500 rounded-2xl py-3 flex-row items-center justify-center"
+                  >
                     <Mail size={18} color="white" />
-                    <Text className="text-white font-bold text-sm">Email</Text>
+                    <Text className="text-white font-bold text-sm ml-2">
+                      Email
+                    </Text>
                   </TouchableOpacity>
                 )}
               </View>
             </View>
           </View>
+
+          )}
         </View>
+
+        <Footer />
       </ScrollView>
 
-      {!housing.isMine && (
-        <View className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-4">
-          <TouchableOpacity onPress={() => setContactModalVisible(true)} className="bg-emerald-600 p-4 rounded-[20px] flex-row items-center justify-center gap-2">
-            <MessageCircle color="white" size={20} />
-            <Text className="text-white font-bold text-lg">Contact Landlord</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      <Footer />
-
-      <Modal animationType="fade" transparent={true} visible={contactModalVisible} onRequestClose={() => setContactModalVisible(false)}>
-        <TouchableOpacity activeOpacity={1} onPress={() => setContactModalVisible(false)} className="flex-1 bg-black/60 justify-center items-center px-6">
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={contactModalVisible}
+        onRequestClose={() => setContactModalVisible(false)}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setContactModalVisible(false)}
+          className="flex-1 bg-black/60 justify-center items-center px-6"
+        >
           <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl">
-            <Text className="text-2xl font-bold text-gray-900 mb-4">Contact Landlord</Text>
+            <Text className="text-2xl font-black text-gray-900 mb-4">
+              Contact Landlord
+            </Text>
+
             <View className="gap-3">
               {housing.contactPhone && (
-                <TouchableOpacity onPress={() => { handleContact('phone'); setContactModalVisible(false); }} className="bg-blue-600 p-4 rounded-[16px] flex-row items-center justify-between">
+                <TouchableOpacity
+                  onPress={() => {
+                    handleContact("phone");
+                    setContactModalVisible(false);
+                  }}
+                  className="bg-indigo-600 p-4 rounded-2xl flex-row items-center justify-between"
+                >
                   <View className="flex-row items-center gap-3">
                     <Phone size={20} color="white" />
                     <Text className="text-white font-bold">Call</Text>
                   </View>
-                  <Text className="text-white text-sm">{housing.contactPhone}</Text>
+
+                  <Text className="text-white text-sm">
+                    {housing.contactPhone}
+                  </Text>
                 </TouchableOpacity>
               )}
+
               {housing.contactEmail && (
-                <TouchableOpacity onPress={() => { handleContact('email'); setContactModalVisible(false); }} className="bg-emerald-600 p-4 rounded-[16px] flex-row items-center justify-between">
+                <TouchableOpacity
+                  onPress={() => {
+                    handleContact("email");
+                    setContactModalVisible(false);
+                  }}
+                  className="bg-indigo-500 p-4 rounded-2xl flex-row items-center justify-between"
+                >
                   <View className="flex-row items-center gap-3">
                     <Mail size={20} color="white" />
                     <Text className="text-white font-bold">Email</Text>
                   </View>
-                  <Text className="text-white text-sm truncate">{housing.contactEmail}</Text>
+
+                  <Text className="text-white text-sm">
+                    {housing.contactEmail}
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
-            <TouchableOpacity onPress={() => setContactModalVisible(false)} className="mt-4 bg-gray-100 p-4 rounded-[16px] items-center">
+
+            <TouchableOpacity
+              onPress={() => setContactModalVisible(false)}
+              className="mt-4 bg-gray-100 p-4 rounded-2xl items-center"
+            >
               <Text className="text-gray-800 font-bold">Close</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
