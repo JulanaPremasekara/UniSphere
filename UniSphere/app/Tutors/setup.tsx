@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { User, X, Camera } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -34,6 +34,7 @@ type FormErrors = {
 
 export default function ProfileSetup() {
   const router = useRouter();
+  const savingRef = useRef(false);
 
   const [fullName, setFullName] = useState("");
   const [hourlyRate, setHourlyRate] = useState("");
@@ -46,10 +47,7 @@ export default function ProfileSetup() {
   const [errors, setErrors] = useState<FormErrors>({});
 
   const clearError = (field: keyof FormErrors) => {
-    setErrors((prev) => ({
-      ...prev,
-      [field]: undefined,
-    }));
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   const getError = (...fields: (keyof FormErrors)[]) => {
@@ -60,6 +58,8 @@ export default function ProfileSetup() {
   };
 
   const pickImage = async () => {
+    if (loading) return;
+
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (status !== "granted") {
@@ -84,6 +84,8 @@ export default function ProfileSetup() {
   };
 
   const handleSaveProfile = async () => {
+    if (savingRef.current || loading) return;
+
     setErrors({});
 
     const localErrors: FormErrors = {};
@@ -98,6 +100,7 @@ export default function ProfileSetup() {
       return;
     }
 
+    savingRef.current = true;
     setLoading(true);
 
     try {
@@ -113,7 +116,7 @@ export default function ProfileSetup() {
       if (image) {
         const filename = image.split("/").pop() || "profile.jpg";
         const match = /\.(\w+)$/.exec(filename);
-        const type = match ? `image/${match[1]}` : "image/jpeg";
+        const type = match ? `image/${match[1].toLowerCase()}` : "image/jpeg";
 
         formData.append("image", {
           uri: image,
@@ -122,15 +125,19 @@ export default function ProfileSetup() {
         } as any);
       }
 
-      const response = await apiClient.post(`/tutors/setup`, formData, {
+      const response = await apiClient.post("/tutors/setup", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
       if (response.status === 201 || response.status === 200) {
-        Alert.alert("Success", "Tutor profile created successfully!");
-        router.replace("/tutors");
+        Alert.alert("Success", "Tutor profile created successfully!", [
+          {
+            text: "OK",
+            onPress: () => router.replace("/tutors"),
+          },
+        ]);
       }
     } catch (error: any) {
       const backendErrors = error.response?.data?.errors;
@@ -163,6 +170,7 @@ export default function ProfileSetup() {
         error.response?.data?.message || "Failed to save profile."
       );
     } finally {
+      savingRef.current = false;
       setLoading(false);
     }
   };
@@ -187,7 +195,7 @@ export default function ProfileSetup() {
               Profile Setup
             </Text>
 
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity disabled={loading} onPress={() => router.back()}>
               <Icon as={X} size="xl" className="text-gray-400" />
             </TouchableOpacity>
           </HStack>
@@ -197,7 +205,11 @@ export default function ProfileSetup() {
           </Text>
 
           <View className="items-center mb-8">
-            <TouchableOpacity onPress={pickImage} activeOpacity={0.7}>
+            <TouchableOpacity
+              onPress={pickImage}
+              activeOpacity={0.7}
+              disabled={loading}
+            >
               <Avatar
                 className={`bg-indigo-600 w-24 h-24 relative ${
                   errors.image ? "border-2 border-red-400" : ""
@@ -246,6 +258,7 @@ export default function ProfileSetup() {
                   placeholder="Dr. Julian Sterling"
                   placeholderTextColor="#9CA3AF"
                   value={fullName}
+                  editable={!loading}
                   onChangeText={(text) => {
                     setFullName(text);
                     clearError("name");
@@ -282,6 +295,7 @@ export default function ProfileSetup() {
                   placeholderTextColor="#9CA3AF"
                   keyboardType="numeric"
                   value={hourlyRate}
+                  editable={!loading}
                   onChangeText={(text) => {
                     setHourlyRate(text);
                     clearError("price");
@@ -313,6 +327,7 @@ export default function ProfileSetup() {
                   placeholder="Physics, Calculus"
                   placeholderTextColor="#9CA3AF"
                   value={subjects}
+                  editable={!loading}
                   onChangeText={(text) => {
                     setSubjects(text);
                     clearError("subject");
@@ -344,6 +359,7 @@ export default function ProfileSetup() {
                   placeholder="Share your background..."
                   placeholderTextColor="#9CA3AF"
                   value={bio}
+                  editable={!loading}
                   onChangeText={(text) => {
                     setBio(text);
                     clearError("bio");
@@ -375,6 +391,7 @@ export default function ProfileSetup() {
                   placeholderTextColor="#9CA3AF"
                   keyboardType="numeric"
                   value={phone}
+                  editable={!loading}
                   onChangeText={(text) => {
                     setPhone(text);
                     clearError("phone");
@@ -390,6 +407,7 @@ export default function ProfileSetup() {
             </VStack>
 
             <TouchableOpacity
+              activeOpacity={0.7}
               className={`bg-[#4338CA] p-4 rounded-full mt-4 mb-10 ${
                 loading ? "opacity-50" : ""
               }`}
