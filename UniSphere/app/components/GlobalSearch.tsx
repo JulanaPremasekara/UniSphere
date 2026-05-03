@@ -5,7 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  FlatList,
+  ScrollView,
   Keyboard,
 } from "react-native";
 import { Search, X } from "lucide-react-native";
@@ -97,7 +97,6 @@ export default function GlobalSearch({
             subtitle: item.location || "",
             route: `/events/${item._id || item.id}`,
           })),
-
           ...marketplace.map((item: any) => ({
             id: item._id || item.id,
             type: "Marketplace",
@@ -105,7 +104,6 @@ export default function GlobalSearch({
             subtitle: item.location || item.condition || "",
             route: `/marketplace/${item._id || item.id}`,
           })),
-
           ...lost.map((item: any) => ({
             id: item._id || item.id,
             type: "Lost Item",
@@ -113,7 +111,6 @@ export default function GlobalSearch({
             subtitle: item.location || item.category || "",
             route: `/lost/${item._id || item.id}`,
           })),
-
           ...housing.map((item: any) => ({
             id: item._id || item.id,
             type: "Housing",
@@ -121,15 +118,13 @@ export default function GlobalSearch({
             subtitle: item.address || item.roomType || "",
             route: `/housing/${item._id || item.id}`,
           })),
-
           ...tutors.map((item: any) => ({
             id: item._id || item.id,
             type: "Tutor",
             title: item.name || "Unnamed Tutor",
             subtitle: item.subject || "",
-            route: `/tutors/${item._id || item.id}`,
+            route: `/Tutors/${item._id || item.id}`,
           })),
-
           ...studyGroups.map((item: any) => ({
             id: item._id || item.id,
             type: "Study Group",
@@ -178,13 +173,8 @@ export default function GlobalSearch({
   };
 
   return (
-    <View
-      style={{
-        position: "relative",
-        zIndex: 999,
-        elevation: 999,
-      }}
-    >
+    <View style={{ zIndex: 999, elevation: 999 }}>
+      {/* Search Bar */}
       <View className="px-6 mt-2 mb-4">
         <View className="flex-row items-center bg-gray-100 rounded-full px-5 h-14">
           <Search size={20} color="#9CA3AF" />
@@ -206,6 +196,7 @@ export default function GlobalSearch({
         </View>
       </View>
 
+      {/* Dropdown */}
       {searchActive && (
         <View
           className="absolute top-16 left-0 right-0 px-6"
@@ -217,7 +208,7 @@ export default function GlobalSearch({
           pointerEvents="box-none"
         >
           <View
-            className="bg-white rounded-3xl border border-gray-100 shadow-lg overflow-hidden"
+            className="bg-white rounded-3xl border border-gray-100 overflow-hidden"
             style={{
               elevation: 1001,
               height: 300,
@@ -231,19 +222,15 @@ export default function GlobalSearch({
                 </Text>
               </View>
             ) : filteredResults.length > 0 ? (
-              <FlatList
-                data={filteredResults}
-                keyExtractor={(item) => `${item.type}-${item.id}`}
+              <ScrollView
                 keyboardShouldPersistTaps="always"
                 nestedScrollEnabled={true}
-                scrollEnabled={true}
                 showsVerticalScrollIndicator={true}
-                removeClippedSubviews={false}
-                contentContainerStyle={{
-                  paddingBottom: 10,
-                }}
-                renderItem={({ item }) => (
+                contentContainerStyle={{ paddingBottom: 10 }}
+              >
+                {filteredResults.map((item) => (
                   <TouchableOpacity
+                    key={`${item.type}-${item.id}`}
                     activeOpacity={0.75}
                     onPress={() => handleResultPress(item.route)}
                     className="px-5 py-4 border-b border-gray-100 bg-white"
@@ -268,8 +255,8 @@ export default function GlobalSearch({
                       </Text>
                     ) : null}
                   </TouchableOpacity>
-                )}
-              />
+                ))}
+              </ScrollView>
             ) : (
               <View className="py-6 items-center bg-white">
                 <Text className="text-gray-400 font-medium">

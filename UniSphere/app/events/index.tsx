@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Calendar, Plus, Trash2, Search } from "lucide-react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import EventCard from "../components/EventCard";
 import Footer from "../components/Footer";
@@ -26,6 +26,7 @@ import SectionHeader from "../components/SectionHeader";
 
 export default function Home() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const [activeFilter, setActiveFilter] = useState("All");
   const { events, loading, refreshEvents } = useEvents();
@@ -154,7 +155,8 @@ export default function Home() {
           onPress={() =>
             !userId ? setLoginModalVisible(true) : router.push("/events/create")
           }
-          className="absolute bottom-28 right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+          className="absolute right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+          style={{ bottom: 90 + Math.max(insets.bottom, 16) }}
         >
           <Plus color="white" size={32} />
         </TouchableOpacity>
