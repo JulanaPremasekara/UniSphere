@@ -8,6 +8,7 @@ import {
   ScrollView,
   FlatList,
   Keyboard,
+  Modal,
 } from "react-native";
 import { Search, X } from "lucide-react-native";
 import { useRouter } from "expo-router";
@@ -174,8 +175,8 @@ export default function GlobalSearch({
   };
 
   return (
-    <View style={{ zIndex: 999, elevation: 999 }}>
-      {/* Search Bar */}
+    <View>
+      {/* Search Bar - Always on Home Screen */}
       <View className="px-6 mt-2 mb-4">
         <View className="flex-row items-center bg-gray-100 rounded-full px-5 h-14">
           <Search size={20} color="#9CA3AF" />
@@ -197,94 +198,77 @@ export default function GlobalSearch({
         </View>
       </View>
 
-      {/* Search Results Overlay */}
-      {searchActive && (
-        <View 
-          style={{ 
-            position: 'absolute', 
-            top: 0, 
-            left: 0, 
-            right: 0, 
-            height: 2000,
-            zIndex: 1000,
-          }}
-          pointerEvents="box-none"
-        >
-          {/* Backdrop Layer */}
+      {/* Separate Window (Modal) for Search Results */}
+      <Modal
+        visible={searchActive}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={clearSearch}
+      >
+        <View className="flex-1 bg-black/20">
+          {/* Invisible backdrop to close search */}
           <TouchableOpacity
             activeOpacity={1}
             onPress={clearSearch}
-            style={{ 
-              position: 'absolute', 
-              top: -500, 
-              left: -500, 
-              right: -500, 
-              bottom: 0,
-              backgroundColor: 'transparent'
-            }}
+            className="absolute inset-0"
           />
 
-          {/* Results Dropdown */}
-          <View 
-            className="px-6" 
-            style={{ marginTop: 64 }}
-            pointerEvents="box-none"
-          >
-            <View 
-              className="bg-white rounded-3xl border border-gray-100 shadow-2xl overflow-hidden"
-              style={{ elevation: 1001 }}
-            >
+          <View className="px-6" style={{ marginTop: 120 }}>
+            <View className="bg-white rounded-[40px] shadow-2xl border border-gray-100 overflow-hidden">
               {loading ? (
-                <View className="py-8 items-center bg-white">
-                  <ActivityIndicator color="#4F46E5" />
-                  <Text className="text-gray-400 mt-2 text-sm">Searching...</Text>
+                <View className="py-12 items-center">
+                  <ActivityIndicator color="#4F46E5" size="large" />
+                  <Text className="text-gray-400 mt-4 font-medium">Searching UniSphere...</Text>
                 </View>
               ) : filteredResults.length > 0 ? (
-                <FlatList
-                  data={filteredResults}
-                  keyExtractor={(item) => `${item.type}-${item.id}`}
-                  keyboardShouldPersistTaps="always"
-                  nestedScrollEnabled={true}
-                  showsVerticalScrollIndicator={true}
-                  style={{ maxHeight: 350 }}
-                  contentContainerStyle={{ paddingBottom: 10 }}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      activeOpacity={0.7}
-                      onPress={() => handleResultPress(item.route)}
-                      className="px-5 py-4 border-b border-gray-100 bg-white"
-                    >
-                      <Text className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">
-                        {item.type}
-                      </Text>
-
-                      <Text
-                        className="text-base font-bold text-gray-900 mt-0.5"
-                        numberOfLines={1}
+                <View style={{ maxHeight: 500 }}>
+                  <FlatList
+                    data={filteredResults}
+                    keyExtractor={(item) => `${item.type}-${item.id}`}
+                    keyboardShouldPersistTaps="always"
+                    showsVerticalScrollIndicator={true}
+                    contentContainerStyle={{ paddingVertical: 10 }}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        activeOpacity={0.7}
+                        onPress={() => handleResultPress(item.route)}
+                        className="px-6 py-5 border-b border-gray-50"
                       >
-                        {item.title}
-                      </Text>
+                        <View className="flex-row justify-between items-center mb-1">
+                          <Text className="text-[10px] font-black text-indigo-600 uppercase tracking-[2px]">
+                            {item.type}
+                          </Text>
+                        </View>
 
-                      {item.subtitle ? (
                         <Text
-                          className="text-sm text-gray-500 mt-0.5"
+                          className="text-lg font-bold text-gray-900"
                           numberOfLines={1}
                         >
-                          {item.subtitle}
+                          {item.title}
                         </Text>
-                      ) : null}
-                    </TouchableOpacity>
-                  )}
-                />
+
+                        {item.subtitle ? (
+                          <Text
+                            className="text-gray-500 mt-1 text-sm font-medium"
+                            numberOfLines={1}
+                          >
+                            {item.subtitle}
+                          </Text>
+                        ) : null}
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
               ) : (
-                <View className="py-10 items-center bg-white">
-                  <Text className="text-gray-400 font-medium">No results found</Text>
+                <View className="py-16 items-center">
+                  <Text className="text-gray-400 font-bold text-lg">No results found</Text>
+                  <Text className="text-gray-300 text-sm mt-1">Try a different search term</Text>
                 </View>
               )}
             </View>
           </View>
         </View>
-      )}
+      </Modal>
     </View>
   );
 }
