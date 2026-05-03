@@ -2,10 +2,12 @@ import { usePathname, useRouter } from "expo-router";
 import { Home, Compass, Users, Calendar, User, Search, BookOpen } from "lucide-react-native";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Footer() {
   const router = useRouter();
   const pathname = usePathname();
+  const insets = useSafeAreaInsets();
 
   const tabs = [
     { name: "HOME", icon: Home, path: "/" },
@@ -19,7 +21,14 @@ export default function Footer() {
   const isActive = (path: string) => path === "/" ? pathname === "/" : pathname.startsWith(path);
 
   return (
-    <View className="flex-row justify-around items-center bg-white border-t border-gray-100 pt-2 pb-6 px-2 rounded-t-[35px] shadow-lg h-24" style={{ elevation: 20 }}>
+    <View 
+      className="flex-row justify-around items-center bg-white border-t border-gray-100 pt-2 px-2 rounded-t-[35px] shadow-lg" 
+      style={{ 
+        elevation: 20,
+        paddingBottom: Math.max(insets.bottom, 16),
+        height: 70 + Math.max(insets.bottom, 16)
+      }}
+    >
       {tabs.map((tab) => {
         const active = isActive(tab.path);
         return (

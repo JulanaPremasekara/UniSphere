@@ -197,12 +197,7 @@ export default function TutorProfile() {
             </Text>
           </View>
 
-          <View className="mt-3 bg-gray-50 p-3 rounded-2xl self-start flex-row items-center">
-            <Star size={16} color="#6366f1" />
-            <Text className="ml-2 text-sm text-gray-600 font-medium">
-              4.9 Rating
-            </Text>
-          </View>
+
 
           <View className="mt-6">
             <Text className="text-base font-bold text-gray-800 mb-2">

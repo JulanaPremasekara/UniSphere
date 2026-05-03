@@ -18,11 +18,8 @@
     "@gluestack-ui/themed": "^1.1.73",
     "@gluestack-ui/utils": "^3.0.11",
     "@legendapp/motion": "^2.5.3",
-<<<<<<< HEAD
     "@react-native-community/datetimepicker": "8.4.4",
-=======
     "@react-native-async-storage/async-storage": "2.2.0",
->>>>>>> d6bf418fc1e71503ae7815a782fc642cdfacb241
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
