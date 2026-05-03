@@ -201,87 +201,95 @@ export default function GlobalSearch({
         </View>
       </View>
 
-      {/* Separate Window (Modal) for Search Results */}
-      <Modal
-        visible={searchActive}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={clearSearch}
-        statusBarTranslucent
-      >
-        <View className="flex-1">
+      {/* Search Results Overlay (Absolute View instead of Modal to fix focus loss) */}
+      {searchActive && (
+        <View 
+          style={{ 
+            position: 'absolute', 
+            top: 64, // Directly under the search bar
+            left: 0, 
+            right: 0, 
+            bottom: -1000, // Large enough to capture touches on Android
+            zIndex: 1000,
+          }}
+          pointerEvents="box-none"
+        >
           {/* Backdrop Layer (Darkened background) */}
           <Pressable
             onPress={clearSearch}
-            className="absolute inset-0 bg-black/40"
+            style={{ 
+              position: 'absolute', 
+              top: 0, 
+              left: 0, 
+              right: 0, 
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.3)'
+            }}
           />
 
-          <SafeAreaView className="flex-1" pointerEvents="box-none">
+          {/* Results Dropdown */}
+          <View 
+            className="px-6" 
+            pointerEvents="box-none"
+          >
             <View 
-              className="px-6" 
-              style={{ marginTop: 100 }}
-              pointerEvents="box-none"
+              className="bg-white rounded-[32px] shadow-2xl border border-gray-100 overflow-hidden"
+              style={{ elevation: 10 }}
             >
-              <View 
-                className="bg-white rounded-[40px] shadow-2xl border border-gray-100 overflow-hidden"
-                style={{ elevation: 20 }}
-              >
-                {loading ? (
-                  <View className="py-12 items-center">
-                    <ActivityIndicator color="#4F46E5" size="large" />
-                    <Text className="text-gray-400 mt-4 font-medium">Searching UniSphere...</Text>
-                  </View>
-                ) : filteredResults.length > 0 ? (
-                  <View style={{ height: 450 }}>
-                    <FlatList
-                      data={filteredResults}
-                      keyExtractor={(item) => `${item.type}-${item.id}`}
-                      keyboardShouldPersistTaps="always"
-                      nestedScrollEnabled={true}
-                      showsVerticalScrollIndicator={true}
-                      contentContainerStyle={{ paddingVertical: 10 }}
-                      renderItem={({ item }) => (
-                        <TouchableOpacity
-                          activeOpacity={0.7}
-                          onPress={() => handleResultPress(item.route)}
-                          className="px-6 py-5 border-b border-gray-50"
-                        >
-                          <View className="flex-row justify-between items-center mb-1">
-                            <Text className="text-[10px] font-black text-indigo-600 uppercase tracking-[2px]">
-                              {item.type}
-                            </Text>
-                          </View>
+              {loading ? (
+                <View className="py-10 items-center">
+                  <ActivityIndicator color="#4F46E5" />
+                  <Text className="text-gray-400 mt-2 text-sm font-medium">Searching...</Text>
+                </View>
+              ) : filteredResults.length > 0 ? (
+                <View style={{ maxHeight: 400 }}>
+                  <FlatList
+                    data={filteredResults}
+                    keyExtractor={(item) => `${item.type}-${item.id}`}
+                    keyboardShouldPersistTaps="always"
+                    showsVerticalScrollIndicator={true}
+                    nestedScrollEnabled={true}
+                    contentContainerStyle={{ paddingVertical: 10 }}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        activeOpacity={0.7}
+                        onPress={() => handleResultPress(item.route)}
+                        className="px-6 py-4 border-b border-gray-50"
+                      >
+                        <View className="flex-row justify-between items-center">
+                          <Text className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">
+                            {item.type}
+                          </Text>
+                        </View>
 
+                        <Text
+                          className="text-base font-bold text-gray-900 mt-0.5"
+                          numberOfLines={1}
+                        >
+                          {item.title}
+                        </Text>
+
+                        {item.subtitle ? (
                           <Text
-                            className="text-lg font-bold text-gray-900"
+                            className="text-sm text-gray-500 mt-0.5 font-medium"
                             numberOfLines={1}
                           >
-                            {item.title}
+                            {item.subtitle}
                           </Text>
-
-                          {item.subtitle ? (
-                            <Text
-                              className="text-gray-500 mt-1 text-sm font-medium"
-                              numberOfLines={1}
-                            >
-                              {item.subtitle}
-                            </Text>
-                          ) : null}
-                        </TouchableOpacity>
-                      )}
-                    />
-                  </View>
-                ) : (
-                  <View className="py-16 items-center">
-                    <Text className="text-gray-400 font-bold text-lg">No results found</Text>
-                    <Text className="text-gray-300 text-sm mt-1">Try a different search term</Text>
-                  </View>
-                )}
-              </View>
+                        ) : null}
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
+              ) : (
+                <View className="py-12 items-center">
+                  <Text className="text-gray-400 font-bold">No results found</Text>
+                </View>
+              )}
             </View>
-          </SafeAreaView>
+          </View>
         </View>
-      </Modal>
+      )}
     </View>
   );
 }
