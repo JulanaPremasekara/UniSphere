@@ -136,7 +136,7 @@ export default function Profile() {
             <View className="w-[1px] h-10 bg-gray-100" />
             <View className="items-center flex-1">
               <Text className="text-2xl font-black text-indigo-600">
-                {user?.year ? new Date().getFullYear() + (4 - parseInt(user.year)) : "N/A"}
+                {user?.year ? new Date().getFullYear() + (4 - parseInt(user.year.match(/\d+/)?.[0] || "0")) : "N/A"}
               </Text>
               <Text className="text-gray-400 text-[10px] font-bold tracking-widest uppercase mt-1">
                 Graduation

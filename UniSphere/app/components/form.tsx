@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FormControl, FormControlLabel, FormControlLabelText, FormControlHelper, FormControlHelperText, FormControlError, FormControlErrorIcon, FormControlErrorText } from '@/components/ui/form-control';
 import { AlertCircleIcon } from '@/components/ui/icon';
-import { Input, InputField } from '@/components/ui/input';
+import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
+import { Eye, EyeOff } from 'lucide-react-native';
 
 interface LoginFormProps {
   email: string;
@@ -13,26 +14,41 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ email, setEmail, password, setPassword, errorMessage }: LoginFormProps) {
-  const Field = ({ label, place, val, setVal, type = 'text', isPass }: any) => (
-    <FormControl isInvalid={!!errorMessage} size="md">
-      <FormControlLabel>
-        <FormControlLabelText className="text-gray-700 font-semibold mb-1">{label}</FormControlLabelText>
-      </FormControlLabel>
-      <Input className="h-14 rounded-[20px] bg-gray-50 border-transparent px-2">
-        <InputField type={type} placeholder={place} value={val} onChangeText={setVal} className="text-gray-800" />
-      </Input>
-      {isPass && errorMessage ? (
-        <FormControlError className="mt-2">
-          <FormControlErrorIcon as={AlertCircleIcon} />
-          <FormControlErrorText>{errorMessage}</FormControlErrorText>
-        </FormControlError>
-      ) : isPass ? (
-        <FormControlHelper>
-          <FormControlHelperText className="text-right mt-2 text-indigo-600 font-medium">Forgot Password?</FormControlHelperText>
-        </FormControlHelper>
-      ) : null}
-    </FormControl>
-  );
+  const Field = ({ label, place, val, setVal, type = 'text', isPass }: any) => {
+    const [showPassword, setShowPassword] = useState(false);
+
+    return (
+      <FormControl isInvalid={!!errorMessage} size="md">
+        <FormControlLabel>
+          <FormControlLabelText className="text-gray-700 font-semibold mb-1">{label}</FormControlLabelText>
+        </FormControlLabel>
+        <Input className="h-14 rounded-[20px] bg-gray-50 border-transparent px-2">
+          <InputField 
+            type={isPass ? (showPassword ? 'text' : 'password') : type} 
+            placeholder={place} 
+            value={val} 
+            onChangeText={setVal} 
+            className="text-gray-800" 
+          />
+          {isPass && (
+            <InputSlot className="pr-3" onPress={() => setShowPassword(!showPassword)}>
+              <InputIcon as={showPassword ? Eye : EyeOff} size="lg" className="text-gray-400" />
+            </InputSlot>
+          )}
+        </Input>
+        {isPass && errorMessage ? (
+          <FormControlError className="mt-2">
+            <FormControlErrorIcon as={AlertCircleIcon} />
+            <FormControlErrorText>{errorMessage}</FormControlErrorText>
+          </FormControlError>
+        ) : isPass ? (
+          <FormControlHelper>
+            <FormControlHelperText className="text-right mt-2 text-indigo-600 font-medium">Forgot Password?</FormControlHelperText>
+          </FormControlHelper>
+        ) : null}
+      </FormControl>
+    );
+  };
 
   return (
     <VStack space="xl">
