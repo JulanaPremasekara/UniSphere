@@ -174,6 +174,21 @@ export default function GlobalSearch({
 
   return (
     <View style={{ zIndex: 999, elevation: 999 }}>
+      {/* Backdrop to close search when clicking outside */}
+      {searchActive && (
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={clearSearch}
+          style={{
+            position: "absolute",
+            top: -500,
+            left: -500,
+            right: -500,
+            bottom: -2000,
+            backgroundColor: "transparent",
+          }}
+        />
+      )}
       {/* Search Bar */}
       <View className="px-6 mt-2 mb-4">
         <View className="flex-row items-center bg-gray-100 rounded-full px-5 h-14">
@@ -203,15 +218,14 @@ export default function GlobalSearch({
           style={{
             zIndex: 1000,
             elevation: 1000,
-            height: 300,
           }}
           pointerEvents="box-none"
         >
           <View
-            className="bg-white rounded-3xl border border-gray-100 overflow-hidden"
+            className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden"
             style={{
               elevation: 1001,
-              height: 300,
+              maxHeight: 350,
             }}
           >
             {loading ? (
@@ -227,6 +241,7 @@ export default function GlobalSearch({
                 nestedScrollEnabled={true}
                 showsVerticalScrollIndicator={true}
                 contentContainerStyle={{ paddingBottom: 10 }}
+                style={{ flexGrow: 0 }}
               >
                 {filteredResults.map((item) => (
                   <TouchableOpacity
