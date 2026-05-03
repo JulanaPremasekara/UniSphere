@@ -47,14 +47,15 @@ export default function GlobalSearch({
   const [items, setItems] = useState<GlobalSearchItem[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const searchActive = query.trim().length > 0;
+
   useEffect(() => {
-    const active = query.trim().length > 0;
-    onSearchActiveChange?.(active);
+    onSearchActiveChange?.(searchActive);
 
     return () => {
       onSearchActiveChange?.(false);
     };
-  }, [query, onSearchActiveChange]);
+  }, [searchActive, onSearchActiveChange]);
 
   useEffect(() => {
     const fetchSearchData = async () => {
@@ -165,112 +166,118 @@ export default function GlobalSearch({
       .slice(0, 20);
   }, [query, items]);
 
-  const handleResultPress = (route: string) => {
-    Keyboard.dismiss();
+  const clearSearch = () => {
     setQuery("");
     onSearchActiveChange?.(false);
+  };
+
+  const handleResultPress = (route: string) => {
+    Keyboard.dismiss();
+    clearSearch();
     router.push(route as any);
   };
 
   return (
     <View
-      className="px-6 mt-2 mb-4"
       style={{
-        zIndex: 9999,
-        elevation: 9999,
+        position: "relative",
+        zIndex: 999,
+        elevation: 999,
       }}
     >
-      <View className="flex-row items-center bg-gray-100 rounded-full px-5 h-14">
-        <Search size={20} color="#9CA3AF" />
+      <View className="px-6 mt-2 mb-4">
+        <View className="flex-row items-center bg-gray-100 rounded-full px-5 h-14">
+          <Search size={20} color="#9CA3AF" />
 
-        <TextInput
-          value={query}
-          onChangeText={setQuery}
-          placeholder="Search UniSphere..."
-          className="flex-1 ml-3 text-gray-700 text-base"
-          placeholderTextColor="#9CA3AF"
-          autoCorrect={false}
-        />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Search UniSphere..."
+            className="flex-1 ml-3 text-gray-700 text-base"
+            placeholderTextColor="#9CA3AF"
+            autoCorrect={false}
+          />
 
-        {query.length > 0 && (
-          <TouchableOpacity
-            onPress={() => {
-              setQuery("");
-              onSearchActiveChange?.(false);
-            }}
-          >
-            <X size={18} color="#9CA3AF" />
-          </TouchableOpacity>
-        )}
+          {query.length > 0 && (
+            <TouchableOpacity onPress={clearSearch}>
+              <X size={18} color="#9CA3AF" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
-      {query.trim().length > 0 && (
+      {searchActive && (
         <View
+          className="absolute top-16 left-0 right-0 px-6"
           style={{
-            position: "absolute",
-            top: 64,
-            left: 24,
-            right: 24,
+            zIndex: 1000,
+            elevation: 1000,
             height: 300,
-            zIndex: 99999,
-            elevation: 99999,
-            backgroundColor: "white",
-            borderRadius: 24,
-            overflow: "hidden",
           }}
+          pointerEvents="box-none"
         >
-          {loading ? (
-            <View className="py-6 items-center bg-white">
-              <ActivityIndicator color="#4F46E5" />
-              <Text className="text-gray-400 mt-2 text-sm">Searching...</Text>
-            </View>
-          ) : filteredResults.length > 0 ? (
-            <FlatList
-              data={filteredResults}
-              keyExtractor={(item) => `${item.type}-${item.id}`}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={true}
-              nestedScrollEnabled={true}
-              scrollEnabled={true}
-              removeClippedSubviews={false}
-              contentContainerStyle={{
-                paddingBottom: 10,
-              }}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  activeOpacity={0.75}
-                  onPress={() => handleResultPress(item.route)}
-                  className="px-5 py-4 border-b border-gray-100 bg-white"
-                >
-                  <Text className="text-[10px] font-bold text-indigo-600 uppercase">
-                    {item.type}
-                  </Text>
-
-                  <Text
-                    className="text-base font-bold text-gray-900 mt-1"
-                    numberOfLines={1}
+          <View
+            className="bg-white rounded-3xl border border-gray-100 shadow-lg overflow-hidden"
+            style={{
+              elevation: 1001,
+              height: 300,
+            }}
+          >
+            {loading ? (
+              <View className="py-6 items-center bg-white">
+                <ActivityIndicator color="#4F46E5" />
+                <Text className="text-gray-400 mt-2 text-sm">
+                  Searching...
+                </Text>
+              </View>
+            ) : filteredResults.length > 0 ? (
+              <FlatList
+                data={filteredResults}
+                keyExtractor={(item) => `${item.type}-${item.id}`}
+                keyboardShouldPersistTaps="always"
+                nestedScrollEnabled={true}
+                scrollEnabled={true}
+                showsVerticalScrollIndicator={true}
+                removeClippedSubviews={false}
+                contentContainerStyle={{
+                  paddingBottom: 10,
+                }}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    activeOpacity={0.75}
+                    onPress={() => handleResultPress(item.route)}
+                    className="px-5 py-4 border-b border-gray-100 bg-white"
                   >
-                    {item.title}
-                  </Text>
+                    <Text className="text-[10px] font-bold text-indigo-600 uppercase">
+                      {item.type}
+                    </Text>
 
-                  {item.subtitle ? (
                     <Text
-                      className="text-sm text-gray-500 mt-1"
+                      className="text-base font-bold text-gray-900 mt-1"
                       numberOfLines={1}
                     >
-                      {item.subtitle}
+                      {item.title}
                     </Text>
-                  ) : null}
-                </TouchableOpacity>
-              )}
-            />
-          ) : (
-            <View className="py-6 items-center bg-white">
-              <Text className="text-gray-400 font-medium">
-                No results found
-              </Text>
-            </View>
-          )}
+
+                    {item.subtitle ? (
+                      <Text
+                        className="text-sm text-gray-500 mt-1"
+                        numberOfLines={1}
+                      >
+                        {item.subtitle}
+                      </Text>
+                    ) : null}
+                  </TouchableOpacity>
+                )}
+              />
+            ) : (
+              <View className="py-6 items-center bg-white">
+                <Text className="text-gray-400 font-medium">
+                  No results found
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
       )}
     </View>
