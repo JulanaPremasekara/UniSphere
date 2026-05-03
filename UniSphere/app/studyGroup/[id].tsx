@@ -80,7 +80,6 @@ export default function StudyGroupDetailScreen() {
 
       let message = "Something went wrong";
 
-      
       if (axios.isAxiosError(error)) {
         message = error.response?.data?.message || error.message;
       } else if (error instanceof Error) {
@@ -88,6 +87,25 @@ export default function StudyGroupDetailScreen() {
       }
 
       Alert.alert("Error", message);
+    }
+  };
+
+  const handleLeave = async () => {
+    try {
+      const res = await apiClient.delete(`/studyGroups/${group._id}/leave`);
+
+      const response = res.data;
+
+      if (!response.success) {
+        Alert.alert("Notice", response.message || "Something went wrong");
+        return;
+      }
+
+      setGroup(response.data);
+      Alert.alert("Success", "You have left the study group.");
+    } catch (error) {
+      console.error("Leave failed:", error);
+      Alert.alert("Error", "Failed to leave the study group.");
     }
   };
 
@@ -171,6 +189,8 @@ export default function StudyGroupDetailScreen() {
     String(group.createdBy) === String(userId) ||
     String(group.userId) === String(userId) ||
     String(group.createdBy?._id) === String(userId);
+
+  const isJoined = group.joinedUsers?.includes(userId);
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-white">
@@ -282,17 +302,31 @@ export default function StudyGroupDetailScreen() {
               </View>
             ) : (
               <View className="mt-8 mb-10">
-                <Button
-                  onPress={handleJoin}
-                  className="bg-indigo-600 rounded-3xl h-16 shadow-lg shadow-indigo-100"
-                >
-                  <HStack space="sm" className="items-center">
-                    <Users size={22} color="white" />
-                    <ButtonText className="text-white font-bold text-lg">
-                      Join Study Group
-                    </ButtonText>
-                  </HStack>
-                </Button>
+                {isJoined ? (
+                  <Button
+                    onPress={handleLeave}
+                    className="bg-gray-100 rounded-3xl h-16 border border-gray-200"
+                  >
+                    <HStack space="sm" className="items-center">
+                      <Users size={22} color="#EF4444" />
+                      <ButtonText className="text-red-500 font-bold text-lg">
+                        Leave Study Group
+                      </ButtonText>
+                    </HStack>
+                  </Button>
+                ) : (
+                  <Button
+                    onPress={handleJoin}
+                    className="bg-indigo-600 rounded-3xl h-16 shadow-lg shadow-indigo-100"
+                  >
+                    <HStack space="sm" className="items-center">
+                      <Users size={22} color="white" />
+                      <ButtonText className="text-white font-bold text-lg">
+                        Join Study Group
+                      </ButtonText>
+                    </HStack>
+                  </Button>
+                )}
               </View>
             )}
           </View>

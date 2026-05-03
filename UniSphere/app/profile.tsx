@@ -1,7 +1,7 @@
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Camera, Bell, Calendar, ChevronLeft, ChevronRight, CircleUserRound, GraduationCap, LogOut, Mail, Settings, ShieldCheck } from 'lucide-react-native';
+import { Camera, Bell, Calendar, ChevronLeft, ChevronRight, CircleUserRound, GraduationCap, LogOut, Mail, Settings, ShieldCheck, Users } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { ActivityIndicator, Platform, ScrollView, Text, TouchableOpacity, View, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -116,26 +116,64 @@ export default function Profile() {
 
         <View className="px-6 mt-10">
           <Box className="flex-row justify-between items-center bg-white p-6 rounded-[32px] shadow-xl shadow-indigo-100/50 border border-indigo-50">
-            <View className="items-center flex-1"><Text className="text-2xl font-black text-indigo-600">12</Text><Text className="text-gray-400 text-[10px] font-bold tracking-widest uppercase mt-1">Groups</Text></View>
+            <View className="items-center flex-1">
+              <Text className="text-2xl font-black text-indigo-600">
+                {user?.groupCount || 0}
+              </Text>
+              <Text className="text-gray-400 text-[10px] font-bold tracking-widest uppercase mt-1">
+                Groups
+              </Text>
+            </View>
             <View className="w-[1px] h-10 bg-gray-100" />
-            <View className="items-center flex-1"><Text className="text-2xl font-black text-indigo-600">48</Text><Text className="text-gray-400 text-[10px] font-bold tracking-widest uppercase mt-1">Events</Text></View>
+            <View className="items-center flex-1">
+              <Text className="text-2xl font-black text-indigo-600">
+                {user?.eventCount || 0}
+              </Text>
+              <Text className="text-gray-400 text-[10px] font-bold tracking-widest uppercase mt-1">
+                Events
+              </Text>
+            </View>
             <View className="w-[1px] h-10 bg-gray-100" />
-            <View className="items-center flex-1"><Text className="text-2xl font-black text-indigo-600">1.2k</Text><Text className="text-gray-400 text-[10px] font-bold tracking-widest uppercase mt-1">Points</Text></View>
+            <View className="items-center flex-1">
+              <Text className="text-2xl font-black text-indigo-600">
+                {user?.year ? new Date().getFullYear() + (4 - parseInt(user.year)) : "N/A"}
+              </Text>
+              <Text className="text-gray-400 text-[10px] font-bold tracking-widest uppercase mt-1">
+                Graduation
+              </Text>
+            </View>
           </Box>
         </View>
 
         <View className="px-6 mt-12">
-          <Text className="text-gray-400 font-bold text-[11px] uppercase tracking-[2px] ml-4 mb-5"> More Details</Text>
+          <Text className="text-gray-400 font-bold text-[11px] uppercase tracking-[2px] ml-4 mb-5">
+            Activity & Security
+          </Text>
           <VStack space="md">
-            <ProfileMenuItem icon={Mail} label="Email Address" value={user?.email || 'No email provided'} />
-            <ProfileMenuItem icon={Calendar} label="Registered Events" onPress={() => router.push('/events/registrations')} />
-            {/*<ProfileMenuItem icon={Bell} label="Notifications" />*/}
-            <ProfileMenuItem 
-              icon={ShieldCheck} 
-              label="Privacy & Security" 
-              onPress={() => router.push('./privacy')} 
+            <ProfileMenuItem
+              icon={Users}
+              label="Joined Study Groups"
+              onPress={() => router.push("/studyGroup/joined")}
             />
-            <TouchableOpacity onPress={logout} className="flex-row items-center bg-red-50 p-5 rounded-[28px] mt-8 border border-red-100">
+            <ProfileMenuItem
+              icon={Calendar}
+              label="Registered Events"
+              onPress={() => router.push("/events/registrations")}
+            />
+            <ProfileMenuItem
+              icon={ShieldCheck}
+              label="Privacy & Security"
+              onPress={() => router.push("./privacy")}
+            />
+            <ProfileMenuItem
+              icon={Mail}
+              label="Email Address"
+              value={user?.email || "No email provided"}
+            />
+            <TouchableOpacity
+              onPress={logout}
+              className="flex-row items-center bg-red-50 p-5 rounded-[28px] mt-8 border border-red-100"
+            >
               <LogOut size={22} color="#EF4444" />
               <Text className="ml-4 font-bold text-red-600 text-lg">Log Out</Text>
             </TouchableOpacity>
