@@ -180,7 +180,7 @@ export default function GlobalSearch() {
       {query.length > 0 && (
         <View
           className="absolute top-16 left-0 right-0 z-[999] px-6"
-          pointerEvents="box-none"
+          pointerEvents="auto"
         >
           <View className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
             {loading ? (
@@ -195,10 +195,12 @@ export default function GlobalSearch() {
                 data={filteredResults}
                 keyExtractor={(item) => `${item.type}-${item.id}`}
                 style={{ maxHeight: 300 }}
-                keyboardShouldPersistTaps="always"
+                keyboardShouldPersistTaps="handled"
                 nestedScrollEnabled={true}
-                showsVerticalScrollIndicator={false}
+                showsVerticalScrollIndicator={true}
                 removeClippedSubviews={false}
+                scrollEnabled={true}
+                bounces={false}
                 renderItem={({ item }) => (
                   <TouchableOpacity
                     activeOpacity={0.75}
