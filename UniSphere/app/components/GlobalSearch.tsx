@@ -9,6 +9,9 @@ import {
   FlatList,
   Keyboard,
   Modal,
+  SafeAreaView,
+  Platform,
+  Pressable,
 } from "react-native";
 import { Search, X } from "lucide-react-native";
 import { useRouter } from "expo-router";
@@ -202,71 +205,81 @@ export default function GlobalSearch({
       <Modal
         visible={searchActive}
         transparent={true}
-        animationType="fade"
+        animationType="slide"
         onRequestClose={clearSearch}
+        statusBarTranslucent
       >
-        <View className="flex-1 bg-black/20">
-          {/* Invisible backdrop to close search */}
-          <TouchableOpacity
-            activeOpacity={1}
+        <View className="flex-1">
+          {/* Backdrop Layer (Darkened background) */}
+          <Pressable
             onPress={clearSearch}
-            className="absolute inset-0"
+            className="absolute inset-0 bg-black/40"
           />
 
-          <View className="px-6" style={{ marginTop: 120 }}>
-            <View className="bg-white rounded-[40px] shadow-2xl border border-gray-100 overflow-hidden">
-              {loading ? (
-                <View className="py-12 items-center">
-                  <ActivityIndicator color="#4F46E5" size="large" />
-                  <Text className="text-gray-400 mt-4 font-medium">Searching UniSphere...</Text>
-                </View>
-              ) : filteredResults.length > 0 ? (
-                <View style={{ maxHeight: 500 }}>
-                  <FlatList
-                    data={filteredResults}
-                    keyExtractor={(item) => `${item.type}-${item.id}`}
-                    keyboardShouldPersistTaps="always"
-                    showsVerticalScrollIndicator={true}
-                    contentContainerStyle={{ paddingVertical: 10 }}
-                    renderItem={({ item }) => (
-                      <TouchableOpacity
-                        activeOpacity={0.7}
-                        onPress={() => handleResultPress(item.route)}
-                        className="px-6 py-5 border-b border-gray-50"
-                      >
-                        <View className="flex-row justify-between items-center mb-1">
-                          <Text className="text-[10px] font-black text-indigo-600 uppercase tracking-[2px]">
-                            {item.type}
-                          </Text>
-                        </View>
-
-                        <Text
-                          className="text-lg font-bold text-gray-900"
-                          numberOfLines={1}
+          <SafeAreaView className="flex-1" pointerEvents="box-none">
+            <View 
+              className="px-6" 
+              style={{ marginTop: 100 }}
+              pointerEvents="box-none"
+            >
+              <View 
+                className="bg-white rounded-[40px] shadow-2xl border border-gray-100 overflow-hidden"
+                style={{ elevation: 20 }}
+              >
+                {loading ? (
+                  <View className="py-12 items-center">
+                    <ActivityIndicator color="#4F46E5" size="large" />
+                    <Text className="text-gray-400 mt-4 font-medium">Searching UniSphere...</Text>
+                  </View>
+                ) : filteredResults.length > 0 ? (
+                  <View style={{ height: 450 }}>
+                    <FlatList
+                      data={filteredResults}
+                      keyExtractor={(item) => `${item.type}-${item.id}`}
+                      keyboardShouldPersistTaps="always"
+                      nestedScrollEnabled={true}
+                      showsVerticalScrollIndicator={true}
+                      contentContainerStyle={{ paddingVertical: 10 }}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          activeOpacity={0.7}
+                          onPress={() => handleResultPress(item.route)}
+                          className="px-6 py-5 border-b border-gray-50"
                         >
-                          {item.title}
-                        </Text>
+                          <View className="flex-row justify-between items-center mb-1">
+                            <Text className="text-[10px] font-black text-indigo-600 uppercase tracking-[2px]">
+                              {item.type}
+                            </Text>
+                          </View>
 
-                        {item.subtitle ? (
                           <Text
-                            className="text-gray-500 mt-1 text-sm font-medium"
+                            className="text-lg font-bold text-gray-900"
                             numberOfLines={1}
                           >
-                            {item.subtitle}
+                            {item.title}
                           </Text>
-                        ) : null}
-                      </TouchableOpacity>
-                    )}
-                  />
-                </View>
-              ) : (
-                <View className="py-16 items-center">
-                  <Text className="text-gray-400 font-bold text-lg">No results found</Text>
-                  <Text className="text-gray-300 text-sm mt-1">Try a different search term</Text>
-                </View>
-              )}
+
+                          {item.subtitle ? (
+                            <Text
+                              className="text-gray-500 mt-1 text-sm font-medium"
+                              numberOfLines={1}
+                            >
+                              {item.subtitle}
+                            </Text>
+                          ) : null}
+                        </TouchableOpacity>
+                      )}
+                    />
+                  </View>
+                ) : (
+                  <View className="py-16 items-center">
+                    <Text className="text-gray-400 font-bold text-lg">No results found</Text>
+                    <Text className="text-gray-300 text-sm mt-1">Try a different search term</Text>
+                  </View>
+                )}
+              </View>
             </View>
-          </View>
+          </SafeAreaView>
         </View>
       </Modal>
     </View>
