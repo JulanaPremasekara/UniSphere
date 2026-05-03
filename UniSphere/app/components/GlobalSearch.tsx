@@ -5,7 +5,8 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  ScrollView,
+  FlatList,
+  Keyboard,
 } from "react-native";
 import { Search, X } from "lucide-react-native";
 import { useRouter } from "expo-router";
@@ -138,16 +139,19 @@ export default function GlobalSearch() {
 
     if (!searchText) return [];
 
-    return items.filter((item) => {
-      const searchableText = `${item.type} ${item.title} ${
-        item.subtitle || ""
-      }`;
+    return items
+      .filter((item) => {
+        const searchableText = `${item.type} ${item.title} ${
+          item.subtitle || ""
+        }`;
 
-      return searchableText.toLowerCase().includes(searchText);
-    });
+        return searchableText.toLowerCase().includes(searchText);
+      })
+      .slice(0, 20);
   }, [query, items]);
 
   const handleResultPress = (route: string) => {
+    Keyboard.dismiss();
     setQuery("");
     router.push(route as any);
   };
@@ -163,6 +167,7 @@ export default function GlobalSearch() {
           placeholder="Search UniSphere..."
           className="flex-1 ml-3 text-gray-700 text-base"
           placeholderTextColor="#9CA3AF"
+          autoCorrect={false}
         />
 
         {query.length > 0 && (
@@ -173,50 +178,55 @@ export default function GlobalSearch() {
       </View>
 
       {query.length > 0 && (
-        <View className="absolute top-16 left-0 right-0 z-[999] px-6">
-          <ScrollView
-            className="bg-white rounded-3xl border border-gray-100 shadow-sm"
-            style={{ maxHeight: 300 }}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            nestedScrollEnabled
-          >
+        <View
+          className="absolute top-16 left-0 right-0 z-[999] px-6"
+          pointerEvents="box-none"
+        >
+          <View className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
             {loading ? (
               <View className="py-6 items-center">
                 <ActivityIndicator color="#4F46E5" />
-
                 <Text className="text-gray-400 mt-2 text-sm">
                   Searching...
                 </Text>
               </View>
             ) : filteredResults.length > 0 ? (
-              filteredResults.slice(0, 20).map((item) => (
-                <TouchableOpacity
-                  key={`${item.type}-${item.id}`}
-                  onPress={() => handleResultPress(item.route)}
-                  className="px-5 py-4 border-b border-gray-100"
-                >
-                  <Text className="text-[10px] font-bold text-indigo-600 uppercase">
-                    {item.type}
-                  </Text>
-
-                  <Text
-                    className="text-base font-bold text-gray-900 mt-1"
-                    numberOfLines={1}
+              <FlatList
+                data={filteredResults}
+                keyExtractor={(item) => `${item.type}-${item.id}`}
+                style={{ maxHeight: 300 }}
+                keyboardShouldPersistTaps="always"
+                nestedScrollEnabled={true}
+                showsVerticalScrollIndicator={false}
+                removeClippedSubviews={false}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    activeOpacity={0.75}
+                    onPress={() => handleResultPress(item.route)}
+                    className="px-5 py-4 border-b border-gray-100"
                   >
-                    {item.title}
-                  </Text>
+                    <Text className="text-[10px] font-bold text-indigo-600 uppercase">
+                      {item.type}
+                    </Text>
 
-                  {item.subtitle ? (
                     <Text
-                      className="text-sm text-gray-500 mt-1"
+                      className="text-base font-bold text-gray-900 mt-1"
                       numberOfLines={1}
                     >
-                      {item.subtitle}
+                      {item.title}
                     </Text>
-                  ) : null}
-                </TouchableOpacity>
-              ))
+
+                    {item.subtitle ? (
+                      <Text
+                        className="text-sm text-gray-500 mt-1"
+                        numberOfLines={1}
+                      >
+                        {item.subtitle}
+                      </Text>
+                    ) : null}
+                  </TouchableOpacity>
+                )}
+              />
             ) : (
               <View className="py-6 items-center">
                 <Text className="text-gray-400 font-medium">
@@ -224,7 +234,7 @@ export default function GlobalSearch() {
                 </Text>
               </View>
             )}
-          </ScrollView>
+          </View>
         </View>
       )}
     </View>
