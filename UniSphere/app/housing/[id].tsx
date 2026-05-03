@@ -419,9 +419,8 @@ export default function HousingDetail() {
 
           )}
         </View>
-
-        <Footer />
       </ScrollView>
+      <Footer />
 
       <Modal
         animationType="fade"

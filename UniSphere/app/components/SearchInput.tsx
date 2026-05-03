@@ -13,7 +13,7 @@ const SearchInput = ({
   placeholder = "Search...",
 }: SearchInputProps) => {
   return (
-    <View className="mb-4 rounded-full bg-slate-100 px-4">
+    <View className="mb-4 rounded-full bg-slate-100 px-4 mt-2">
       <TextInput
         value={value}
         onChangeText={onChangeText}

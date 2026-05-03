@@ -112,11 +112,11 @@ export default function FindTutor() {
     }
 
     if (tutor.userId === userId || tutor._id === userId) {
-      router.push("/Tutors/setup" as any);
+      router.push("/tutors/setup" as any);
       return;
     }
 
-    router.push(`/Tutors/${tutor._id}` as any);
+    router.push(`/tutors/${tutor._id}` as any);
   };
 
   const handleCreateTutor = () => {
@@ -125,7 +125,7 @@ export default function FindTutor() {
       return;
     }
 
-    router.push("/Tutors/setup" as any);
+    router.push("/tutors/setup" as any);
   };
 
 

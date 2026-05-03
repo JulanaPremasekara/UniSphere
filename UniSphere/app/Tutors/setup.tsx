@@ -135,7 +135,7 @@ export default function ProfileSetup() {
         Alert.alert("Success", "Tutor profile created successfully!", [
           {
             text: "OK",
-            onPress: () => router.replace("/Tutors"),
+            onPress: () => router.replace("/tutors"),
           },
         ]);
       }

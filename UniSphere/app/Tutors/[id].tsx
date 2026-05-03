@@ -61,21 +61,24 @@ export default function TutorProfile() {
   //   router.push(`/Tutors/setup?id=${id}` as any);
   // };
   const handleToggleStatus = async () => {
-  if (!id) return Alert.alert("Error", "Tutor ID missing");
+    if (!id || !tutor) return Alert.alert("Error", "Tutor ID missing");
 
-  setLoading(true);
-  try {
-    await apiClient.patch(`/tutors/${id}/status`, { isOnline: false }); // Using apiClient for consistency
-    
-    Alert.alert("Success", "Status updated successfully.");
-    router.replace("/Tutors"); 
-  } catch (error: any) {
-    console.log("Error Detail:", error.response?.data || error.message);
-    Alert.alert("Error", "Validation still failing. See console.");
-  } finally {
-    setLoading(false);
-  }
-};
+    const newStatus = !tutor.isOnline;
+    setLoading(true);
+    try {
+      await apiClient.patch(`/tutors/${id}/status`, { isOnline: newStatus });
+      
+      const response = await apiClient.get(`/tutors/${id}`);
+      setTutor(response.data.data || response.data);
+      
+      Alert.alert("Success", `Status updated to ${newStatus ? "Online" : "Offline"}`);
+    } catch (error: any) {
+      console.log("Error Detail:", error.response?.data || error.message);
+      Alert.alert("Error", "Failed to update status.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDelete = () => {
   Alert.alert("Delete Profile", "This action cannot be undone!", [
@@ -94,7 +97,7 @@ export default function TutorProfile() {
           Alert.alert("Success", "Tutor profile deleted successfully.", [
             {
               text: "OK",
-              onPress: () => router.replace("/Tutors"),
+              onPress: () => router.replace("/tutors"),
             },
           ]);
         } catch (error: any) {
@@ -194,12 +197,7 @@ export default function TutorProfile() {
             </Text>
           </View>
 
-          <View className="mt-3 bg-gray-50 p-3 rounded-2xl self-start flex-row items-center">
-            <Star size={16} color="#6366f1" />
-            <Text className="ml-2 text-sm text-gray-600 font-medium">
-              4.9 Rating
-            </Text>
-          </View>
+
 
           <View className="mt-6">
             <Text className="text-base font-bold text-gray-800 mb-2">
@@ -240,7 +238,9 @@ export default function TutorProfile() {
               onPress={handleToggleStatus}
               className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3"
               >
-                <Text className="font-bold text-gray-800">Set Offline</Text>
+                <Text className="font-bold text-gray-800">
+                  {tutor.isOnline ? "Set Offline" : "Set Online"}
+                </Text>
               </TouchableOpacity>
 
               {/* <TouchableOpacity
@@ -293,9 +293,9 @@ export default function TutorProfile() {
             </TouchableOpacity>
           )} */}
         </View>
-
-        <Footer />
       </ScrollView>
+
+      <Footer />
     </SafeAreaView>
   );
 }

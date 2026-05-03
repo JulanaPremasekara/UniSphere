@@ -4,6 +4,8 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+import { StatusBar } from "expo-status-bar";
+
 import "../global.css";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import "@/global.css";
@@ -19,6 +21,7 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <GluestackUIProvider mode="dark">
         <GestureHandlerRootView style={{ flex: 1 }}>
+          <StatusBar style="dark" />
           <Stack
             screenOptions={{
               headerShown: false,

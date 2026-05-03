@@ -223,8 +223,9 @@ export default function ProductDetailScreen() {
           )}
         </View>
 
-        <Footer />
+        
       </ScrollView>
+      <Footer />
     </SafeAreaView>
   );
 }

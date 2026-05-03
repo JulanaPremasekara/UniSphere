@@ -65,14 +65,14 @@ export default function LostDetailScreen() {
                 Lost & Found
               </Text>
             </View>
-            <View className="flex-row gap-5">
+            {/*<View className="flex-row gap-5">
               <TouchableOpacity>
                 <Text className="text-xl text-gray-400">🔗</Text>
               </TouchableOpacity>
               <TouchableOpacity>
                 <Text className="text-xl text-gray-400">⋮</Text>
               </TouchableOpacity>
-            </View>
+            </View>*/}
           </View>
           <View className="p-5">
             <View className="relative rounded-[30px] overflow-hidden">

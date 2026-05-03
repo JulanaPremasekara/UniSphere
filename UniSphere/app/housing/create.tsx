@@ -13,7 +13,8 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { X, Camera, MapPin, CheckCircle2 } from "lucide-react-native";
+import { X, Camera, MapPin, CheckCircle2, Calendar } from "lucide-react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { Input, InputField, InputSlot } from "@/components/ui/input";
 import apiClient from "../services/api";
 
@@ -103,6 +104,82 @@ const FormField = ({
         </Input>
       )}
 
+      {error && (
+        <Text className="mt-1 text-xs font-medium text-red-500">
+          {error}
+        </Text>
+      )}
+    </View>
+  );
+};
+
+const DatePickerField = ({
+  label,
+  place,
+  val,
+  field,
+  updateForm,
+  error,
+  className = "",
+}: any) => {
+  const [show, setShow] = useState(false);
+
+  const onChange = (event: any, selectedDate?: Date) => {
+    setShow(Platform.OS === "ios");
+    if (selectedDate) {
+      const formatted = selectedDate.toLocaleDateString("en-US");
+      updateForm(field, formatted);
+    }
+  };
+
+  const handleTextChange = (text: string) => {
+    let formatted = text.replace(/\D/g, "");
+    if (formatted.length > 2 && formatted.length <= 4) {
+      formatted = `${formatted.slice(0, 2)}/${formatted.slice(2)}`;
+    } else if (formatted.length > 4) {
+      formatted = `${formatted.slice(0, 2)}/${formatted.slice(2, 4)}/${formatted.slice(4, 8)}`;
+    }
+    updateForm(field, formatted);
+  };
+
+  const getSafeDate = (dateStr: string) => {
+    const parsed = Date.parse(dateStr);
+    return isNaN(parsed) ? new Date() : new Date(parsed);
+  };
+
+  return (
+    <View className={className}>
+      <Text className="text-[13px] font-bold text-gray-800 uppercase tracking-[1.5px] ml-1 mb-3">
+        {label}
+      </Text>
+
+      <Input
+        className={`h-16 rounded-[22px] bg-gray-50 px-5 border ${
+          error ? "border-red-400" : "border-transparent"
+        }`}
+      >
+        <InputField
+          placeholder={place}
+          placeholderTextColor="#9CA3AF"
+          keyboardType="numeric"
+          className="font-semibold text-lg text-gray-800"
+          value={val}
+          onChangeText={handleTextChange}
+          maxLength={10}
+        />
+        <TouchableOpacity onPress={() => setShow(true)} className="justify-center px-2">
+          <Calendar size={22} color="#4F46E5" />
+        </TouchableOpacity>
+      </Input>
+
+      {show && (
+        <DateTimePicker
+          value={getSafeDate(val)}
+          mode="date"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          onChange={onChange}
+        />
+      )}
       {error && (
         <Text className="mt-1 text-xs font-medium text-red-500">
           {error}
@@ -575,14 +652,13 @@ export default function CreateHousing() {
           Availability
         </Text>
 
-        <FormField
+        <DatePickerField
           label="Available From (Date)"
           place="mm/dd/yyyy"
           val={form.availableFrom}
           field="availableFrom"
           updateForm={updateForm}
           className="mb-4"
-          keyboardType="numeric"
           error={errors.availableFrom}
         />
 
