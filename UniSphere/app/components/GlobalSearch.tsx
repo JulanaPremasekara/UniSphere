@@ -174,21 +174,6 @@ export default function GlobalSearch({
 
   return (
     <View style={{ zIndex: 999, elevation: 999 }}>
-      {/* Backdrop to close search when clicking outside */}
-      {searchActive && (
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={clearSearch}
-          style={{
-            position: "absolute",
-            top: -500,
-            left: -500,
-            right: -500,
-            bottom: -2000,
-            backgroundColor: "transparent",
-          }}
-        />
-      )}
       {/* Search Bar */}
       <View className="px-6 mt-2 mb-4">
         <View className="flex-row items-center bg-gray-100 rounded-full px-5 h-14">
@@ -211,74 +196,94 @@ export default function GlobalSearch({
         </View>
       </View>
 
-      {/* Dropdown */}
+      {/* Search Results Overlay */}
       {searchActive && (
-        <View
-          className="absolute top-16 left-0 right-0 px-6"
-          style={{
+        <View 
+          style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            height: 2000,
             zIndex: 1000,
-            elevation: 1000,
           }}
           pointerEvents="box-none"
         >
-          <View
-            className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden"
-            style={{
-              elevation: 1001,
-              maxHeight: 350,
+          {/* Backdrop Layer */}
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={clearSearch}
+            style={{ 
+              position: 'absolute', 
+              top: -500, 
+              left: -500, 
+              right: -500, 
+              bottom: 0,
+              backgroundColor: 'transparent'
             }}
+          />
+
+          {/* Results Dropdown */}
+          <View 
+            className="px-6" 
+            style={{ marginTop: 64 }}
+            pointerEvents="box-none"
           >
-            {loading ? (
-              <View className="py-6 items-center bg-white">
-                <ActivityIndicator color="#4F46E5" />
-                <Text className="text-gray-400 mt-2 text-sm">
-                  Searching...
-                </Text>
-              </View>
-            ) : filteredResults.length > 0 ? (
-              <ScrollView
-                keyboardShouldPersistTaps="always"
-                nestedScrollEnabled={true}
-                showsVerticalScrollIndicator={true}
-                contentContainerStyle={{ paddingBottom: 10 }}
-                style={{ flexGrow: 0 }}
-              >
-                {filteredResults.map((item) => (
-                  <TouchableOpacity
-                    key={`${item.type}-${item.id}`}
-                    activeOpacity={0.75}
-                    onPress={() => handleResultPress(item.route)}
-                    className="px-5 py-4 border-b border-gray-100 bg-white"
-                  >
-                    <Text className="text-[10px] font-bold text-indigo-600 uppercase">
-                      {item.type}
-                    </Text>
-
-                    <Text
-                      className="text-base font-bold text-gray-900 mt-1"
-                      numberOfLines={1}
+            <View 
+              className="bg-white rounded-3xl border border-gray-100 shadow-2xl overflow-hidden"
+              style={{ 
+                elevation: 1001,
+                maxHeight: 400 
+              }}
+            >
+              {loading ? (
+                <View className="py-8 items-center bg-white">
+                  <ActivityIndicator color="#4F46E5" />
+                  <Text className="text-gray-400 mt-2 text-sm">Searching...</Text>
+                </View>
+              ) : filteredResults.length > 0 ? (
+                <ScrollView
+                  keyboardShouldPersistTaps="always"
+                  nestedScrollEnabled={true}
+                  showsVerticalScrollIndicator={true}
+                  contentContainerStyle={{ paddingBottom: 10 }}
+                  bounces={true}
+                >
+                  {filteredResults.map((item) => (
+                    <TouchableOpacity
+                      key={`${item.type}-${item.id}`}
+                      activeOpacity={0.7}
+                      onPress={() => handleResultPress(item.route)}
+                      className="px-5 py-4 border-b border-gray-100 bg-white"
                     >
-                      {item.title}
-                    </Text>
+                      <Text className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">
+                        {item.type}
+                      </Text>
 
-                    {item.subtitle ? (
                       <Text
-                        className="text-sm text-gray-500 mt-1"
+                        className="text-base font-bold text-gray-900 mt-0.5"
                         numberOfLines={1}
                       >
-                        {item.subtitle}
+                        {item.title}
                       </Text>
-                    ) : null}
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            ) : (
-              <View className="py-6 items-center bg-white">
-                <Text className="text-gray-400 font-medium">
-                  No results found
-                </Text>
-              </View>
-            )}
+
+                      {item.subtitle ? (
+                        <Text
+                          className="text-sm text-gray-500 mt-0.5"
+                          numberOfLines={1}
+                        >
+                          {item.subtitle}
+                        </Text>
+                      ) : null}
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              ) : (
+                <View className="py-10 items-center bg-white">
+                  <Text className="text-gray-400 font-medium">No results found</Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
       )}
