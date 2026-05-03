@@ -17,6 +17,13 @@ import { X, Camera, MapPin, CheckCircle2 } from "lucide-react-native";
 import { Input, InputField, InputSlot } from "@/components/ui/input";
 import apiClient from "../services/api";
 
+const blurActiveElement = () => {
+  if (Platform.OS === "web" && typeof document !== "undefined") {
+    const active = document.activeElement as HTMLElement | null;
+    active?.blur();
+  }
+};
+
 type FormState = {
   title: string;
   description: string;
@@ -34,6 +41,8 @@ type FormState = {
   contactEmail: string;
 };
 
+type FormErrors = Partial<Record<keyof FormState | "images", string>>;
+
 type FormTextKey = Exclude<keyof FormState, "furnished" | "wifi" | "parking">;
 type FeatureKey = "furnished" | "wifi" | "parking";
 
@@ -47,6 +56,7 @@ const FormField = ({
   className = "",
   updateForm,
   keyboardType = "default",
+  error,
 }: any) => {
   return (
     <View className={className}>
@@ -55,7 +65,11 @@ const FormField = ({
       </Text>
 
       {multiline ? (
-        <View className="bg-gray-50 rounded-[22px] p-5 min-h-[120px]">
+        <View
+          className={`bg-gray-50 rounded-[22px] p-5 min-h-[120px] border ${
+            error ? "border-red-400" : "border-transparent"
+          }`}
+        >
           <TextInput
             multiline
             placeholder={place}
@@ -67,9 +81,14 @@ const FormField = ({
           />
         </View>
       ) : (
-        <Input className="h-16 rounded-[22px] bg-gray-50 border-transparent px-5">
+        <Input
+          className={`h-16 rounded-[22px] bg-gray-50 px-5 border ${
+            error ? "border-red-400" : "border-transparent"
+          }`}
+        >
           <InputField
             placeholder={place}
+            placeholderTextColor="#9CA3AF"
             keyboardType={keyboardType}
             className="font-semibold text-lg text-gray-800"
             value={val}
@@ -78,10 +97,16 @@ const FormField = ({
 
           {IconComp && (
             <InputSlot className="pr-2">
-              <IconComp size={22} color="#1F2937" />
+              <IconComp size={22} color="#4F46E5" />
             </InputSlot>
           )}
         </Input>
+      )}
+
+      {error && (
+        <Text className="mt-1 text-xs font-medium text-red-500">
+          {error}
+        </Text>
       )}
     </View>
   );
@@ -93,6 +118,7 @@ const ToggleField = ({
   selected,
   onSelect,
   className = "",
+  error,
 }: any) => (
   <View className={className}>
     <Text className="text-[13px] font-bold text-gray-800 uppercase tracking-[1.5px] ml-1 mb-3">
@@ -105,7 +131,7 @@ const ToggleField = ({
           key={opt}
           onPress={() => onSelect(opt)}
           className={`flex-1 p-3 rounded-[18px] items-center justify-center ${
-            selected === opt ? "bg-emerald-600" : "bg-gray-100"
+            selected === opt ? "bg-indigo-600" : "bg-gray-100"
           }`}
         >
           <Text
@@ -118,19 +144,25 @@ const ToggleField = ({
         </TouchableOpacity>
       ))}
     </View>
+
+    {error && (
+      <Text className="mt-1 text-xs font-medium text-red-500">
+        {error}
+      </Text>
+    )}
   </View>
 );
 
 const CheckboxField = ({ label, value, onChange, className = "" }: any) => (
   <TouchableOpacity
     className={`flex-row items-center p-3 rounded-[18px] ${className} ${
-      value ? "bg-emerald-50" : "bg-gray-50"
+      value ? "bg-indigo-50" : "bg-gray-50"
     }`}
     onPress={() => onChange(!value)}
   >
     <View
       className={`w-6 h-6 rounded-lg mr-3 items-center justify-center ${
-        value ? "bg-emerald-600" : "bg-gray-200"
+        value ? "bg-indigo-600" : "bg-gray-200"
       }`}
     >
       {value && <Text className="text-white font-bold">✓</Text>}
@@ -153,6 +185,8 @@ const RowField = ({
   updateForm,
   keyboardType1 = "default",
   keyboardType2 = "default",
+  error1,
+  error2,
 }: any) => (
   <View className="flex-row gap-4">
     <FormField
@@ -164,6 +198,7 @@ const RowField = ({
       className="flex-1"
       updateForm={updateForm}
       keyboardType={keyboardType1}
+      error={error1}
     />
 
     <FormField
@@ -174,6 +209,7 @@ const RowField = ({
       className="flex-1"
       updateForm={updateForm}
       keyboardType={keyboardType2}
+      error={error2}
     />
   </View>
 );
@@ -185,6 +221,7 @@ export default function CreateHousing() {
   const isEditing = !!editId;
 
   const [images, setImages] = useState<string[]>([]);
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isPicking, setIsPicking] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -207,12 +244,16 @@ export default function CreateHousing() {
     contactEmail: "",
   });
 
+  const clearError = (field: keyof FormErrors) => {
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
+
   const pickImage = async () => {
     try {
       setIsPicking(true);
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsMultipleSelection: true,
         allowsEditing: false,
         quality: 0.7,
@@ -227,6 +268,7 @@ export default function CreateHousing() {
           .filter(Boolean);
 
         setImages((prevImages) => [...prevImages, ...newImages]);
+        clearError("images");
       }
     } catch (error) {
       Alert.alert("Error", "Could not pick images");
@@ -236,7 +278,18 @@ export default function CreateHousing() {
   };
 
   const removeImage = (index: number) => {
-    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+    setImages((prevImages) => {
+      const updated = prevImages.filter((_, i) => i !== index);
+
+      if (updated.length === 0) {
+        setErrors((prev) => ({
+          ...prev,
+          images: "Please upload at least one room photo.",
+        }));
+      }
+
+      return updated;
+    });
   };
 
   React.useEffect(() => {
@@ -245,7 +298,7 @@ export default function CreateHousing() {
     const loadHousingDetails = async () => {
       try {
         const {
-          data: { success, housing: h },
+          data: { success, data: h },
         } = await apiClient.get(`/housing/${editId}`);
 
         if (success) {
@@ -285,6 +338,8 @@ export default function CreateHousing() {
       ...prevForm,
       [field]: text,
     }));
+
+    clearError(field);
   };
 
   const toggleFeature = (feature: FeatureKey) => {
@@ -297,38 +352,37 @@ export default function CreateHousing() {
   const handlePublish = async () => {
     if (isPublishing) return;
 
-    const showAlert = (title: string, message: string) =>
-      Platform.OS === "web"
-        ? alert(`${title}\n\n${message}`)
-        : Alert.alert(title, message);
+    setErrors({});
+
+    const localErrors: FormErrors = {};
 
     if (!form.title.trim()) {
-      showAlert("Required Field", "Please enter a room title");
-      return;
+      localErrors.title = "Please enter a room title.";
     }
 
     if (!form.address.trim()) {
-      showAlert("Required Field", "Please enter an address/location");
-      return;
+      localErrors.address = "Please enter an address/location.";
     }
 
     if (!form.rentPrice.trim()) {
-      showAlert("Required Field", "Please enter a rent price");
-      return;
+      localErrors.rentPrice = "Please enter a rent price.";
     }
 
     if (!form.contactName.trim()) {
-      showAlert("Required Field", "Please enter your name");
-      return;
+      localErrors.contactName = "Please enter your name.";
     }
 
     if (!form.contactPhone.trim() && !form.contactEmail.trim()) {
-      showAlert("Required Field", "Please enter phone or email");
-      return;
+      localErrors.contactPhone = "Please enter phone or email.";
+      localErrors.contactEmail = "Please enter phone or email.";
     }
 
     if (images.length === 0) {
-      showAlert("Required Field", "Please upload at least one room photo");
+      localErrors.images = "Please upload at least one room photo.";
+    }
+
+    if (Object.keys(localErrors).length > 0) {
+      setErrors(localErrors);
       return;
     }
 
@@ -366,22 +420,57 @@ export default function CreateHousing() {
             : "Listing posted successfully!"
         );
 
+        blurActiveElement();
         setShowSuccessModal(true);
 
         setTimeout(() => {
           router.back();
         }, 1500);
       } else {
-        showAlert("Error", data.message || "Something went wrong");
+        Alert.alert("Error", data.message || "Something went wrong");
       }
     } catch (error: any) {
-      showAlert(
+      const backendErrors = error.response?.data?.errors;
+
+      if (Array.isArray(backendErrors)) {
+        const fieldErrors: FormErrors = {};
+
+        backendErrors.forEach((err: { field: string; message: string }) => {
+          if (
+            err.field === "title" ||
+            err.field === "description" ||
+            err.field === "address" ||
+            err.field === "roomType" ||
+            err.field === "rentPrice" ||
+            err.field === "deposit" ||
+            err.field === "availableFrom" ||
+            err.field === "availabilityStatus" ||
+            err.field === "contactName" ||
+            err.field === "contactPhone" ||
+            err.field === "contactEmail" ||
+            err.field === "images"
+          ) {
+            fieldErrors[err.field as keyof FormErrors] = err.message;
+          }
+        });
+
+        setErrors(fieldErrors);
+        return;
+      }
+
+      Alert.alert(
         "Error",
         error.response?.data?.message || "An error occurred during publishing"
       );
     } finally {
       setIsPublishing(false);
     }
+  };
+
+  const closeSuccessModal = () => {
+    blurActiveElement();
+    setShowSuccessModal(false);
+    router.back();
   };
 
   return (
@@ -394,13 +483,18 @@ export default function CreateHousing() {
         style={{ paddingTop: Platform.OS === "ios" ? 60 : 50 }}
       >
         <View className="flex-row justify-between items-center">
-          <Text className="text-2xl font-bold text-emerald-900">
-            {isEditing ? "Edit Listing" : "Post a Room"}
-          </Text>
+          <View>
+            <Text className="text-[10px] font-extrabold uppercase tracking-[2px] text-indigo-300 mb-1">
+              {isEditing ? "Edit Listing" : "Housing Submission"}
+            </Text>
+            <Text className="text-4xl font-extrabold text-slate-900">
+              {isEditing ? "Edit Room" : "Post a Room"}
+            </Text>
+          </View>
 
           <TouchableOpacity
             onPress={() => router.back()}
-            className="bg-gray-100 p-2 rounded-full"
+            className="bg-gray-100 p-3 rounded-full"
           >
             <X size={24} color="#6B7280" />
           </TouchableOpacity>
@@ -409,7 +503,8 @@ export default function CreateHousing() {
 
       <ScrollView
         className="flex-1 px-6 pb-4"
-        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 120 }}
       >
         <Text className="text-lg font-bold text-gray-900 mt-8 mb-5">
           Basic Information
@@ -422,6 +517,7 @@ export default function CreateHousing() {
           field="title"
           updateForm={updateForm}
           className="mb-4"
+          error={errors.title}
         />
 
         <FormField
@@ -432,6 +528,7 @@ export default function CreateHousing() {
           multiline
           updateForm={updateForm}
           className="mb-4"
+          error={errors.description}
         />
 
         <FormField
@@ -442,6 +539,7 @@ export default function CreateHousing() {
           icon={MapPin}
           updateForm={updateForm}
           className="mb-4"
+          error={errors.address}
         />
 
         <ToggleField
@@ -450,6 +548,7 @@ export default function CreateHousing() {
           selected={form.roomType}
           onSelect={(val: string) => updateForm("roomType", val)}
           className="mb-4"
+          error={errors.roomType}
         />
 
         <Text className="text-lg font-bold text-gray-900 mt-8 mb-5">
@@ -468,6 +567,8 @@ export default function CreateHousing() {
           field2="deposit"
           keyboardType2="numeric"
           updateForm={updateForm}
+          error1={errors.rentPrice}
+          error2={errors.deposit}
         />
 
         <Text className="text-lg font-bold text-gray-900 mt-8 mb-5">
@@ -482,6 +583,7 @@ export default function CreateHousing() {
           updateForm={updateForm}
           className="mb-4"
           keyboardType="numeric"
+          error={errors.availableFrom}
         />
 
         <ToggleField
@@ -490,6 +592,7 @@ export default function CreateHousing() {
           selected={form.availabilityStatus}
           onSelect={(val: string) => updateForm("availabilityStatus", val)}
           className="mb-4"
+          error={errors.availabilityStatus}
         />
 
         <Text className="text-lg font-bold text-gray-900 mt-8 mb-5">
@@ -524,11 +627,13 @@ export default function CreateHousing() {
         <TouchableOpacity
           onPress={pickImage}
           disabled={isPicking}
-          className="bg-emerald-50 border-2 border-dashed border-emerald-300 rounded-[20px] p-8 items-center justify-center mb-4"
+          className={`bg-indigo-50 border-2 border-dashed rounded-[24px] p-8 items-center justify-center mb-2 ${
+            errors.images ? "border-red-400" : "border-indigo-300"
+          }`}
         >
-          <Camera size={40} color="#059669" />
+          <Camera size={40} color="#4F46E5" />
 
-          <Text className="text-emerald-700 font-bold text-lg mt-2">
+          <Text className="text-indigo-700 font-bold text-lg mt-2">
             {isPicking ? "Picking..." : "Tap to Upload Photos"}
           </Text>
 
@@ -536,6 +641,12 @@ export default function CreateHousing() {
             Select one or multiple images
           </Text>
         </TouchableOpacity>
+
+        {errors.images && (
+          <Text className="mb-4 text-xs font-medium text-red-500">
+            {errors.images}
+          </Text>
+        )}
 
         {images.length > 0 && (
           <View className="mb-6">
@@ -574,6 +685,7 @@ export default function CreateHousing() {
           field="contactName"
           updateForm={updateForm}
           className="mb-4"
+          error={errors.contactName}
         />
 
         <FormField
@@ -584,6 +696,7 @@ export default function CreateHousing() {
           updateForm={updateForm}
           className="mb-4"
           keyboardType="phone-pad"
+          error={errors.contactPhone}
         />
 
         <FormField
@@ -594,6 +707,7 @@ export default function CreateHousing() {
           updateForm={updateForm}
           className="mb-6"
           keyboardType="email-address"
+          error={errors.contactEmail}
         />
       </ScrollView>
 
@@ -601,8 +715,8 @@ export default function CreateHousing() {
         <TouchableOpacity
           onPress={handlePublish}
           disabled={isPublishing}
-          className={`p-4 rounded-[20px] items-center justify-center ${
-            isPublishing ? "bg-gray-300" : "bg-emerald-600"
+          className={`p-4 rounded-[24px] items-center justify-center ${
+            isPublishing ? "bg-gray-300" : "bg-indigo-600"
           }`}
         >
           <Text className="text-white font-bold text-lg">
@@ -619,19 +733,16 @@ export default function CreateHousing() {
         animationType="fade"
         transparent
         visible={showSuccessModal}
-        onRequestClose={() => setShowSuccessModal(false)}
+        onRequestClose={closeSuccessModal}
       >
         <TouchableOpacity
           activeOpacity={1}
-          onPress={() => {
-            setShowSuccessModal(false);
-            router.back();
-          }}
+          onPress={closeSuccessModal}
           className="flex-1 bg-black/60 justify-center items-center px-6"
         >
           <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
-            <View className="bg-emerald-50 p-6 rounded-full mb-6">
-              <CheckCircle2 size={50} color="#059669" />
+            <View className="bg-indigo-50 p-6 rounded-full mb-6">
+              <CheckCircle2 size={50} color="#4F46E5" />
             </View>
 
             <Text className="text-2xl font-black text-gray-900 mb-2">
@@ -643,11 +754,8 @@ export default function CreateHousing() {
             </Text>
 
             <TouchableOpacity
-              onPress={() => {
-                setShowSuccessModal(false);
-                router.back();
-              }}
-              className="bg-emerald-600 px-8 py-4 rounded-[20px]"
+              onPress={closeSuccessModal}
+              className="bg-indigo-600 px-8 py-4 rounded-[20px]"
             >
               <Text className="text-white font-bold">Done</Text>
             </TouchableOpacity>

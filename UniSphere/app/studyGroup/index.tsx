@@ -1,51 +1,264 @@
-import { useRouter } from 'expo-router';
-import { Clock, MapPin, Plus } from 'lucide-react-native';
-import React from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useRouter } from "expo-router";
+import { Calendar, Clock, MapPin, Plus } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import Footer from '../components/Footer';
+import Footer from "../components/Footer";
+import AppHeader from "../components/AppHeader";
+import SearchInput from "../components/SearchInput";
+import SectionHeader from "../components/SectionHeader";
+import FilterChips from "../components/FilterChips";
+import { useUser } from "@/hooks/useUser";
+import apiClient from "../services/api";
+
+type StudyFilter = "ALL" | "GENERAL" | "MATHEMATICS" | "COMPUTER SCIENCE";
+
+const filterOptions: StudyFilter[] = [
+  "ALL",
+  "GENERAL",
+  "MATHEMATICS",
+  "COMPUTER SCIENCE",
+];
 
 export default function StudyGroupFeed() {
   const router = useRouter();
-  const groups = [
-    { id: '1', subject: 'Calculus III: Multivariable Integration', time: '2:00 PM', location: 'Central Library, Room 402', tag: 'MATHEMATICS' },
-    { id: '2', subject: 'Data Structures & Algorithms Mock Interviews', time: '4:30 PM', location: 'Engineering Hall', tag: 'COMPUTER SCIENCE' }
-  ];
+
+  const { userId } = useUser();
+
+  const [groups, setGroups] = useState<any[]>([]);
+  const [filteredGroups, setFilteredGroups] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [loginModalVisible, setLoginModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState<StudyFilter>("ALL");
+
+  useEffect(() => {
+    const fetchStudyGroups = async () => {
+      try {
+        setLoading(true);
+
+        const response = await apiClient.get("/studyGroups");
+
+        const data = response.data.data || response.data;
+
+        if (Array.isArray(data)) {
+          setGroups(data);
+          setFilteredGroups(data);
+        }
+      } catch (error) {
+        console.error("Error fetching study groups:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudyGroups();
+  }, []);
+
+  useEffect(() => {
+    let filtered = [...groups];
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+
+      filtered = filtered.filter(
+        (group) =>
+          group.subject?.toLowerCase().includes(query) ||
+          group.location?.toLowerCase().includes(query) ||
+          group.tag?.toLowerCase().includes(query)
+      );
+    }
+
+    if (selectedFilter !== "ALL") {
+      filtered = filtered.filter(
+        (group) => group.tag?.toUpperCase() === selectedFilter
+      );
+    }
+
+    setFilteredGroups(filtered);
+  }, [searchQuery, selectedFilter, groups]);
+
+  const handlePressGroup = (id: string) => {
+    if (!userId) {
+      setLoginModalVisible(true);
+      return;
+    }
+
+    router.push(`/studyGroup/${id}` as any);
+  };
+
+  const handleCreateGroup = () => {
+    if (!userId) {
+      setLoginModalVisible(true);
+      return;
+    }
+
+    router.push("/studyGroup/create" as any);
+  };
+
+
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#4F46E5" />
+        <Text className="text-center text-gray-400 mt-4">
+          Finding study groups...
+        </Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <View className="flex-1 bg-white">
-      <View className="flex-1 p-6 pt-12">
-        <Text className="text-3xl font-bold mb-2">Study Groups</Text>
-        <Text className="text-gray-500 mb-6">Connect with peers and master your courses together.</Text>
-        
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {groups.map((group) => (
-            <TouchableOpacity 
-              key={group.id} 
-              onPress={() => router.push(`/studyGroup/${group.id}` as any)}
-              className="bg-white border border-gray-100 rounded-[35px] p-6 mb-4 shadow-sm"
-            >
-              <View className="bg-indigo-100 self-start px-3 py-1 rounded-lg mb-3">
-                <Text className="text-indigo-600 font-bold text-[10px]">{group.tag}</Text>
-              </View>
-              <Text className="text-lg font-bold mb-4">{group.subject}</Text>
-              <View className="flex-row items-center gap-4">
-                 <View className="flex-row items-center"><Clock size={14} color="#4F46E5" /><Text className="ml-1 text-xs text-gray-600">{group.time}</Text></View>
-                 <View className="flex-row items-center"><MapPin size={14} color="#4F46E5" /><Text className="ml-1 text-xs text-gray-600">{group.location}</Text></View>
-              </View>
-            </TouchableOpacity>
-          ))}
+    <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+      <View className="flex-1">
+        <AppHeader title="UniSphere" />
+
+        <View className="px-5">
+          <SearchInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Find study groups..."
+          />
+        </View>
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingTop: 8,
+            paddingBottom: 20,
+          }}
+        >
+          <FilterChips
+            options={filterOptions}
+            selectedValue={selectedFilter}
+            onSelect={setSelectedFilter}
+          />
+
+          <SectionHeader
+            title="Study Groups"
+            subtitle="Connect with peers and master your courses together."
+          />
+
+          {filteredGroups.length > 0 ? (
+            <View>
+              {filteredGroups.map((group) => (
+                <TouchableOpacity
+                  key={group._id || group.id}
+                  onPress={() => handlePressGroup(group._id || group.id)}
+                  className="bg-white rounded-[35px] mb-8 overflow-hidden border border-gray-100 shadow-sm p-6"
+                >
+                  <View className="bg-indigo-100 self-start px-4 py-2 rounded-full mb-4">
+                    <Text className="text-indigo-700 font-black text-[10px] uppercase">
+                      {group.tag || "GENERAL"}
+                    </Text>
+                  </View>
+
+                  <Text className="text-2xl font-black text-gray-900 mb-5">
+                    {group.subject}
+                  </Text>
+
+                  <View className="gap-y-3">
+                    <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
+                      <Clock size={16} color="#4F46E5" />
+                      <Text className="ml-2 text-sm text-gray-600 font-medium">
+                        {group.time}
+                      </Text>
+                    </View>
+
+                    <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
+                      <MapPin size={16} color="#4F46E5" />
+                      <Text className="ml-2 text-sm text-gray-600 font-medium">
+                        {group.location}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
+            <View className="w-full py-20 items-center">
+              <Text className="text-lg font-bold text-gray-700">
+                No study groups found
+              </Text>
+
+              <Text className="text-sm text-gray-400 mt-2 text-center px-10">
+                Try adjusting your search or filter.
+              </Text>
+            </View>
+          )}
         </ScrollView>
 
-        <TouchableOpacity 
-          onPress={() => router.push('/studyGroup/create' as any)}
-          className="absolute bottom-10 right-6 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+        <TouchableOpacity
+          onPress={handleCreateGroup}
+          className="absolute bottom-28 right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
         >
-          <Plus color="white" size={30} />
+          <Plus color="white" size={32} />
         </TouchableOpacity>
-      </View>
 
-      <Footer />
-    </View>
+        <Footer />
+
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={loginModalVisible}
+          onRequestClose={() => setLoginModalVisible(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => setLoginModalVisible(false)}
+            className="flex-1 bg-black/60 justify-center items-center px-6"
+          >
+            <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
+              <View className="bg-indigo-50 p-6 rounded-full mb-6">
+                <Calendar size={40} color="#4F46E5" />
+              </View>
+
+              <Text className="text-2xl font-black text-gray-900 mb-2">
+                Login Required
+              </Text>
+
+              <Text className="text-gray-500 text-center text-lg mb-8 leading-relaxed">
+                Please sign in to view study group details or create a new
+                study group.
+              </Text>
+
+              <View className="flex-row gap-4 w-full">
+                <TouchableOpacity
+                  onPress={() => setLoginModalVisible(false)}
+                  className="flex-1 bg-gray-50 p-5 rounded-3xl"
+                >
+                  <Text className="text-gray-900 font-bold text-center text-lg">
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    setLoginModalVisible(false);
+                    router.push("/login" as any);
+                  }}
+                  className="flex-1 bg-indigo-600 p-5 rounded-3xl shadow-lg shadow-indigo-200"
+                >
+                  <Text className="text-white font-bold text-center text-lg">
+                    Sign In
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      </View>
+    </SafeAreaView>
   );
 }

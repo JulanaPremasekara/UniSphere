@@ -5,6 +5,7 @@ import {
   createLostItem,
   deleteLostItem,
   updateLostItem,
+  markItemAsResolved,
 } from "../services/itemApi";
 
 /* =========================
@@ -69,9 +70,19 @@ export const useDeleteLostItemMutation = (navigation?: any) => {
   });
 };
 
-/* =========================
-   🔹 MUTATION: UPDATE ITEM
-========================= */
+export const useMarkItemAsResolvedMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (itemId: string) => markItemAsResolved(itemId),
+    onSuccess: (_, itemId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["lostItems"],
+        refetchType: "all",
+      });
+    },
+  });
+};
+
 export const useUpdateLostItemMutation = () => {
   const queryClient = useQueryClient();
 

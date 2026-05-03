@@ -1,31 +1,45 @@
-import axios from "axios";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router"; // Added useFocusEffect
-import { ChevronLeft, ChevronRight, Phone, ShieldCheck, Star, User } from "lucide-react-native"; // Added User icon
 import React, { useState } from "react";
-import { ActivityIndicator, Linking, ScrollView, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Linking,
+  ScrollView,
+  TouchableOpacity,
+  View,
+  Alert,
+} from "react-native";
+import {
+  useFocusEffect,
+  useLocalSearchParams,
+  useRouter,
+} from "expo-router";
+import {
+  ChevronLeft,
+  Phone,
+  ShieldCheck,
+  Star,
+  User,
+} from "lucide-react-native";
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Box } from "@/components/ui/box";
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
-import { VStack } from "@/components/ui/vstack";
-import Footer from '../components/Footer';
+import Footer from "../components/Footer";
 import apiClient from "../services/api";
-
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useUser } from "@/hooks/useUser";
 
 export default function TutorProfile() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
 
-  // --- STATE MANAGEMENT ---
+  const { userId } = useUser();
+
   const [tutor, setTutor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showContact, setShowContact] = useState(false);
 
-
-  // --- FETCH DATA FROM BACKEND ---
-  
   useFocusEffect(
     React.useCallback(() => {
       const fetchTutorDetails = async () => {
@@ -43,136 +57,245 @@ export default function TutorProfile() {
     }, [id])
   );
 
-  // --- LOADING STATE ---
+  // const handleEdit = () => {
+  //   router.push(`/Tutors/setup?id=${id}` as any);
+  // };
+  const handleToggleStatus = async () => {
+  if (!id) return Alert.alert("Error", "Tutor ID missing");
+
+  setLoading(true);
+  try {
+    await apiClient.patch(`/tutors/${id}/status`, { isOnline: false }); // Using apiClient for consistency
+    
+    Alert.alert("Success", "Status updated successfully.");
+    router.replace("/Tutors"); 
+  } catch (error: any) {
+    console.log("Error Detail:", error.response?.data || error.message);
+    Alert.alert("Error", "Validation still failing. See console.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const handleDelete = () => {
+  Alert.alert("Delete Profile", "This action cannot be undone!", [
+    { text: "Cancel", style: "cancel" },
+    {
+      text: "Delete",
+      style: "destructive",
+      onPress: async () => {
+        try {
+          setLoading(true);
+
+          const response = await apiClient.delete(`/tutors/${id}`);
+
+          console.log("Delete success:", response.data);
+
+          Alert.alert("Success", "Tutor profile deleted successfully.", [
+            {
+              text: "OK",
+              onPress: () => router.replace("/Tutors"),
+            },
+          ]);
+        } catch (error: any) {
+          console.log("Delete error:", error.response?.data || error.message);
+
+          const backendMessage =
+            error.response?.data?.message ||
+            "Failed to delete profile. Please try again.";
+
+          Alert.alert("Error", backendMessage);
+        } finally {
+          setLoading(false);
+        }
+      },
+    },
+  ]);
+};
+
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" color="#4338CA" />
-        <Text className="mt-4 text-gray-500">Loading profile...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
-  // --- ERROR STATE ---
   if (!tutor) {
     return (
-      <View className="flex-1 justify-center items-center p-6">
-        <Text className="text-xl font-bold">Tutor not found</Text>
-        <TouchableOpacity onPress={() => router.back()} className="mt-4 bg-indigo-600 px-6 py-2 rounded-full">
-          <Text className="text-white">Go Back</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView className="flex-1 items-center justify-center bg-white px-6">
+        <Text className="text-lg font-bold">Tutor not found</Text>
+      </SafeAreaView>
     );
   }
 
+  const isOwner =
+    tutor.userId === userId ||
+    tutor.ownerId === userId ||
+    tutor.createdBy === userId ||
+    tutor._id === userId;
+
   return (
-    <View className="flex-1 bg-gray-50">
-      <ScrollView className="flex-1">
-        
-        {/* HEADER */}
-        <HStack className="p-6 mt-10 justify-between items-center">
-          <TouchableOpacity onPress={() => router.back()} className="bg-white p-2 rounded-full shadow-sm">
-            <Icon as={ChevronLeft} size="lg" className="text-black" />
-          </TouchableOpacity>
-          <Text className="font-bold text-lg text-black">Tutor Profile</Text>
-          <Box className="w-10" /> 
-        </HStack>
+    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-white">
+      <ScrollView showsVerticalScrollIndicator={false} className="bg-white">
+        <View className="flex-row justify-between items-center px-5 pt-14 pb-4 bg-white">
+          <View className="flex-row items-center gap-4">
+            <TouchableOpacity onPress={() => router.back()}>
+              <ChevronLeft size={28} color="#4B5563" />
+            </TouchableOpacity>
 
-        <VStack className="items-center px-6">
-          
-          {/* AVATAR ICON & STATUS DOT */}
-          
-<View className="relative">
-  <Avatar size="2xl" className="bg-indigo-600 border-4 border-white shadow-xl">
-    {tutor.image ? (
-      <AvatarImage 
-        source={{ uri: tutor.image }} 
-        className="w-full h-full rounded-full" 
-      />
-    ) : (
-      <Icon as={User} size="xl" className="text-white" />
-    )}
-  </Avatar>
-  
-  {/* Status dot logic remains exactly as you had it */}
-  <Box 
-    className={`absolute bottom-1 right-2 w-6 h-6 border-4 border-white rounded-full ${
-      tutor.isOnline !== false ? 'bg-green-500' : 'bg-gray-400'
-    }`} 
-  />
-</View>
+            <Text className="text-lg font-bold text-indigo-600">Tutors</Text>
+          </View>
+        </View>
 
-          <Text className="text-3xl font-bold text-black mt-4 text-center">{tutor.name}</Text>
-          <Text className="text-gray-500 text-center mt-1">{tutor.subject}</Text>
+        <View className="p-5">
+          <View className="relative rounded-[30px] overflow-hidden items-center bg-gray-50 py-10">
+            <Avatar
+              size="2xl"
+              className="bg-indigo-600 border-4 border-white shadow-xl"
+            >
+              {tutor.image ? (
+                <AvatarImage
+                  source={{ uri: tutor.image }}
+                  className="w-full h-full rounded-full"
+                />
+              ) : (
+                <Icon as={User} size="xl" className="text-white" />
+              )}
+            </Avatar>
 
-          {/* CONTACT INFO CARD */}
+            <Box
+              className={`absolute bottom-8 right-[40%] w-4 h-4 border-2 border-white rounded-full ${
+                tutor.isOnline !== false ? "bg-green-500" : "bg-gray-400"
+              }`}
+            />
+          </View>
+
+          <View className="flex-row items-center mt-4 mb-2 gap-2">
+            <View className="w-2 h-2 rounded-full bg-emerald-500" />
+            <Text className="text-xs font-bold text-emerald-500 uppercase">
+              Available
+            </Text>
+          </View>
+
+          <View className="flex-row justify-between items-start">
+            <Text className="text-3xl font-extrabold text-gray-800 flex-1">
+              {tutor.name}
+            </Text>
+
+            <Text className="text-2xl font-black text-indigo-600">
+              {tutor.price}/hr
+            </Text>
+          </View>
+
+          <View className="mt-3 bg-gray-50 p-3 rounded-2xl self-start">
+            <Text className="text-sm text-gray-600 font-medium">
+              📘 {tutor.subject}
+            </Text>
+          </View>
+
+          <View className="mt-3 bg-gray-50 p-3 rounded-2xl self-start flex-row items-center">
+            <Star size={16} color="#6366f1" />
+            <Text className="ml-2 text-sm text-gray-600 font-medium">
+              4.9 Rating
+            </Text>
+          </View>
+
+          <View className="mt-6">
+            <Text className="text-base font-bold text-gray-800 mb-2">
+              About
+            </Text>
+            <Text className="text-sm text-gray-500 leading-5">
+              {tutor.bio ||
+                `I am ${tutor.name}, specializing in ${tutor.subject}.`}
+            </Text>
+          </View>
+
           {showContact && (
-            <Box className="w-full mt-6 bg-indigo-50 p-6 rounded-[30px] border border-indigo-100 shadow-sm">
-              <Text className="text-center font-bold text-indigo-900 uppercase mb-3 text-[10px] tracking-widest">Tutor Contact Details</Text>
-              
-              <HStack className="justify-center" space="lg">
-                <TouchableOpacity 
-                  onPress={() => tutor.phone && Linking.openURL(`tel:${tutor.phone}`)}
-                  className="bg-white p-4 rounded-2xl items-center shadow-sm flex-1"
-                >
-                  <Icon as={Phone} size="md" className="text-indigo-600 mb-1" />
-                  <Text className="text-xs font-bold text-gray-700">{tutor.phone || "No Number Provided"}</Text>
-                </TouchableOpacity>
-              </HStack>
+            <Box className="mt-6 bg-indigo-50 p-5 rounded-[25px]">
+              <Text className="text-[10px] font-bold text-indigo-400 uppercase mb-2">
+                Contact
+              </Text>
+
+              <TouchableOpacity
+                onPress={() =>
+                  tutor.phone && Linking.openURL(`tel:${tutor.phone}`)
+                }
+                className="bg-white p-4 rounded-2xl"
+              >
+                <Text className="text-indigo-900 font-bold text-lg">
+                  {tutor.phone || "No Number"}
+                </Text>
+              </TouchableOpacity>
             </Box>
           )}
 
-          <HStack space="md" className="mt-6">
-            <Box className="bg-white px-4 py-2 rounded-full shadow-sm flex-row items-center">
-              <Icon as={Star} size="xs" className="text-indigo-600 mr-2" />
-              <Text className="font-bold text-black">4.9</Text>
-            </Box>
-            <Box className="bg-white px-4 py-2 rounded-full shadow-sm">
-              <Text className="font-bold text-indigo-600">{tutor.price}</Text>
-            </Box>
-          </HStack>
+          {isOwner ? (
+            <View className="mx-5 my-4 p-6 bg-gray-100 rounded-[40px]">
+              <Text className="text-[10px] font-bold text-gray-400 text-center tracking-[2px] mb-5 uppercase">
+                Admin Controls
+              </Text>
 
-          {/* ABOUT SECTION */}
-          <Box className="bg-white rounded-[30px] p-6 mt-8 w-full shadow-sm">
-            <Text className="font-bold text-lg text-black mb-2">About Me</Text>
-            <Text className="text-gray-600 leading-6">
-              {tutor.bio || `I am ${tutor.name}, specializing in ${tutor.subject}. Contact me to schedule a session or discuss your university assignments.`}
-            </Text>
-          </Box>
+              <TouchableOpacity 
+              onPress={handleToggleStatus}
+              className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3"
+              >
+                <Text className="font-bold text-gray-800">Set Offline</Text>
+              </TouchableOpacity>
 
-          {/* SETTINGS & SAFETY BUTTON */}
-          <TouchableOpacity 
-            onPress={() => router.push({
-              pathname: '/Tutors/settings',
-              params: { id: tutor._id || id } 
-            })}
-            className="bg-white border border-gray-100 p-5 rounded-[25px] shadow-sm w-full mt-6 mb-24"
-          >
-            <HStack className="justify-between items-center">
-              <HStack space="md" className="items-center">
-                <View className="bg-gray-100 p-2 rounded-lg">
+              {/* <TouchableOpacity
+                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3"
+              >
+                <Text className="font-bold text-gray-800">Edit Profile</Text>
+              </TouchableOpacity> */}
+
+              <TouchableOpacity
+                onPress={handleDelete}
+                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center"
+              >
+                <Text className="font-bold text-red-500">Remove Profile</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View className="mt-8 mb-10">
+              <TouchableOpacity
+                className="bg-indigo-600 py-5 rounded-3xl items-center"
+                onPress={() => setShowContact(true)}
+              >
+                <HStack className="items-center">
+                  <Icon as={Phone} size="sm" className="text-white mr-2" />
+                  <Text className="text-white font-bold text-lg">
+                    Book a Session
+                  </Text>
+                </HStack>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* {isOwner && (
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: "/Tutors/settings",
+                  params: { id: tutor._id || id },
+                })
+              }
+              className="bg-white border border-gray-100 p-5 rounded-[25px] shadow-sm w-full mt-4 mb-10"
+            >
+              <HStack className="justify-between items-center">
+                <HStack space="md" className="items-center">
                   <Icon as={ShieldCheck} size="sm" className="text-gray-500" />
-                </View>
-                <Text className="font-bold text-black text-lg">Settings & Safety</Text>
+                  <Text className="font-bold text-black text-lg">
+                    Settings & Safety
+                  </Text>
+                </HStack>
               </HStack>
-              <Icon as={ChevronRight} size="sm" className="text-gray-300" />
-            </HStack>
-          </TouchableOpacity>
-          
-        </VStack>
-      </ScrollView>
+            </TouchableOpacity>
+          )} */}
+        </View>
 
-      {/* BOOKING BUTTON */}
-      <View className="p-6 bg-white border-t border-gray-100">
-        <TouchableOpacity 
-          className="bg-[#4338CA] py-4 rounded-full flex-row justify-center items-center shadow-md"
-          onPress={() => setShowContact(true)} 
-        >
-          <Icon as={Phone} size="sm" className="text-white mr-2" />
-          <Text className="text-white font-bold text-lg">Book a Session</Text>
-        </TouchableOpacity>
-      </View>
-    <Footer />
-    </View>
+        <Footer />
+      </ScrollView>
+    </SafeAreaView>
   );
 }

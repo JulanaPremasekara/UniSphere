@@ -21,9 +21,19 @@ export const getAllLostItems = async () => {
 };
 
 export const createLostItem = async (formData: FormData) => {
-  const response = await apiClient.post("/lost", formData);
+  const response = await apiClient.post("/lost", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
   return response.data;
 };
+
+export const markItemAsResolved = async (itemId: string) => {
+  const response = await apiClient.patch(`/lost/${itemId}/resolve`);
+  return response.data;
+}
 
 export const deleteLostItem = async (itemId: string) => {
     const response = await apiClient.delete(`/lost/${itemId}`);
@@ -31,6 +41,10 @@ export const deleteLostItem = async (itemId: string) => {
 }
 
 export const updateLostItem = async (itemId: string, formData: FormData) => {
-    const response = await apiClient.put(`/lost/${itemId}`, formData);
+    const response = await apiClient.put(`/lost/${itemId}`, formData,{
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
     return response.data;
 }
