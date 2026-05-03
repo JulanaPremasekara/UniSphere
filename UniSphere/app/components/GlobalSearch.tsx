@@ -7,12 +7,9 @@ import {
   ActivityIndicator,
   FlatList,
   Keyboard,
-  Modal,
-  Pressable,
 } from "react-native";
 import { Search, X } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../services/api";
 
 type GlobalSearchItem = {
@@ -21,6 +18,10 @@ type GlobalSearchItem = {
   title: string;
   subtitle?: string;
   route: string;
+};
+
+type GlobalSearchProps = {
+  onSearchActiveChange?: (active: boolean) => void;
 };
 
 const toArray = (res: any) => {
@@ -37,13 +38,23 @@ const toArray = (res: any) => {
   return [];
 };
 
-export default function GlobalSearch() {
+export default function GlobalSearch({
+  onSearchActiveChange,
+}: GlobalSearchProps) {
   const router = useRouter();
 
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<GlobalSearchItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    const active = query.trim().length > 0;
+    onSearchActiveChange?.(active);
+
+    return () => {
+      onSearchActiveChange?.(false);
+    };
+  }, [query, onSearchActiveChange]);
 
   useEffect(() => {
     const fetchSearchData = async () => {
@@ -143,146 +154,125 @@ export default function GlobalSearch() {
 
     if (!searchText) return [];
 
-    return items.filter((item) => {
-      const searchableText = `${item.type} ${item.title} ${
-        item.subtitle || ""
-      }`;
+    return items
+      .filter((item) => {
+        const searchableText = `${item.type} ${item.title} ${
+          item.subtitle || ""
+        }`;
 
-      return searchableText.toLowerCase().includes(searchText);
-    });
+        return searchableText.toLowerCase().includes(searchText);
+      })
+      .slice(0, 20);
   }, [query, items]);
-
-  const openSearch = () => {
-    setModalVisible(true);
-  };
-
-  const closeSearch = () => {
-    Keyboard.dismiss();
-    setQuery("");
-    setModalVisible(false);
-  };
 
   const handleResultPress = (route: string) => {
     Keyboard.dismiss();
     setQuery("");
-    setModalVisible(false);
+    onSearchActiveChange?.(false);
     router.push(route as any);
   };
 
   return (
-    <>
-      <View className="px-6 mt-2 mb-4">
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={openSearch}
-          className="flex-row items-center bg-gray-100 rounded-full px-5 h-14"
-        >
-          <Search size={20} color="#9CA3AF" />
+    <View
+      className="px-6 mt-2 mb-4"
+      style={{
+        zIndex: 9999,
+        elevation: 9999,
+      }}
+    >
+      <View className="flex-row items-center bg-gray-100 rounded-full px-5 h-14">
+        <Search size={20} color="#9CA3AF" />
 
-          <Text className="flex-1 ml-3 text-gray-400 text-base">
-            Search UniSphere...
-          </Text>
-        </TouchableOpacity>
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search UniSphere..."
+          className="flex-1 ml-3 text-gray-700 text-base"
+          placeholderTextColor="#9CA3AF"
+          autoCorrect={false}
+        />
+
+        {query.length > 0 && (
+          <TouchableOpacity
+            onPress={() => {
+              setQuery("");
+              onSearchActiveChange?.(false);
+            }}
+          >
+            <X size={18} color="#9CA3AF" />
+          </TouchableOpacity>
+        )}
       </View>
 
-      <Modal
-        visible={modalVisible}
-        animationType="fade"
-        transparent
-        statusBarTranslucent
-        onRequestClose={closeSearch}
-      >
-        <SafeAreaView className="flex-1 bg-black/40">
-          <Pressable className="flex-1" onPress={closeSearch}>
-            <Pressable
-              className="mx-5 mt-4 bg-white rounded-[30px] overflow-hidden"
-              onPress={() => {}}
-            >
-              <View className="flex-row items-center bg-gray-100 rounded-full px-5 h-14 mx-4 mt-4 mb-3">
-                <Search size={20} color="#9CA3AF" />
-
-                <TextInput
-                  value={query}
-                  onChangeText={setQuery}
-                  placeholder="Search UniSphere..."
-                  className="flex-1 ml-3 text-gray-700 text-base"
-                  placeholderTextColor="#9CA3AF"
-                  autoCorrect={false}
-                  autoFocus
-                />
-
-                {query.length > 0 ? (
-                  <TouchableOpacity onPress={() => setQuery("")}>
-                    <X size={18} color="#9CA3AF" />
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity onPress={closeSearch}>
-                    <X size={18} color="#9CA3AF" />
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              {loading ? (
-                <View className="py-10 items-center">
-                  <ActivityIndicator color="#4F46E5" />
-                  <Text className="text-gray-400 mt-2 text-sm">
-                    Searching...
+      {query.trim().length > 0 && (
+        <View
+          style={{
+            position: "absolute",
+            top: 64,
+            left: 24,
+            right: 24,
+            height: 300,
+            zIndex: 99999,
+            elevation: 99999,
+            backgroundColor: "white",
+            borderRadius: 24,
+            overflow: "hidden",
+          }}
+        >
+          {loading ? (
+            <View className="py-6 items-center bg-white">
+              <ActivityIndicator color="#4F46E5" />
+              <Text className="text-gray-400 mt-2 text-sm">Searching...</Text>
+            </View>
+          ) : filteredResults.length > 0 ? (
+            <FlatList
+              data={filteredResults}
+              keyExtractor={(item) => `${item.type}-${item.id}`}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={true}
+              nestedScrollEnabled={true}
+              scrollEnabled={true}
+              removeClippedSubviews={false}
+              contentContainerStyle={{
+                paddingBottom: 10,
+              }}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  activeOpacity={0.75}
+                  onPress={() => handleResultPress(item.route)}
+                  className="px-5 py-4 border-b border-gray-100 bg-white"
+                >
+                  <Text className="text-[10px] font-bold text-indigo-600 uppercase">
+                    {item.type}
                   </Text>
-                </View>
-              ) : query.trim().length === 0 ? (
-                <View className="py-10 items-center px-6">
-                  <Text className="text-gray-400 font-medium text-center">
-                    Type to search events, marketplace, lost items, housing,
-                    tutors, and study groups.
+
+                  <Text
+                    className="text-base font-bold text-gray-900 mt-1"
+                    numberOfLines={1}
+                  >
+                    {item.title}
                   </Text>
-                </View>
-              ) : filteredResults.length > 0 ? (
-                <FlatList
-                  data={filteredResults}
-                  keyExtractor={(item) => `${item.type}-${item.id}`}
-                  style={{ maxHeight: 420 }}
-                  keyboardShouldPersistTaps="handled"
-                  showsVerticalScrollIndicator
-                  nestedScrollEnabled
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      activeOpacity={0.75}
-                      onPress={() => handleResultPress(item.route)}
-                      className="px-5 py-4 border-b border-gray-100"
+
+                  {item.subtitle ? (
+                    <Text
+                      className="text-sm text-gray-500 mt-1"
+                      numberOfLines={1}
                     >
-                      <Text className="text-[10px] font-bold text-indigo-600 uppercase">
-                        {item.type}
-                      </Text>
-
-                      <Text
-                        className="text-base font-bold text-gray-900 mt-1"
-                        numberOfLines={1}
-                      >
-                        {item.title}
-                      </Text>
-
-                      {item.subtitle ? (
-                        <Text
-                          className="text-sm text-gray-500 mt-1"
-                          numberOfLines={1}
-                        >
-                          {item.subtitle}
-                        </Text>
-                      ) : null}
-                    </TouchableOpacity>
-                  )}
-                />
-              ) : (
-                <View className="py-10 items-center">
-                  <Text className="text-gray-400 font-medium">
-                    No results found
-                  </Text>
-                </View>
+                      {item.subtitle}
+                    </Text>
+                  ) : null}
+                </TouchableOpacity>
               )}
-            </Pressable>
-          </Pressable>
-        </SafeAreaView>
-      </Modal>
-    </>
+            />
+          ) : (
+            <View className="py-6 items-center bg-white">
+              <Text className="text-gray-400 font-medium">
+                No results found
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
+    </View>
   );
 }
