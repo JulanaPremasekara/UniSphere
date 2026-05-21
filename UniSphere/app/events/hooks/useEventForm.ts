@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Alert, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import apiClient from '../app/services/api';
+import apiClient from '@/services/api';
 
 export const useEventForm = (editId?: string | string[]) => {
   const isEditing = !!editId;

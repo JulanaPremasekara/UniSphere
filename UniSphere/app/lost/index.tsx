@@ -10,18 +10,19 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"; // ✅ Modern
 import { router } from "expo-router";
 
-import AppHeader from "../components/AppHeader";
-import SearchInput from "../components/SearchInput";
-import FilterChips from "../components/FilterChips";
-import SectionHeader from "../components/SectionHeader";
+import AppHeader from "@/components/AppHeader";
+import SearchInput from "@/components/SearchInput";
+import FilterChips from "@/components/FilterChips";
+import SectionHeader from "@/components/SectionHeader";
 
 import LostItemCard from "./components/LostItemCard";
 import { useLostItemsListQuery } from "./hooks/useLostItems";
 import { LostItem } from "./types/lostItem.types";
-import { useFilteredList } from "../hooks/useFilteredList";
-import Footer from "../components/Footer";
+import { useFilteredList } from "@/hooks/useFilteredList";
+import Footer from "@/components/Footer";
 import { Calendar, Plus } from "lucide-react-native";
 import { useUser } from "@/hooks/useUser";
+import { useTheme } from "@/context/ThemeContext";
 
 type LostItemsFilter = "ALL" | "LOST" | "FOUND" | "ELECTRONICS" | "PERSON";
 
@@ -39,6 +40,7 @@ export default function LostIndexScreen() {
   const [selectedFilter, setSelectedFilter] = useState<LostItemsFilter>("ALL");
   const { userId, user } = useUser();
   const [loginModalVisible, setLoginModalVisible] = useState(false);
+  const { colors } = useTheme();
 
   const {
     data: items = [],
@@ -89,19 +91,19 @@ export default function LostIndexScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#4F46E5" />
+      <SafeAreaView style={{ backgroundColor: colors.bg }} className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
   }
 
   if (isError) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white px-6">
-        <Text className="mb-2 text-lg font-bold text-slate-900">
+      <SafeAreaView style={{ backgroundColor: colors.bg }} className="flex-1 items-center justify-center px-6">
+        <Text style={{ color: colors.text }} className="mb-2 text-lg font-bold">
           Failed to load lost items
         </Text>
-        <Text className="text-center text-sm text-slate-500">
+        <Text style={{ color: colors.textSecondary }} className="text-center text-sm">
           {error instanceof Error ? error.message : "Something went wrong"}
         </Text>
       </SafeAreaView>
@@ -109,7 +111,7 @@ export default function LostIndexScreen() {
   }
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+    <SafeAreaView edges={["top"]} style={{ backgroundColor: colors.bg }} className="flex-1">
       <View className="flex-1">
         <AppHeader title="UniSphere" />
 
@@ -141,11 +143,11 @@ export default function LostIndexScreen() {
           }
           ListEmptyComponent={
             <View className="mt-20 items-center">
-              <Text className="text-lg font-bold text-gray-700">
+              <Text style={{ color: colors.text }} className="text-lg font-bold">
                 No items found
               </Text>
 
-              <Text className="text-sm text-gray-400 mt-2 text-center px-10">
+              <Text style={{ color: colors.textSecondary }} className="text-sm mt-2 text-center px-10">
                 Try adjusting your search or filter to find what you're looking
                 for.
               </Text>
@@ -171,8 +173,8 @@ export default function LostIndexScreen() {
           onPress={() =>
             !userId ? setLoginModalVisible(true) : handleCreateReport()
           }
-          className="absolute right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
-          style={{ bottom: 90 + Math.max(insets.bottom, 16) }}
+          style={{ bottom: 90 + Math.max(insets.bottom, 16), backgroundColor: colors.primary }}
+          className="absolute right-8 w-16 h-16 rounded-full items-center justify-center shadow-lg"
         >
           <Plus color="white" size={32} />
         </TouchableOpacity>
@@ -189,23 +191,24 @@ export default function LostIndexScreen() {
             onPress={() => setLoginModalVisible(false)}
             className="flex-1 bg-black/60 justify-center items-center px-6"
           >
-            <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
-              <View className="bg-indigo-50 p-6 rounded-full mb-6">
-                <Calendar size={40} color="#4F46E5" />
+            <View style={{ backgroundColor: colors.white }} className="rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
+              <View style={{ backgroundColor: colors.primaryLight }} className="p-6 rounded-full mb-6">
+                <Calendar size={40} color={colors.primary} />
               </View>
-              <Text className="text-2xl font-black text-gray-900 mb-2">
+              <Text style={{ color: colors.text }} className="text-2xl font-black mb-2">
                 Login Required
               </Text>
-              <Text className="text-gray-500 text-center text-lg mb-8 leading-relaxed">
+              <Text style={{ color: colors.textSecondary }} className="text-center text-lg mb-8 leading-relaxed">
                 Please sign in to your UniSphere account to create and share new
                 events with the campus.
               </Text>
               <View className="flex-row gap-4 w-full">
                 <TouchableOpacity
                   onPress={() => setLoginModalVisible(false)}
-                  className="flex-1 bg-gray-50 p-5 rounded-3xl"
+                  style={{ backgroundColor: colors.bgInput }}
+                  className="flex-1 p-5 rounded-3xl"
                 >
-                  <Text className="text-gray-900 font-bold text-center text-lg">
+                  <Text style={{ color: colors.text }} className="font-bold text-center text-lg">
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -214,7 +217,8 @@ export default function LostIndexScreen() {
                     setLoginModalVisible(false);
                     router.push("/login");
                   }}
-                  className="flex-1 bg-indigo-600 p-5 rounded-3xl shadow-lg shadow-indigo-200"
+                  style={{ backgroundColor: colors.primary }}
+                  className="flex-1 p-5 rounded-3xl shadow-lg"
                 >
                   <Text className="text-white font-bold text-center text-lg">
                     Sign In

@@ -17,7 +17,7 @@ import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText } from '@/components/ui/button';
 import { X, Save } from 'lucide-react-native';
-import apiClient from "../services/api";
+import apiClient from "@/services/api";
 
 const CONDITIONS = ["New", "Used", "Like New"];
 

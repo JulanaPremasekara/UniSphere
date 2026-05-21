@@ -1,42 +1,36 @@
-import { useState, useCallback, useEffect } from 'react';
+import React from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { Alert, Platform } from 'react-native';
-import apiClient from '../app/services/api';
-import { AppStorage } from '../app/services/storage';
+import apiClient from '@/services/api';
+import { AppStorage } from '@/services/storage';
 
 export const useProfile = () => {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchProfile = useCallback(async () => {
-    try {
+  const [isUpdating, setIsUpdating] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+
+  // Reuse the same cache key as useUser so both hooks share the same data
+  const { data: user, isLoading, refetch } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
       const token = await AppStorage.getItem('userToken');
-      if (!token) {
-        setUser(null);
-        return;
-      }
+      if (!token) return null;
       const res = await apiClient.get('/users/me');
-      if (res.data.success) {
-        setUser(res.data.user);
-      } else {
-        await AppStorage.removeItem('userToken');
-        setUser(null);
-      }
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      if (res.data.success) return res.data.user;
+      await AppStorage.removeItem('userToken');
+      return null;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
   const logout = async () => {
     await AppStorage.removeItem('userToken');
     await AppStorage.removeItem('hasSeenWelcome');
-    setUser(null);
+    queryClient.removeQueries({ queryKey: ['currentUser'] });
     router.replace('/login');
   };
 
@@ -67,15 +61,14 @@ export const useProfile = () => {
       }
 
       const response = await apiClient.put('/users/update', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       if (response.data.success) {
         setSuccessMessage("Profile updated successfully!");
-        setUser(response.data.user);
-        
+        // Update the shared cache immediately with the new user data
+        queryClient.setQueryData(['currentUser'], response.data.user);
+
         if (shouldNavigateBack) {
           if (Platform.OS !== 'web') {
             Alert.alert("Success", "Profile updated successfully!", [{ text: "OK", onPress: () => router.back() }]);
@@ -98,7 +91,7 @@ export const useProfile = () => {
     try {
       const response = await apiClient.delete('/users/profile-image');
       if (response.data.success) {
-        setUser(response.data.user);
+        queryClient.setQueryData(['currentUser'], response.data.user);
         setSuccessMessage("Profile image removed.");
         return true;
       }
@@ -115,6 +108,7 @@ export const useProfile = () => {
       const res = await apiClient.delete('/users');
       if (res.data.success) {
         await AppStorage.removeItem('userToken');
+        queryClient.removeQueries({ queryKey: ['currentUser'] });
         router.replace('/login');
         return true;
       }
@@ -124,13 +118,9 @@ export const useProfile = () => {
     return false;
   };
 
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
-
   return {
-    user,
-    loading,
+    user: user ?? null,
+    loading: isLoading,
     isUpdating,
     errorMessage,
     successMessage,
@@ -138,6 +128,6 @@ export const useProfile = () => {
     updateProfile,
     deleteProfileImage,
     deleteAccount,
-    refreshProfile: fetchProfile
+    refreshProfile: refetch,
   };
 };

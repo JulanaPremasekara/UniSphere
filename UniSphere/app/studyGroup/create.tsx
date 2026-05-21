@@ -10,6 +10,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  View,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -21,7 +22,8 @@ import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
 
-import apiClient from "../services/api";
+import apiClient from "@/services/api";
+import { useTheme } from "@/context/ThemeContext";
 
 const TAGS = ["GENERAL", "MATHEMATICS", "COMPUTER SCIENCE"];
 
@@ -38,6 +40,7 @@ type FormErrors = {
 export default function CreateStudyGroup() {
   const router = useRouter();
   const { editId } = useLocalSearchParams();
+  const { colors } = useTheme();
 
   const isEdit = !!editId;
 
@@ -172,9 +175,9 @@ export default function CreateStudyGroup() {
       formData.append("tag", tag);
 
       const goalsArray = learningGoals
-        .split(",")
-        .map((goal) => goal.trim())
-        .filter(Boolean);
+          .split(",")
+          .map((goal) => goal.trim())
+          .filter(Boolean);
 
       formData.append("learningGoals", JSON.stringify(goalsArray));
 
@@ -243,26 +246,23 @@ export default function CreateStudyGroup() {
 
   if (screenLoading) {
     return (
-      <Box className="flex-1 bg-white items-center justify-center">
-        <ActivityIndicator size="large" color="#4F46E5" />
-        <Text className="mt-3 text-gray-500 font-semibold">
+      <Box style={{ backgroundColor: colors.bg }} className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={{ color: colors.textSecondary }} className="mt-3 font-semibold">
           Loading study group...
         </Text>
       </Box>
     );
   }
 
-  const inputBase =
-    "bg-gray-50 p-5 rounded-2xl text-lg font-bold text-gray-900 border";
-
   const FormContent = (
-    <Box className="flex-1 pt-12 bg-white">
+    <Box style={{ backgroundColor: colors.bg }} className="flex-1 pt-12">
       <HStack className="px-6 py-4 items-center">
         <TouchableOpacity onPress={() => router.back()}>
-          <ChevronLeft size={28} color="#1f2937" />
+          <ChevronLeft size={28} color={colors.text} />
         </TouchableOpacity>
 
-        <Text className="ml-4 text-xl font-bold text-gray-900">
+        <Text style={{ color: colors.text }} className="ml-4 text-xl font-bold">
           {isEdit ? "Edit Study Group" : "Create Study Group"}
         </Text>
       </HStack>
@@ -277,16 +277,18 @@ export default function CreateStudyGroup() {
           <VStack>
             <TouchableOpacity
               onPress={pickImage}
-              className={`h-64 bg-gray-100 rounded-[40px] border-2 border-dashed items-center justify-center overflow-hidden ${
-                errors.image ? "border-red-400" : "border-gray-200"
-              }`}
+              style={{
+                backgroundColor: colors.bgCard,
+                borderColor: errors.image ? "#EF4444" : colors.border,
+              }}
+              className="h-64 rounded-[40px] border-2 border-dashed items-center justify-center overflow-hidden"
             >
               {image ? (
                 <Image source={{ uri: image }} className="w-full h-full" />
               ) : (
                 <VStack className="items-center">
-                  <Camera size={40} color="#9CA3AF" />
-                  <Text className="text-gray-600 mt-2">Add Photo</Text>
+                  <Camera size={40} color={colors.textMuted} />
+                  <Text style={{ color: colors.textSecondary }} className="mt-2">Add Photo</Text>
                 </VStack>
               )}
             </TouchableOpacity>
@@ -301,15 +303,19 @@ export default function CreateStudyGroup() {
           <VStack>
             <TextInput
               placeholder="Subject"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textMuted}
               value={subject}
               onChangeText={(text) => {
                 setSubject(text);
                 clearError("subject");
               }}
-              className={`${inputBase} ${
-                errors.subject ? "border-red-400" : "border-gray-100"
-              }`}
+              style={{
+                backgroundColor: colors.bgInput,
+                color: colors.text,
+                borderColor: errors.subject ? "#EF4444" : "transparent",
+                borderWidth: errors.subject ? 1 : 0,
+              }}
+              className="p-5 rounded-2xl text-lg font-bold"
             />
 
             {errors.subject && (
@@ -322,15 +328,19 @@ export default function CreateStudyGroup() {
           <VStack>
             <TextInput
               placeholder="Location"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textMuted}
               value={location}
               onChangeText={(text) => {
                 setLocation(text);
                 clearError("location");
               }}
-              className={`${inputBase} ${
-                errors.location ? "border-red-400" : "border-gray-100"
-              }`}
+              style={{
+                backgroundColor: colors.bgInput,
+                color: colors.text,
+                borderColor: errors.location ? "#EF4444" : "transparent",
+                borderWidth: errors.location ? 1 : 0,
+              }}
+              className="p-5 rounded-2xl text-lg font-bold"
             />
 
             {errors.location && (
@@ -343,15 +353,19 @@ export default function CreateStudyGroup() {
           <VStack>
             <TextInput
               placeholder="Time (e.g. 2026-05-10T14:30:00Z)"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textMuted}
               value={time}
               onChangeText={(text) => {
                 setTime(text);
                 clearError("time");
               }}
-              className={`${inputBase} ${
-                errors.time ? "border-red-400" : "border-gray-100"
-              }`}
+              style={{
+                backgroundColor: colors.bgInput,
+                color: colors.text,
+                borderColor: errors.time ? "#EF4444" : "transparent",
+                borderWidth: errors.time ? 1 : 0,
+              }}
+              className="p-5 rounded-2xl text-lg font-bold"
             />
 
             {errors.time && (
@@ -364,18 +378,20 @@ export default function CreateStudyGroup() {
           <VStack>
             <TextInput
               placeholder="Max Participants"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textMuted}
               value={maxParticipants}
               onChangeText={(text) => {
                 setMaxParticipants(text);
                 clearError("maxParticipants");
               }}
               keyboardType="numeric"
-              className={`${inputBase} ${
-                errors.maxParticipants
-                  ? "border-red-400"
-                  : "border-gray-100"
-              }`}
+              style={{
+                backgroundColor: colors.bgInput,
+                color: colors.text,
+                borderColor: errors.maxParticipants ? "#EF4444" : "transparent",
+                borderWidth: errors.maxParticipants ? 1 : 0,
+              }}
+              className="p-5 rounded-2xl text-lg font-bold"
             />
 
             {errors.maxParticipants && (
@@ -386,7 +402,7 @@ export default function CreateStudyGroup() {
           </VStack>
 
           <VStack space="xs">
-            <Text className="text-[11px] font-black text-gray-500 uppercase ml-2">
+            <Text style={{ color: colors.textMuted }} className="text-[11px] font-black uppercase ml-2">
               Tag
             </Text>
 
@@ -398,16 +414,17 @@ export default function CreateStudyGroup() {
                     setTag(t);
                     clearError("tag");
                   }}
-                  className={`px-5 py-3 rounded-full border mb-2 ${
-                    tag === t
-                      ? "bg-indigo-600 border-indigo-600"
-                      : "bg-white border-gray-200"
-                  }`}
+                  style={{
+                    backgroundColor: tag === t ? colors.primary : colors.bgInput,
+                    borderColor: tag === t ? colors.primary : colors.border,
+                  }}
+                  className="px-5 py-3 rounded-full border mb-2"
                 >
                   <Text
-                    className={`font-bold ${
-                      tag === t ? "text-white" : "text-gray-700"
-                    }`}
+                    style={{
+                      color: tag === t ? "white" : colors.textSecondary,
+                    }}
+                    className="font-bold"
                   >
                     {t}
                   </Text>
@@ -425,7 +442,7 @@ export default function CreateStudyGroup() {
           <VStack>
             <TextInput
               placeholder="Learning Goals (comma separated)"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textMuted}
               value={learningGoals}
               onChangeText={(text) => {
                 setLearningGoals(text);
@@ -433,9 +450,13 @@ export default function CreateStudyGroup() {
               }}
               multiline
               textAlignVertical="top"
-              className={`bg-gray-50 p-5 rounded-2xl text-base text-gray-900 border min-h-[100px] ${
-                errors.learningGoals ? "border-red-400" : "border-gray-100"
-              }`}
+              style={{
+                backgroundColor: colors.bgInput,
+                color: colors.text,
+                borderColor: errors.learningGoals ? "#EF4444" : "transparent",
+                borderWidth: errors.learningGoals ? 1 : 0,
+              }}
+              className="p-5 rounded-2xl text-base border min-h-[100px]"
             />
 
             {errors.learningGoals && (
@@ -447,11 +468,12 @@ export default function CreateStudyGroup() {
         </VStack>
       </ScrollView>
 
-      <Box className="absolute bottom-0 w-full p-6 bg-white">
+      <Box style={{ backgroundColor: colors.bg }} className="absolute bottom-0 w-full p-6">
         <Button
           onPress={handleSave}
           disabled={loading}
-          className="bg-indigo-600 rounded-full h-16 shadow-lg shadow-indigo-100"
+          style={{ backgroundColor: colors.primary }}
+          className="rounded-full h-16 shadow-lg"
         >
           {loading ? (
             <ActivityIndicator color="white" />
@@ -468,7 +490,7 @@ export default function CreateStudyGroup() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1, backgroundColor: "white" }}
+      style={{ flex: 1, backgroundColor: colors.bg }}
     >
       {Platform.OS === "web" ? (
         FormContent

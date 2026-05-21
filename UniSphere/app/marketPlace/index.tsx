@@ -8,20 +8,22 @@ import {
   Modal,
   View,
 } from "react-native";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter } from "expo-router";
 import { Calendar, Plus } from "lucide-react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
 
-import apiClient from "../services/api";
-import AppHeader from "../components/AppHeader";
-import SearchInput from "../components/SearchInput";
-import SectionHeader from "../components/SectionHeader";
-import Footer from "../components/Footer";
-import FilterChips from "../components/FilterChips";
+import apiClient from "@/services/api";
+import AppHeader from "@/components/AppHeader";
+import SearchInput from "@/components/SearchInput";
+import SectionHeader from "@/components/SectionHeader";
+import Footer from "@/components/Footer";
+import FilterChips from "@/components/FilterChips";
 import { useUser } from "@/hooks/useUser";
+import { useMarketplace } from "./hooks/useMarketplace";
+import { useTheme } from "@/context/ThemeContext";
 
 type MarketFilter =
   | "ALL"
@@ -43,41 +45,19 @@ export default function MarketplaceIndex() {
   const insets = useSafeAreaInsets();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<MarketFilter>("ALL");
-
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const { userId } = useUser();
   const [loginModalVisible, setLoginModalVisible] = useState(false);
+  const { colors } = useTheme();
 
-  const fetchProducts = useCallback(async () => {
-    try {
-      const response = await apiClient.get("/api/marketplace");
-      const data = response.data.data || response.data;
-      const list = Array.isArray(data) ? data : [];
-
-      setProducts(list);
-      setFilteredProducts(list);
-    } catch (error) {
-      console.error("Error fetching marketplace items:", error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchProducts();
-    }, [fetchProducts])
-  );
+  const { products, loading, refreshProducts } = useMarketplace();
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchProducts();
+    refreshProducts().finally(() => setRefreshing(false));
   };
 
   // 🔥 FILTER LOGIC (same pattern as tutor)
@@ -153,14 +133,14 @@ export default function MarketplaceIndex() {
 
   if (loading && !refreshing) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#4F46E5" />
+      <SafeAreaView style={{ backgroundColor: colors.bg }} className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+    <SafeAreaView edges={["top"]} style={{ backgroundColor: colors.bg }} className="flex-1">
       <View className="flex-1">
         <AppHeader title="UniSphere" />
 
@@ -202,9 +182,16 @@ export default function MarketplaceIndex() {
                   <TouchableOpacity
                     key={item._id}
                     onPress={() => handlePressProduct(item)}
-                    className="bg-white rounded-[35px] mb-8 overflow-hidden"
+                    style={{
+                      backgroundColor: colors.bgCard,
+                      borderRadius: 35,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      marginBottom: 32,
+                      overflow: "hidden",
+                    }}
                   >
-                    <Box className="relative w-full h-[340px] rounded-[35px] overflow-hidden bg-gray-50 border border-gray-100">
+                    <Box style={{ backgroundColor: colors.bgCard, borderColor: colors.border }} className="relative w-full h-[340px] rounded-[35px] overflow-hidden border">
                       <Image
                         source={{
                           uri:
@@ -216,15 +203,16 @@ export default function MarketplaceIndex() {
                       />
                     </Box>
 
-                    <View className="flex-row justify-between items-center px-4 pt-5">
+                    <View className="flex-row justify-between items-center px-4 pt-5 pb-4">
                       <Text
-                        className="text-2xl font-black text-gray-900 flex-1 mr-2"
+                        style={{ color: colors.text }}
+                        className="text-2xl font-black flex-1 mr-2"
                         numberOfLines={1}
                       >
                         {item.title}
                       </Text>
 
-                      <Text className="text-indigo-600 font-black text-xl">
+                      <Text style={{ color: colors.primary }} className="font-black text-xl">
                         ${item.price}
                       </Text>
                     </View>
@@ -233,7 +221,7 @@ export default function MarketplaceIndex() {
               </View>
             ) : (
               <Box className="w-full py-10 items-center">
-                <Text className="text-gray-400 font-medium">
+                <Text style={{ color: colors.textMuted }} className="font-medium">
                   No items found
                 </Text>
               </Box>
@@ -243,8 +231,8 @@ export default function MarketplaceIndex() {
 
         <TouchableOpacity
           onPress={handleCreateProduct}
-          className="absolute right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
-          style={{ bottom: 90 + Math.max(insets.bottom, 16) }}
+          style={{ bottom: 90 + Math.max(insets.bottom, 16), backgroundColor: colors.primary }}
+          className="absolute right-8 w-16 h-16 rounded-full items-center justify-center shadow-lg"
         >
           <Plus size={32} color="white" />
         </TouchableOpacity>
@@ -263,16 +251,16 @@ export default function MarketplaceIndex() {
             onPress={() => setLoginModalVisible(false)}
             className="flex-1 bg-black/60 justify-center items-center px-6"
           >
-            <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
-              <View className="bg-indigo-50 p-6 rounded-full mb-6">
-                <Calendar size={40} color="#4F46E5" />
+            <View style={{ backgroundColor: colors.white }} className="rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
+              <View style={{ backgroundColor: colors.primaryLight }} className="p-6 rounded-full mb-6">
+                <Calendar size={40} color={colors.primary} />
               </View>
 
-              <Text className="text-2xl font-black text-gray-900 mb-2">
+              <Text style={{ color: colors.text }} className="text-2xl font-black mb-2">
                 Login Required
               </Text>
 
-              <Text className="text-gray-500 text-center text-lg mb-8 leading-relaxed">
+              <Text style={{ color: colors.textSecondary }} className="text-center text-lg mb-8 leading-relaxed">
                 Please sign in to your UniSphere account to view marketplace
                 items or create a new listing.
               </Text>
@@ -280,9 +268,10 @@ export default function MarketplaceIndex() {
               <View className="flex-row gap-4 w-full">
                 <TouchableOpacity
                   onPress={() => setLoginModalVisible(false)}
-                  className="flex-1 bg-gray-50 p-5 rounded-3xl"
+                  style={{ backgroundColor: colors.bgInput }}
+                  className="flex-1 p-5 rounded-3xl"
                 >
-                  <Text className="text-gray-900 font-bold text-center text-lg">
+                  <Text style={{ color: colors.text }} className="font-bold text-center text-lg">
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -292,7 +281,8 @@ export default function MarketplaceIndex() {
                     setLoginModalVisible(false);
                     router.push("/login" as any);
                   }}
-                  className="flex-1 bg-indigo-600 p-5 rounded-3xl shadow-lg shadow-indigo-200"
+                  style={{ backgroundColor: colors.primary }}
+                  className="flex-1 p-5 rounded-3xl shadow-lg"
                 >
                   <Text className="text-white font-bold text-center text-lg">
                     Sign In

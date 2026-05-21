@@ -1,43 +1,31 @@
- import { useState, useEffect } from 'react';
-import apiClient from '../app/services/api';
+ import { useQuery } from '@tanstack/react-query';
+import apiClient from '@/services/api';
 
 export const useUser = () => {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchUser = async () => {
-    try {
-      setLoading(true);
+  const { data: user, isLoading, error, refetch } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
       const res = await apiClient.get('/users/me');
-      setUser(res.data.user);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch user');
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return res.data.user ?? null;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const getuserById = async (id:string) => {
-    try{
-      setLoading(true);
+  const getuserById = async (id: string) => {
+    try {
       const res = await apiClient.get(`/users/${id}`);
-      setError(null);
       return res.data.user;
-    }catch{
-      setError("Failed to fetch user by ID");
-      setUser(null);
-    }finally{
-      setLoading(false);
+    } catch {
+      return null;
     }
   };
 
-  useEffect(() => {
-    
-    fetchUser();
-  }, []);
-
-  return { user, userId: user?._id, loading, error, refreshUser: fetchUser,getuserById };
+  return {
+    user: user ?? null,
+    userId: user?._id,
+    loading: isLoading,
+    error: error ? (error as any).message : null,
+    refreshUser: refetch,
+    getuserById,
+  };
 };

@@ -21,11 +21,12 @@ import {
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import Footer from "./components/Footer";
-import AppHeader from "./components/AppHeader";
-import { useEvents } from "../hooks/useEvents";
-import { AppStorage } from "./services/storage";
-import GlobalSearch from "./components/GlobalSearch";
+import Footer from "@/components/Footer";
+import AppHeader from "@/components/AppHeader";
+import { useEvents } from "@/app/events/hooks/useEvents";
+import { AppStorage } from "@/services/storage";
+import GlobalSearch from "@/components/GlobalSearch";
+import { useTheme } from "@/context/ThemeContext";
 
 const categories = [
   {
@@ -75,6 +76,7 @@ const categories = [
 export default function Home() {
   const router = useRouter();
   const { events, loading } = useEvents();
+  const { isDark, colors } = useTheme();
 
   const [showWelcome, setShowWelcome] = useState(false);
   const [searchActive, setSearchActive] = useState(false);
@@ -108,7 +110,15 @@ export default function Home() {
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.9}
-      className="w-[300px] bg-white rounded-[35px] border border-gray-100 shadow-sm mr-5 overflow-hidden"
+      style={{
+        width: 300,
+        backgroundColor: colors.white,
+        borderRadius: 35,
+        borderWidth: 1,
+        borderColor: colors.border,
+        marginRight: 20,
+        overflow: "hidden",
+      }}
     >
       <Image
         source={{
@@ -121,23 +131,24 @@ export default function Home() {
 
       <View className="p-5">
         <View className="flex-row justify-between items-center mb-2">
-          <View className="bg-indigo-100 px-3 py-1 rounded-full">
-            <Text className="text-indigo-600 text-[10px] font-bold uppercase tracking-wider">
+          <View style={{ backgroundColor: colors.primaryLight }} className="px-3 py-1 rounded-full">
+            <Text style={{ color: colors.primary }} className="text-[10px] font-bold uppercase tracking-wider">
               {event.month} {event.day}
             </Text>
           </View>
 
-          <Bookmark size={18} color="#4338CA" />
+          <Bookmark size={18} color={colors.primary} />
         </View>
 
         <Text
-          className="text-lg font-bold text-gray-900 mb-1"
+          style={{ color: colors.text }}
+          className="text-lg font-bold mb-1"
           numberOfLines={1}
         >
           {event.title}
         </Text>
 
-        <Text className="text-gray-500 text-xs leading-4" numberOfLines={2}>
+        <Text style={{ color: colors.textSecondary }} className="text-xs leading-4" numberOfLines={2}>
           Hosted by {event.organizer} • {event.location}
         </Text>
       </View>
@@ -145,7 +156,7 @@ export default function Home() {
   );
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: colors.bg }}>
       <View className="flex-1">
         {renderHeader()}
 
@@ -163,28 +174,32 @@ export default function Home() {
             {categories.map((item, index) => (
               <TouchableOpacity
                 key={index}
-                style={{ backgroundColor: item.color }}
+                style={{
+                  backgroundColor: isDark ? colors.bgCard : item.color,
+                  borderWidth: isDark ? 1 : 0,
+                  borderColor: colors.border,
+                }}
                 onPress={() => router.push(item.route as any)}
                 className="w-[47%] aspect-square rounded-[40px] items-center justify-center mb-4"
               >
-                <View className="bg-white p-3 rounded-2xl mb-2 shadow-sm">
-                  <item.icon size={29} color={item.iconColor} />
+                <View style={{ backgroundColor: isDark ? colors.white : "#ffffff" }} className="p-3 rounded-2xl mb-2 shadow-sm">
+                  <item.icon size={29} color={isDark ? colors.primary : item.iconColor} />
                 </View>
 
-                <Text className="font-bold text-gray-800 text-[14px] text-center px-2 leading-[16px]">
+                <Text style={{ color: colors.text }} className="font-bold text-[14px] text-center px-2 leading-[16px]">
                   {item.name}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
 
-          <View className="px-6 flex-row justify-between items-end mt-[-60]">
-            <Text className="text-2xl font-bold text-gray-900">
+          <View style={{ marginTop: -60 }} className="px-6 flex-row justify-between items-end">
+            <Text style={{ color: colors.text }} className="text-2xl font-bold">
               Featured Events
             </Text>
 
             <TouchableOpacity onPress={() => router.push("/events")}>
-              <Text className="text-indigo-600 font-bold text-base">
+              <Text style={{ color: colors.primary }} className="font-bold text-base">
                 View all
               </Text>
             </TouchableOpacity>
@@ -199,7 +214,7 @@ export default function Home() {
           >
             {loading ? (
               <View className="w-[300px] h-64 items-center justify-center">
-                <ActivityIndicator size="large" color="#4338CA" />
+                <ActivityIndicator size="large" color={colors.primary} />
               </View>
             ) : (
               events.slice(0, 5).map((event: any) => (
@@ -212,10 +227,10 @@ export default function Home() {
             )}
 
             {!loading && events.length === 0 && (
-              <View className="w-[300px] h-64 bg-gray-50 rounded-[35px] border border-dashed border-gray-200 items-center justify-center">
-                <Calendar size={32} color="#9CA3AF" />
+              <View style={{ backgroundColor: colors.bgCard, borderColor: colors.border }} className="w-[300px] h-64 rounded-[35px] border border-dashed items-center justify-center">
+                <Calendar size={32} color={colors.textMuted} />
 
-                <Text className="text-gray-400 font-bold mt-2">
+                <Text style={{ color: colors.textMuted }} className="font-bold mt-2">
                   No featured events
                 </Text>
               </View>
@@ -226,24 +241,24 @@ export default function Home() {
         <Footer />
 
         <Modal visible={showWelcome} animationType="fade" transparent={false}>
-          <View className="flex-1 bg-white items-center justify-center px-10">
-            <View className="bg-indigo-50 p-10 rounded-[45px] mb-10 shadow-sm">
-              <GraduationCap size={100} color="#4F46E5" strokeWidth={1.5} />
+          <View style={{ backgroundColor: colors.bg }} className="flex-1 items-center justify-center px-10">
+            <View style={{ backgroundColor: colors.primaryLight }} className="p-10 rounded-[45px] mb-10 shadow-sm">
+              <GraduationCap size={100} color={colors.primary} strokeWidth={1.5} />
             </View>
 
-            <Text className="text-4xl font-black text-gray-900 text-center mb-5">
+            <Text style={{ color: colors.text }} className="text-4xl font-black text-center mb-5">
               Welcome to UniSphere
             </Text>
 
-            <Text className="text-gray-500 text-center text-lg leading-relaxed font-medium px-4">
+            <Text style={{ color: colors.textSecondary }} className="text-center text-lg leading-relaxed font-medium px-4">
               Your all-in-one campus hub for events, marketplace, and community
               connections.
             </Text>
 
             <View className="absolute bottom-20 items-center">
-              <ActivityIndicator color="#4F46E5" size="large" />
+              <ActivityIndicator color={colors.primary} size="large" />
 
-              <Text className="text-indigo-600 mt-6 font-bold uppercase tracking-[3px] text-[10px] text-center">
+              <Text style={{ color: colors.primary }} className="mt-6 font-bold uppercase tracking-[3px] text-[10px] text-center">
                 Initializing your experience
               </Text>
             </View>

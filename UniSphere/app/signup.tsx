@@ -3,14 +3,16 @@ import { View, Text, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingVie
 import { useRouter } from 'expo-router';
 import { Button, ButtonText, ButtonSpinner } from '@/components/ui/button';
 import { ChevronLeft, GraduationCap } from 'lucide-react-native';
-import SignUpForm from './components/SignUpForm';
-import { useAuth } from '../hooks/useAuth';
+import SignUpForm from '@/components/SignUpForm';
+import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function SignUp() {
   const router = useRouter();
   const { signup, isLoading, errorMessage } = useAuth();
   const [showError, setShowError] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', year: '', major: '', password: '', confirmPassword: '' });
+  const { colors } = useTheme();
 
   const handleSignUp = async () => {
     const success = await signup(formData);
@@ -21,7 +23,8 @@ export default function SignUp() {
     // KeyboardAvoidingView ensures the keyboard doesn't cover input fields
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-      className="flex-1 bg-white"
+      style={{ backgroundColor: colors.bg }}
+      className="flex-1"
     >
       <ScrollView 
         className="flex-1" 
@@ -33,14 +36,14 @@ export default function SignUp() {
           
           {/* Back Button */}
           <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 w-12 mb-4">
-            <ChevronLeft size={28} color="#1E1B4B" />
+            <ChevronLeft size={28} color={colors.text} />
           </TouchableOpacity>
 
           <View className="flex-row items-center mb-10">
-            <View className="bg-indigo-600 p-3 rounded-2xl mr-4 shadow-sm"><GraduationCap size={28} color="white" /></View>
+            <View style={{ backgroundColor: colors.primary }} className="p-3 rounded-2xl mr-4 shadow-sm"><GraduationCap size={28} color="white" /></View>
             <View>
-              <Text className="text-2xl font-black text-indigo-900">Join UniSphere</Text>
-              <Text className="text-gray-400 font-medium">Student Registration</Text>
+              <Text style={{ color: colors.primary }} className="text-2xl font-black">Join UniSphere</Text>
+              <Text style={{ color: colors.textSecondary }} className="font-medium">Student Registration</Text>
             </View>
           </View>
 
@@ -48,14 +51,14 @@ export default function SignUp() {
             <SignUpForm formData={formData} setFormData={setFormData} showError={showError} errorMessage={errorMessage} />
           </View>
           
-          <Button onPress={handleSignUp} disabled={isLoading} className="bg-indigo-600 h-16 rounded-[25px] mt-20 shadow-md shadow-indigo-200">
+          <Button onPress={handleSignUp} disabled={isLoading} style={{ backgroundColor: colors.primary }} className="h-16 rounded-[25px] mt-20 shadow-md">
             {isLoading && <ButtonSpinner className="mr-2" />}
             <ButtonText className="font-bold text-lg">Create Account</ButtonText>
           </Button>
 
           <View className="flex-row justify-center mt-8 mb-10">
-            <Text className="text-gray-500">Already a member? </Text>
-            <TouchableOpacity onPress={() => router.push('/login')}><Text className="text-indigo-600 font-bold">Sign In</Text></TouchableOpacity>
+            <Text style={{ color: colors.textSecondary }}>Already a member? </Text>
+            <TouchableOpacity onPress={() => router.push('/login')}><Text style={{ color: colors.primary }} className="font-bold">Sign In</Text></TouchableOpacity>
           </View>
         </View>
       </ScrollView>

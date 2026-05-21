@@ -10,6 +10,7 @@ import {
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLostForm } from "./hooks/useCreateLostForm";
+import { useTheme } from "@/context/ThemeContext";
 
 const categories = [
   "Electronics",
@@ -21,6 +22,7 @@ const categories = [
 
 export default function CreateLostReportScreen() {
   const { itemId } = useLocalSearchParams<{ itemId?: string }>();
+  const { colors } = useTheme();
 
   const {
     form,
@@ -37,53 +39,54 @@ export default function CreateLostReportScreen() {
     return (
       <SafeAreaView
         edges={["top"]}
-        className="flex-1 items-center justify-center bg-white"
+        style={{ backgroundColor: colors.bg }}
+        className="flex-1 items-center justify-center"
       >
-        <Text className="text-slate-500">Loading item...</Text>
+        <Text style={{ color: colors.textSecondary }}>Loading item...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-white">
-      <View className="flex-1 px-4 pt-2">
+    <SafeAreaView edges={["top"]} style={{ backgroundColor: colors.bg }} className="flex-1">
+      <View style={{ backgroundColor: colors.bg }} className="flex-1 px-4 pt-2">
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 28 }}
         >
           <View className="mb-6 flex-row items-start justify-between">
             <View>
-              <Text className="mb-1 text-[10px] font-extrabold uppercase tracking-[2px] text-indigo-300">
+              <Text style={{ color: colors.primary }} className="mb-1 text-[10px] font-extrabold uppercase tracking-[2px]">
                 {isEditMode ? "Edit Report" : "Report Submission"}
               </Text>
-              <Text className="text-4xl font-extrabold text-slate-900">
+              <Text style={{ color: colors.text }} className="text-4xl font-extrabold">
                 Lost &amp; Found
               </Text>
             </View>
 
             <TouchableOpacity onPress={() => router.back()} className="p-2">
-              <Text className="text-xl text-slate-400">×</Text>
+              <Text style={{ color: colors.textSecondary }} className="text-2xl">×</Text>
             </TouchableOpacity>
           </View>
 
           <View className="mb-5">
-            <Text className="mb-2 text-sm font-semibold text-slate-600">
+            <Text style={{ color: colors.text }} className="mb-2 text-sm font-semibold">
               Report Classification
             </Text>
 
-            <View className="flex-row rounded-full bg-slate-100 p-1">
+            <View style={{ backgroundColor: colors.bgInput }} className="flex-row rounded-full p-1">
               <TouchableOpacity
                 onPress={() => updateField("reportType", "LOST")}
-                className={`flex-1 rounded-full px-4 py-3 ${
-                  form.reportType === "LOST" ? "bg-white" : ""
-                }`}
+                style={{
+                  backgroundColor: form.reportType === "LOST" ? colors.white : "transparent",
+                }}
+                className="flex-1 rounded-full px-4 py-3"
               >
                 <Text
-                  className={`text-center text-sm font-bold ${
-                    form.reportType === "LOST"
-                      ? "text-indigo-600"
-                      : "text-slate-500"
-                  }`}
+                  style={{
+                    color: form.reportType === "LOST" ? colors.primary : colors.textSecondary,
+                  }}
+                  className="text-center text-sm font-bold"
                 >
                   I Lost Something
                 </Text>
@@ -91,16 +94,16 @@ export default function CreateLostReportScreen() {
 
               <TouchableOpacity
                 onPress={() => updateField("reportType", "FOUND")}
-                className={`flex-1 rounded-full px-4 py-3 ${
-                  form.reportType === "FOUND" ? "bg-white" : ""
-                }`}
+                style={{
+                  backgroundColor: form.reportType === "FOUND" ? colors.white : "transparent",
+                }}
+                className="flex-1 rounded-full px-4 py-3"
               >
                 <Text
-                  className={`text-center text-sm font-bold ${
-                    form.reportType === "FOUND"
-                      ? "text-indigo-600"
-                      : "text-slate-500"
-                  }`}
+                  style={{
+                    color: form.reportType === "FOUND" ? colors.primary : colors.textSecondary,
+                  }}
+                  className="text-center text-sm font-bold"
                 >
                   I Found Something
                 </Text>
@@ -109,7 +112,7 @@ export default function CreateLostReportScreen() {
           </View>
 
           <View className="mb-5">
-            <Text className="mb-2 text-sm font-semibold text-slate-600">
+            <Text style={{ color: colors.text }} className="mb-2 text-sm font-semibold">
               Category
             </Text>
 
@@ -119,18 +122,16 @@ export default function CreateLostReportScreen() {
                   <TouchableOpacity
                     key={category}
                     onPress={() => updateField("category", category)}
-                    className={`rounded-full px-4 py-2 ${
-                      form.category === category
-                        ? "bg-indigo-600"
-                        : "bg-slate-100"
-                    }`}
+                    style={{
+                      backgroundColor: form.category === category ? colors.primary : colors.bgInput,
+                    }}
+                    className="rounded-full px-4 py-2"
                   >
                     <Text
-                      className={`text-sm font-bold ${
-                        form.category === category
-                          ? "text-white"
-                          : "text-slate-500"
-                      }`}
+                      style={{
+                        color: form.category === category ? "white" : colors.textSecondary,
+                      }}
+                      className="text-sm font-bold"
                     >
                       {category}
                     </Text>
@@ -147,7 +148,7 @@ export default function CreateLostReportScreen() {
           </View>
 
           <View className="mb-5">
-            <Text className="mb-2 text-sm font-semibold text-slate-600">
+            <Text style={{ color: colors.text }} className="mb-2 text-sm font-semibold">
               Item Title
             </Text>
 
@@ -155,10 +156,14 @@ export default function CreateLostReportScreen() {
               value={form.title}
               onChangeText={(text) => updateField("title", text)}
               placeholder="e.g. Mac book"
-              placeholderTextColor="#CBD5E1"
-              className={`rounded-2xl bg-slate-100 px-4 py-4 text-sm text-slate-900 ${
-                errors.title ? "border border-red-400" : ""
-              }`}
+              placeholderTextColor={colors.textMuted}
+              style={{
+                backgroundColor: colors.bgInput,
+                color: colors.text,
+                borderColor: errors.title ? "#EF4444" : "transparent",
+                borderWidth: errors.title ? 1 : 0,
+              }}
+              className="rounded-2xl px-4 py-4 text-sm font-semibold"
             />
 
             {errors.title && (
@@ -169,7 +174,7 @@ export default function CreateLostReportScreen() {
           </View>
 
           <View className="mb-5">
-            <Text className="mb-2 text-sm font-semibold text-slate-600">
+            <Text style={{ color: colors.text }} className="mb-2 text-sm font-semibold">
               Last Seen / Found Location
             </Text>
 
@@ -177,10 +182,14 @@ export default function CreateLostReportScreen() {
               value={form.location}
               onChangeText={(text) => updateField("location", text)}
               placeholder="e.g. Library Second Floor"
-              placeholderTextColor="#CBD5E1"
-              className={`rounded-2xl bg-slate-100 px-4 py-4 text-sm text-slate-900 ${
-                errors.location ? "border border-red-400" : ""
-              }`}
+              placeholderTextColor={colors.textMuted}
+              style={{
+                backgroundColor: colors.bgInput,
+                color: colors.text,
+                borderColor: errors.location ? "#EF4444" : "transparent",
+                borderWidth: errors.location ? 1 : 0,
+              }}
+              className="rounded-2xl px-4 py-4 text-sm font-semibold"
             />
 
             {errors.location && (
@@ -191,7 +200,7 @@ export default function CreateLostReportScreen() {
           </View>
 
           <View className="mb-5">
-            <Text className="mb-2 text-sm font-semibold text-slate-600">
+            <Text style={{ color: colors.text }} className="mb-2 text-sm font-semibold">
               Distinguishing Features
             </Text>
 
@@ -199,12 +208,16 @@ export default function CreateLostReportScreen() {
               value={form.features}
               onChangeText={(text) => updateField("features", text)}
               placeholder="Contains a student ID and a $20 bill."
-              placeholderTextColor="#CBD5E1"
+              placeholderTextColor={colors.textMuted}
               multiline
               textAlignVertical="top"
-              className={`min-h-[120px] rounded-2xl bg-slate-100 px-4 py-4 text-sm text-slate-900 ${
-                errors.features ? "border border-red-400" : ""
-              }`}
+              style={{
+                backgroundColor: colors.bgInput,
+                color: colors.text,
+                borderColor: errors.features ? "#EF4444" : "transparent",
+                borderWidth: errors.features ? 1 : 0,
+              }}
+              className="min-h-[120px] rounded-2xl px-4 py-4 text-sm font-semibold"
             />
 
             {errors.features && (
@@ -215,16 +228,18 @@ export default function CreateLostReportScreen() {
           </View>
 
           <View className="mb-8">
-            <Text className="mb-2 text-sm font-semibold text-slate-600">
+            <Text style={{ color: colors.text }} className="mb-2 text-sm font-semibold">
               Photo Reference
             </Text>
 
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={pickImage}
-              className={`overflow-hidden rounded-3xl border border-dashed bg-slate-50 ${
-                errors.image ? "border-red-400" : "border-slate-300"
-              }`}
+              style={{
+                backgroundColor: colors.bgCard,
+                borderColor: errors.image ? "#EF4444" : colors.border,
+              }}
+              className="overflow-hidden rounded-3xl border border-dashed"
             >
               {form.image ? (
                 <View className="items-center justify-center p-3">
@@ -233,14 +248,14 @@ export default function CreateLostReportScreen() {
                     className="h-52 w-full rounded-2xl"
                     resizeMode="cover"
                   />
-                  <Text className="mt-3 text-sm font-medium text-indigo-600">
+                  <Text style={{ color: colors.primary }} className="mt-3 text-sm font-medium">
                     Tap to change image
                   </Text>
                 </View>
               ) : (
                 <View className="h-36 items-center justify-center">
                   <Text className="text-2xl">📷</Text>
-                  <Text className="mt-2 text-sm text-slate-500">
+                  <Text style={{ color: colors.textSecondary }} className="mt-2 text-sm">
                     Upload or Select Image
                   </Text>
                 </View>
@@ -258,11 +273,17 @@ export default function CreateLostReportScreen() {
             onPress={submitForm}
             disabled={isSubmitting}
             activeOpacity={0.9}
-            className={`mb-5 rounded-full px-6 py-4 ${
-              isSubmitting ? "bg-indigo-300" : "bg-indigo-600"
-            }`}
+            style={{
+              backgroundColor: isSubmitting ? colors.primaryLight : colors.primary,
+            }}
+            className="mb-5 rounded-full px-6 py-4"
           >
-            <Text className="text-center text-base font-extrabold text-white">
+            <Text
+              style={{
+                color: isSubmitting ? colors.primary : "white",
+              }}
+              className="text-center text-base font-extrabold"
+            >
               {isSubmitting
                 ? isEditMode
                   ? "Updating..."
@@ -277,7 +298,7 @@ export default function CreateLostReportScreen() {
             onPress={() => router.back()}
             disabled={isSubmitting}
           >
-            <Text className="text-center text-sm font-medium text-slate-400">
+            <Text style={{ color: colors.textMuted }} className="text-center text-sm font-medium">
               Cancel and discard draft
             </Text>
           </TouchableOpacity>

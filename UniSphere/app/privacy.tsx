@@ -4,10 +4,12 @@ import React from "react";
 import { ScrollView, Text, TouchableOpacity, View, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import Footer from "./components/Footer";
+import Footer from "@/components/Footer";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function PrivacyPolicy() {
   const router = useRouter();
+  const { colors } = useTheme();
 
   const sections = [
     {
@@ -38,25 +40,29 @@ export default function PrivacyPolicy() {
   ];
 
   return (
-    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-white">
-      <View className="flex-row justify-between items-center px-6 pb-4 bg-white border-b border-gray-50" style={{ paddingTop: Platform.OS === 'ios' ? 20 : 60 }}>
+    <SafeAreaView edges={["left", "right"]} style={{ backgroundColor: colors.bg }} className="flex-1">
+      <View
+        style={{ backgroundColor: colors.bg, borderBottomColor: colors.border, borderBottomWidth: 1, paddingTop: Platform.OS === "ios" ? 20 : 60 }}
+        className="flex-row justify-between items-center px-6 pb-4"
+      >
         <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 w-12 h-12 justify-center items-start">
-          <ChevronLeft size={28} color="#1E1B4B" />
+          <ChevronLeft size={28} color={colors.text} />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-indigo-900">Privacy & Policy</Text>
+        <Text style={{ color: colors.text }} className="text-xl font-bold">Privacy &amp; Policy</Text>
         <View className="w-12" />
       </View>
 
-      <ScrollView 
-        showsVerticalScrollIndicator={false} 
+      <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 30, paddingBottom: 40 }}
+        style={{ backgroundColor: colors.bg }}
       >
-        <View className="bg-indigo-50/50 p-8 rounded-[40px] items-center mb-10 border border-indigo-100">
-          <View className="bg-white p-6 rounded-[30px] shadow-sm">
-            <ShieldCheck size={50} color="#4F46E5" strokeWidth={1.5} />
+        <View style={{ backgroundColor: colors.primaryLight, borderColor: colors.border, borderWidth: 1 }} className="p-8 rounded-[40px] items-center mb-10">
+          <View style={{ backgroundColor: colors.white }} className="p-6 rounded-[30px] shadow-sm">
+            <ShieldCheck size={50} color={colors.primary} strokeWidth={1.5} />
           </View>
-          <Text className="text-2xl font-black text-gray-900 mt-6 text-center">Your Privacy Matters</Text>
-          <Text className="text-gray-500 text-center mt-3 leading-6 font-medium">
+          <Text style={{ color: colors.text }} className="text-2xl font-black mt-6 text-center">Your Privacy Matters</Text>
+          <Text style={{ color: colors.textSecondary }} className="text-center mt-3 leading-6 font-medium">
             At UniSphere, we are committed to protecting your personal information and your right to privacy.
           </Text>
         </View>
@@ -64,13 +70,13 @@ export default function PrivacyPolicy() {
         {sections.map((section, index) => (
           <View key={index} className="mb-8">
             <View className="flex-row items-center mb-4">
-              <View className="bg-indigo-600 p-2 rounded-xl">
+              <View style={{ backgroundColor: colors.primary }} className="p-2 rounded-xl">
                 <section.icon size={18} color="white" />
               </View>
-              <Text className="ml-4 text-lg font-bold text-gray-900">{section.title}</Text>
+              <Text style={{ color: colors.text }} className="ml-4 text-lg font-bold">{section.title}</Text>
             </View>
-            <View className="bg-gray-50 p-6 rounded-[28px] border border-gray-100">
-              <Text className="text-gray-600 leading-6 text-[15px] font-medium">
+            <View style={{ backgroundColor: colors.bgCard, borderColor: colors.border, borderWidth: 1 }} className="p-6 rounded-[28px]">
+              <Text style={{ color: colors.textSecondary }} className="leading-6 text-[15px] font-medium">
                 {section.content}
               </Text>
             </View>
@@ -78,7 +84,7 @@ export default function PrivacyPolicy() {
         ))}
 
         <View className="mt-10 mb-2 items-center">
-          <Text className="text-gray-400 text-xs font-bold uppercase tracking-widest">Last Updated: May 2026</Text>
+          <Text style={{ color: colors.textMuted }} className="text-xs font-bold uppercase tracking-widest">Last Updated: May 2026</Text>
         </View>
       </ScrollView>
 

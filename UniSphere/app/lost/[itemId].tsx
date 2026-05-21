@@ -15,11 +15,13 @@ import LostUserActions from "./components/LostUserActions";
 import { useLostItemDetailQuery } from "./hooks/useLostItems";
 
 import { useUser } from "@/hooks/useUser";
-import Footer from "../components/Footer";
+import Footer from "@/components/Footer";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function LostDetailScreen() {
   const { itemId } = useLocalSearchParams<{ itemId: string }>();
-  const { userId, user } = useUser();
+  const { userId } = useUser();
+  const { colors, isDark } = useTheme();
 
   const {
     data: item,
@@ -30,19 +32,19 @@ export default function LostDetailScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#4F46E5" />
+      <SafeAreaView style={{ backgroundColor: colors.bg }} className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
   }
 
   if (isError || !item) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white px-6">
-        <Text className="mb-2 text-lg font-bold text-slate-900">
+      <SafeAreaView style={{ backgroundColor: colors.bg }} className="flex-1 items-center justify-center px-6">
+        <Text style={{ color: colors.text }} className="mb-2 text-lg font-bold">
           Failed to load item details
         </Text>
-        <Text className="text-center text-sm text-slate-500">
+        <Text style={{ color: colors.textSecondary }} className="text-center text-sm">
           {error instanceof Error ? error.message : "Something went wrong"}
         </Text>
       </SafeAreaView>
@@ -53,26 +55,18 @@ export default function LostDetailScreen() {
   const isResolved = item.status?.toLowerCase() === "resolved";
 
   return (
-    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-white">
+    <SafeAreaView edges={["left", "right"]} style={{ backgroundColor: colors.bg }} className="flex-1">
       <View className="flex-1">
-        <ScrollView showsVerticalScrollIndicator={false} className="bg-white" contentContainerStyle={{ paddingBottom: 120 }}>
-          <View className="flex-row justify-between items-center px-5 pt-14 pb-4 bg-white">
+        <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: colors.bg }} contentContainerStyle={{ paddingBottom: 120 }}>
+          <View style={{ backgroundColor: colors.bg }} className="flex-row justify-between items-center px-5 pt-14 pb-4">
             <View className="flex-row items-center gap-4">
               <TouchableOpacity onPress={() => router.back()}>
-                <Text className="text-2xl text-gray-600">←</Text>
+                <Text style={{ color: colors.text }} className="text-2xl">←</Text>
               </TouchableOpacity>
-              <Text className="text-lg font-bold text-indigo-600">
+              <Text style={{ color: colors.primary }} className="text-lg font-bold">
                 Lost & Found
               </Text>
             </View>
-            {/*<View className="flex-row gap-5">
-              <TouchableOpacity>
-                <Text className="text-xl text-gray-400">🔗</Text>
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <Text className="text-xl text-gray-400">⋮</Text>
-              </TouchableOpacity>
-            </View>*/}
           </View>
           <View className="p-5">
             <View className="relative rounded-[30px] overflow-hidden">
@@ -81,50 +75,50 @@ export default function LostDetailScreen() {
                 className="w-full h-64"
                 resizeMode="cover"
               />
-              <View className="absolute top-4 left-4 bg-white/90 px-3 py-1.5 rounded-full">
-                <Text className="text-[10px] font-black text-indigo-900 uppercase">
+              <View style={{ backgroundColor: isDark ? "rgba(30, 27, 75, 0.9)" : "rgba(255, 255, 255, 0.9)" }} className="absolute top-4 left-4 px-3 py-1.5 rounded-full">
+                <Text style={{ color: colors.primary }} className="text-[10px] font-black uppercase">
                   {item.category}
                 </Text>
               </View>
             </View>
 
             <View className="flex-row items-center mt-4 mb-2 gap-2">
-              <View className="w-2 h-2 rounded-full bg-emerald-500" />
-              <Text className="text-xs font-bold text-emerald-500 uppercase tracking-tighter">
-                Status: Active
+              <View style={{ backgroundColor: colors.primary }} className="w-2 h-2 rounded-full" />
+              <Text style={{ color: colors.primary }} className="text-xs font-bold uppercase tracking-tighter">
+                Status: {item.status || "Active"}
               </Text>
             </View>
 
-            <Text className="text-3xl font-extrabold text-gray-800 leading-tight">
+            <Text style={{ color: colors.text }} className="text-3xl font-extrabold leading-tight">
               {item.title}
             </Text>
 
             <View className="mt-4 gap-y-2">
-              <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
+              <View style={{ backgroundColor: colors.bgCard }} className="flex-row items-center p-3 rounded-2xl self-start">
                 <Text className="mr-2">📍</Text>
-                <Text className="text-sm text-gray-600 font-medium">
+                <Text style={{ color: colors.textSecondary }} className="text-sm font-medium">
                   {item.location}
                 </Text>
               </View>
-              <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
+              <View style={{ backgroundColor: colors.bgCard }} className="flex-row items-center p-3 rounded-2xl self-start">
                 <Text className="mr-2">📅</Text>
-                <Text className="text-sm text-gray-600 font-medium">
+                <Text style={{ color: colors.textSecondary }} className="text-sm font-medium">
                   {new Date(item.createdAt).toLocaleDateString()}
                 </Text>
               </View>
             </View>
 
             <View className="mt-6">
-              <Text className="text-base font-bold text-gray-800 mb-2">
+              <Text style={{ color: colors.text }} className="text-base font-bold mb-2">
                 Description
               </Text>
-              <Text className="text-sm text-gray-500 leading-5">
+              <Text style={{ color: colors.textSecondary }} className="text-sm leading-5">
                 {item.features || item.description}
               </Text>
             </View>
             {!isResolved &&
               (isOwner ? (
-                <LostAdminActions itemId={itemId} />
+                <LostAdminActions itemId={itemId as string} />
               ) : (
                 <LostUserActions
                   itemId={item.title}

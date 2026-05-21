@@ -1,6 +1,8 @@
+/// <reference types="nativewind/types" />
 import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { MapPin } from "lucide-react-native";
+import { useTheme } from "@/context/ThemeContext";
 
 interface HousingCardProps {
   item: {
@@ -16,11 +18,21 @@ interface HousingCardProps {
 }
 
 export default function HousingCard({ item, onPress }: HousingCardProps) {
+  const { colors, isDark } = useTheme();
+
   return (
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={onPress}
-      className="bg-white rounded-[30px] border border-gray-100 shadow-sm mb-6 overflow-hidden"
+      style={{
+        backgroundColor: colors.bgCard,
+        borderRadius: 30,
+        borderWidth: 1,
+        borderColor: colors.border,
+        marginBottom: 24,
+        overflow: "hidden",
+      }}
+      className="shadow-sm"
     >
       {/* Image */}
       <View className="relative">
@@ -31,14 +43,14 @@ export default function HousingCard({ item, onPress }: HousingCardProps) {
             resizeMode="cover"
           />
         ) : (
-          <View className="w-full h-48 bg-gray-200 justify-center items-center">
-            <Text className="text-gray-400">No image</Text>
+          <View style={{ backgroundColor: colors.bgInput }} className="w-full h-48 justify-center items-center">
+            <Text style={{ color: colors.textMuted }}>No image</Text>
           </View>
         )}
 
         {/* Room Type Badge (indigo style like Lost) */}
-        <View className="absolute top-4 left-4 bg-white/90 px-3 py-1.5 rounded-full">
-          <Text className="text-[10px] font-black text-indigo-900 uppercase">
+        <View style={{ backgroundColor: isDark ? "rgba(30, 27, 75, 0.9)" : "rgba(255, 255, 255, 0.9)" }} className="absolute top-4 left-4 px-3 py-1.5 rounded-full">
+          <Text style={{ color: colors.primary }} className="text-[10px] font-black uppercase">
             {item.roomType}
           </Text>
         </View>
@@ -48,25 +60,26 @@ export default function HousingCard({ item, onPress }: HousingCardProps) {
       <View className="p-5">
         {/* Title */}
         <Text
-          className="text-xl font-extrabold text-gray-900 mb-2"
+          style={{ color: colors.text }}
+          className="text-xl font-extrabold mb-2"
           numberOfLines={1}
         >
           {item.title}
         </Text>
 
         {/* Location */}
-        <View className="flex-row items-center bg-gray-50 px-3 py-2 rounded-2xl self-start mb-4">
-          <MapPin size={14} color="#6B7280" />
-          <Text className="text-gray-600 text-xs font-medium ml-2">
+        <View style={{ backgroundColor: colors.bgInput }} className="flex-row items-center px-3 py-2 rounded-2xl self-start mb-4">
+          <MapPin size={14} color={colors.primary} />
+          <Text style={{ color: colors.textSecondary }} className="text-xs font-medium ml-2">
             {item.location}
           </Text>
         </View>
 
         {/* Price */}
         <View className="flex-row justify-between items-center">
-          <Text className="text-indigo-600 font-black text-lg">
+          <Text style={{ color: colors.primary }} className="font-black text-lg">
             LKR {item.rentPrice}
-            <Text className="text-gray-400 text-sm font-medium"> /month</Text>
+            <Text style={{ color: colors.textMuted }} className="text-sm font-medium"> /month</Text>
           </Text>
         </View>
       </View>

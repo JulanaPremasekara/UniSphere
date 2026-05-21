@@ -18,7 +18,8 @@ import { Icon } from "@/components/ui/icon";
 import { Input, InputField, InputSlot } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import apiClient from "../services/api";
+import apiClient from "@/services/api";
+import { useTheme } from "@/context/ThemeContext";
 
 type FormErrors = {
   name?: string;
@@ -34,6 +35,7 @@ type FormErrors = {
 
 export default function ProfileSetup() {
   const router = useRouter();
+  const { colors } = useTheme();
   const savingRef = useRef(false);
 
   const [fullName, setFullName] = useState("");
@@ -182,25 +184,25 @@ export default function ProfileSetup() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: colors.bg }}
     >
       <ScrollView
-        className="flex-1 bg-gray-50"
+        style={{ backgroundColor: colors.bg }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View className="bg-white rounded-t-[40px] mt-20 p-8 flex-1 min-h-[800px]">
+        <View style={{ backgroundColor: colors.bg }} className="rounded-t-[40px] mt-20 p-8 flex-1 min-h-[800px]">
           <HStack className="justify-between items-center mb-2">
-            <Text className="text-3xl font-bold text-black">
+            <Text style={{ color: colors.text }} className="text-3xl font-bold">
               Profile Setup
             </Text>
 
             <TouchableOpacity disabled={loading} onPress={() => router.back()}>
-              <Icon as={X} size="xl" className="text-gray-400" />
+              <Icon as={X} size="xl" style={{ color: colors.textMuted }} />
             </TouchableOpacity>
           </HStack>
 
-          <Text className="text-gray-500 mb-6">
+          <Text style={{ color: colors.textSecondary }} className="mb-6">
             Tell us about your academic expertise.
           </Text>
 
@@ -211,7 +213,8 @@ export default function ProfileSetup() {
               disabled={loading}
             >
               <Avatar
-                className={`bg-indigo-600 w-24 h-24 relative ${
+                style={{ backgroundColor: colors.primary }}
+                className={`w-24 h-24 relative ${
                   errors.image ? "border-2 border-red-400" : ""
                 }`}
               >
@@ -224,13 +227,13 @@ export default function ProfileSetup() {
                   <Icon as={User} size="xl" className="text-white" />
                 )}
 
-                <View className="absolute bottom-0 right-0 bg-white p-1.5 rounded-full shadow-sm border border-gray-100">
-                  <Icon as={Camera} size="xs" className="text-indigo-600" />
+                <View style={{ backgroundColor: colors.white, borderColor: colors.border }} className="absolute bottom-0 right-0 p-1.5 rounded-full shadow-sm border">
+                  <Icon as={Camera} size="xs" style={{ color: colors.primary }} />
                 </View>
               </Avatar>
             </TouchableOpacity>
 
-            <Text className="text-gray-400 text-xs mt-3 font-medium uppercase tracking-tighter">
+            <Text style={{ color: colors.textMuted }} className="text-xs mt-3 font-medium uppercase tracking-tighter">
               {image ? "Tap to change" : "Add Profile Photo"}
             </Text>
 
@@ -243,20 +246,19 @@ export default function ProfileSetup() {
 
           <VStack space="xl">
             <VStack space="xs">
-              <Text className="text-xs font-bold uppercase tracking-wider text-black">
+              <Text style={{ color: colors.text }} className="text-xs font-bold uppercase tracking-wider">
                 Full Name
               </Text>
 
               <Input
                 variant="rounded"
-                className={`bg-gray-100 h-14 px-2 border ${
-                  nameError ? "border-red-400" : "border-transparent"
-                }`}
+                style={{ backgroundColor: colors.bgInput, borderColor: nameError ? "#EF4444" : "transparent", borderWidth: 1 }}
+                className="h-14 px-2"
               >
                 <InputField
-                  className="text-black"
+                  style={{ color: colors.text }}
                   placeholder="Dr. Julian Sterling"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={colors.textMuted}
                   value={fullName}
                   editable={!loading}
                   onChangeText={(text) => {
@@ -275,24 +277,23 @@ export default function ProfileSetup() {
             </VStack>
 
             <VStack space="xs">
-              <Text className="text-xs font-bold uppercase tracking-wider text-black">
+              <Text style={{ color: colors.text }} className="text-xs font-bold uppercase tracking-wider">
                 Hourly Rate (LKR)
               </Text>
 
               <Input
                 variant="rounded"
-                className={`bg-gray-100 h-14 px-2 border ${
-                  priceError ? "border-red-400" : "border-transparent"
-                }`}
+                style={{ backgroundColor: colors.bgInput, borderColor: priceError ? "#EF4444" : "transparent", borderWidth: 1 }}
+                className="h-14 px-2"
               >
                 <InputSlot className="pl-3">
-                  <Text className="text-gray-400 mr-1">Rs.</Text>
+                  <Text style={{ color: colors.textMuted }} className="mr-1">Rs.</Text>
                 </InputSlot>
 
                 <InputField
-                  className="text-black"
+                  style={{ color: colors.text }}
                   placeholder="1000"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={colors.textMuted}
                   keyboardType="numeric"
                   value={hourlyRate}
                   editable={!loading}
@@ -312,20 +313,19 @@ export default function ProfileSetup() {
             </VStack>
 
             <VStack space="xs">
-              <Text className="text-xs font-bold uppercase tracking-wider text-black">
+              <Text style={{ color: colors.text }} className="text-xs font-bold uppercase tracking-wider">
                 Subjects
               </Text>
 
               <Input
                 variant="rounded"
-                className={`bg-gray-100 h-14 px-2 border ${
-                  subjectError ? "border-red-400" : "border-transparent"
-                }`}
+                style={{ backgroundColor: colors.bgInput, borderColor: subjectError ? "#EF4444" : "transparent", borderWidth: 1 }}
+                className="h-14 px-2"
               >
                 <InputField
-                  className="text-black"
+                  style={{ color: colors.text }}
                   placeholder="Physics, Calculus"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={colors.textMuted}
                   value={subjects}
                   editable={!loading}
                   onChangeText={(text) => {
@@ -344,20 +344,19 @@ export default function ProfileSetup() {
             </VStack>
 
             <VStack space="xs">
-              <Text className="text-xs font-bold uppercase tracking-wider text-black">
-                Bio & Experience
+              <Text style={{ color: colors.text }} className="text-xs font-bold uppercase tracking-wider">
+                Bio &amp; Experience
               </Text>
 
               <Input
                 variant="rounded"
-                className={`bg-gray-100 h-14 px-2 border ${
-                  errors.bio ? "border-red-400" : "border-transparent"
-                }`}
+                style={{ backgroundColor: colors.bgInput, borderColor: errors.bio ? "#EF4444" : "transparent", borderWidth: 1 }}
+                className="h-14 px-2"
               >
                 <InputField
-                  className="text-black"
+                  style={{ color: colors.text }}
                   placeholder="Share your background..."
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={colors.textMuted}
                   value={bio}
                   editable={!loading}
                   onChangeText={(text) => {
@@ -375,20 +374,19 @@ export default function ProfileSetup() {
             </VStack>
 
             <VStack space="xs">
-              <Text className="text-xs font-bold uppercase tracking-wider text-black">
+              <Text style={{ color: colors.text }} className="text-xs font-bold uppercase tracking-wider">
                 Contact Number
               </Text>
 
               <Input
                 variant="rounded"
-                className={`bg-gray-100 h-14 px-2 border ${
-                  errors.phone ? "border-red-400" : "border-transparent"
-                }`}
+                style={{ backgroundColor: colors.bgInput, borderColor: errors.phone ? "#EF4444" : "transparent", borderWidth: 1 }}
+                className="h-14 px-2"
               >
                 <InputField
-                  className="text-black"
+                  style={{ color: colors.text }}
                   placeholder="0771234567"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={colors.textMuted}
                   keyboardType="numeric"
                   value={phone}
                   editable={!loading}
@@ -408,9 +406,8 @@ export default function ProfileSetup() {
 
             <TouchableOpacity
               activeOpacity={0.7}
-              className={`bg-[#4338CA] p-4 rounded-full mt-4 mb-10 ${
-                loading ? "opacity-50" : ""
-              }`}
+              style={{ backgroundColor: colors.primary, opacity: loading ? 0.5 : 1 }}
+              className="p-4 rounded-full mt-4 mb-10"
               onPress={handleSaveProfile}
               disabled={loading}
             >

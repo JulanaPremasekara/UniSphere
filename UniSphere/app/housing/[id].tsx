@@ -25,9 +25,10 @@ import {
 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import Footer from "../components/Footer";
-import apiClient from "../services/api";
-import { useUser } from "../../hooks/useUser";
+import Footer from "@/components/Footer";
+import apiClient from "@/services/api";
+import { useUser } from "@/hooks/useUser";
+import { useTheme } from "@/context/ThemeContext";
 
 interface HousingDetail {
   id: string;
@@ -56,6 +57,7 @@ export default function HousingDetail() {
   const housingId = typeof params.id === "string" ? params.id : undefined;
 
   const { userId } = useUser();
+  const { colors, isDark } = useTheme();
 
   const [housing, setHousing] = useState<HousingDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -124,22 +126,23 @@ export default function HousingDetail() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#4F46E5" />
+      <SafeAreaView style={{ backgroundColor: colors.bg }} className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
   }
 
   if (!housing && (notFound || hasFetched)) {
     return (
-      <SafeAreaView className="flex-1 bg-white justify-center items-center px-6">
-        <Text className="text-lg font-bold text-gray-800">
+      <SafeAreaView style={{ backgroundColor: colors.bg }} className="flex-1 justify-center items-center px-6">
+        <Text style={{ color: colors.text }} className="text-lg font-bold">
           Listing not found
         </Text>
 
         <TouchableOpacity
           onPress={() => router.back()}
-          className="mt-4 bg-indigo-600 px-6 py-3 rounded-full"
+          style={{ backgroundColor: colors.primary }}
+          className="mt-4 px-6 py-3 rounded-full"
         >
           <Text className="text-white font-bold">Go Back</Text>
         </TouchableOpacity>
@@ -149,8 +152,8 @@ export default function HousingDetail() {
 
   if (!housing) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#4F46E5" />
+      <SafeAreaView style={{ backgroundColor: colors.bg }} className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
   }
@@ -199,15 +202,15 @@ export default function HousingDetail() {
   };
 
   return (
-    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-white">
-      <ScrollView showsVerticalScrollIndicator={false} className="bg-white">
-        <View className="flex-row justify-between items-center px-5 pt-14 pb-4 bg-white">
+    <SafeAreaView edges={["left", "right"]} style={{ backgroundColor: colors.bg }} className="flex-1">
+      <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: colors.bg }}>
+        <View style={{ backgroundColor: colors.bg }} className="flex-row justify-between items-center px-5 pt-14 pb-4">
           <View className="flex-row items-center gap-4">
             <TouchableOpacity onPress={() => router.back()}>
-              <ChevronLeft size={28} color="#4B5563" />
+              <ChevronLeft size={28} color={colors.text} />
             </TouchableOpacity>
 
-            <Text className="text-lg font-bold text-indigo-600">Housing</Text>
+            <Text style={{ color: colors.primary }} className="text-lg font-bold">Housing</Text>
           </View>
         </View>
 
@@ -220,13 +223,13 @@ export default function HousingDetail() {
                 resizeMode="cover"
               />
             ) : (
-              <View className="w-full h-64 bg-gray-100 items-center justify-center">
-                <Text className="text-gray-400">No image</Text>
+              <View style={{ backgroundColor: colors.bgCard }} className="w-full h-64 items-center justify-center">
+                <Text style={{ color: colors.textMuted }}>No image</Text>
               </View>
             )}
 
-            <View className="absolute top-4 left-4 bg-white/90 px-3 py-1.5 rounded-full">
-              <Text className="text-[10px] font-black text-indigo-900 uppercase">
+            <View style={{ backgroundColor: isDark ? "rgba(30, 27, 75, 0.9)" : "rgba(255, 255, 255, 0.9)" }} className="absolute top-4 left-4 px-3 py-1.5 rounded-full">
+              <Text style={{ color: colors.primary }} className="text-[10px] font-black uppercase">
                 {housing.roomType}
               </Text>
             </View>
@@ -264,34 +267,34 @@ export default function HousingDetail() {
           </View>
 
           <View className="flex-row items-center mt-4 mb-2 gap-2">
-            <View className="w-2 h-2 rounded-full bg-indigo-500" />
-            <Text className="text-xs font-bold text-indigo-500 uppercase tracking-tighter">
+            <View style={{ backgroundColor: colors.primary }} className="w-2 h-2 rounded-full" />
+            <Text style={{ color: colors.primary }} className="text-xs font-bold uppercase tracking-tighter">
               Status: {housing.availabilityStatus}
             </Text>
           </View>
 
           <View className="flex-row justify-between items-start gap-4">
-            <Text className="text-3xl font-extrabold text-gray-800 leading-tight flex-1">
+            <Text style={{ color: colors.text }} className="text-3xl font-extrabold leading-tight flex-1">
               {housing.title}
             </Text>
 
-            <Text className="text-2xl font-black text-indigo-600">
+            <Text style={{ color: colors.primary }} className="text-2xl font-black">
               LKR {housing.rentPrice}
             </Text>
           </View>
 
           <View className="mt-4 gap-y-2">
-            <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
-              <MapPin size={17} color="#4F46E5" />
-              <Text className="ml-2 text-sm text-gray-600 font-medium">
+            <View style={{ backgroundColor: colors.bgCard }} className="flex-row items-center p-3 rounded-2xl self-start">
+              <MapPin size={17} color={colors.primary} />
+              <Text style={{ color: colors.textSecondary }} className="ml-2 text-sm font-medium">
                 {housing.address}
               </Text>
             </View>
 
             {housing.availableFrom && (
-              <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
-                <Calendar size={17} color="#4F46E5" />
-                <Text className="ml-2 text-sm text-gray-600 font-medium">
+              <View style={{ backgroundColor: colors.bgCard }} className="flex-row items-center p-3 rounded-2xl self-start">
+                <Calendar size={17} color={colors.primary} />
+                <Text style={{ color: colors.textSecondary }} className="ml-2 text-sm font-medium">
                   Available from{" "}
                   {new Date(housing.availableFrom).toLocaleDateString()}
                 </Text>
@@ -299,9 +302,9 @@ export default function HousingDetail() {
             )}
 
             {housing.deposit && (
-              <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
-                <Text className="text-indigo-600 font-bold">Deposit</Text>
-                <Text className="ml-2 text-sm text-gray-600 font-medium">
+              <View style={{ backgroundColor: colors.bgCard }} className="flex-row items-center p-3 rounded-2xl self-start">
+                <Text style={{ color: colors.primary }} className="font-bold">Deposit</Text>
+                <Text style={{ color: colors.textSecondary }} className="ml-2 text-sm font-medium">
                   LKR {housing.deposit}
                 </Text>
               </View>
@@ -309,17 +312,17 @@ export default function HousingDetail() {
           </View>
 
           <View className="mt-6">
-            <Text className="text-base font-bold text-gray-800 mb-2">
+            <Text style={{ color: colors.text }} className="text-base font-bold mb-2">
               About
             </Text>
 
-            <Text className="text-sm text-gray-500 leading-5">
+            <Text style={{ color: colors.textSecondary }} className="text-sm leading-5">
               {housing.description}
             </Text>
           </View>
 
           <View className="mt-6">
-            <Text className="text-base font-bold text-gray-800 mb-3">
+            <Text style={{ color: colors.text }} className="text-base font-bold mb-3">
               Features
             </Text>
 
@@ -331,18 +334,16 @@ export default function HousingDetail() {
               ].map((feature, idx) => (
                 <View
                   key={idx}
-                  className={`px-4 py-3 rounded-2xl flex-row items-center ${
-                    feature.value ? "bg-indigo-50" : "bg-gray-100"
-                  }`}
+                  style={{ backgroundColor: feature.value ? colors.primaryLight : colors.bgCard }}
+                  className="px-4 py-3 rounded-2xl flex-row items-center"
                 >
                   <feature.icon
                     size={18}
-                    color={feature.value ? "#4F46E5" : "#9CA3AF"}
+                    color={feature.value ? colors.primary : colors.textMuted}
                   />
                   <Text
-                    className={`ml-2 text-xs font-bold ${
-                      feature.value ? "text-indigo-700" : "text-gray-500"
-                    }`}
+                    style={{ color: feature.value ? colors.primary : colors.textSecondary }}
+                    className="ml-2 text-xs font-bold"
                   >
                     {feature.label}
                   </Text>
@@ -351,72 +352,68 @@ export default function HousingDetail() {
             </View>
           </View>
 
-          
           {housing.isMine ? (
-            <View className="mx-5 my-6 p-6 bg-gray-100 rounded-[40px]">
-              <Text className="text-[10px] font-bold text-gray-400 text-center tracking-[2px] mb-5 uppercase">
+            <View style={{ backgroundColor: colors.bgCard }} className="mx-5 my-6 p-6 rounded-[40px]">
+              <Text style={{ color: colors.textMuted }} className="text-[10px] font-bold text-center tracking-[2px] mb-5 uppercase">
                 Admin Controls
               </Text>
 
-              {/* <TouchableOpacity className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3">
-                <Text className="font-bold text-gray-800">
-                  Mark Unavailable
-                </Text>
-              </TouchableOpacity> */}
-
               <TouchableOpacity
                 onPress={handleEdit}
-                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center mb-3"
+                style={{ backgroundColor: colors.white, borderColor: colors.border, borderWidth: 1 }}
+                className="w-full p-5 rounded-3xl items-center mb-3"
               >
-                <Text className="font-bold text-gray-800">Edit Listing</Text>
+                <Text style={{ color: colors.text }} className="font-bold">Edit Listing</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={handleDelete}
-                className="w-full bg-white p-5 rounded-3xl shadow-sm items-center"
+                style={{ backgroundColor: colors.white, borderColor: colors.border, borderWidth: 1 }}
+                className="w-full p-5 rounded-3xl items-center"
               >
                 <Text className="font-bold text-red-500">Remove Listing</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View className="mt-6">
-            <Text className="text-base font-bold text-gray-800 mb-3">
-              Posted By
-            </Text>
-
-            <View className="bg-gray-50 rounded-[25px] p-5">
-              <Text className="text-gray-800 font-bold text-base mb-3">
-                {housing.contactName}
+              <Text style={{ color: colors.text }} className="text-base font-bold mb-3">
+                Posted By
               </Text>
 
-              <View className="flex-row gap-2">
-                {housing.contactPhone && (
-                  <TouchableOpacity
-                    onPress={() => handleContact("phone")}
-                    className="flex-1 bg-indigo-600 rounded-2xl py-3 flex-row items-center justify-center"
-                  >
-                    <Phone size={18} color="white" />
-                    <Text className="text-white font-bold text-sm ml-2">
-                      Call
-                    </Text>
-                  </TouchableOpacity>
-                )}
+              <View style={{ backgroundColor: colors.bgCard }} className="rounded-[25px] p-5">
+                <Text style={{ color: colors.text }} className="font-bold text-base mb-3">
+                  {housing.contactName}
+                </Text>
 
-                {housing.contactEmail && (
-                  <TouchableOpacity
-                    onPress={() => handleContact("email")}
-                    className="flex-1 bg-indigo-500 rounded-2xl py-3 flex-row items-center justify-center"
-                  >
-                    <Mail size={18} color="white" />
-                    <Text className="text-white font-bold text-sm ml-2">
-                      Email
-                    </Text>
-                  </TouchableOpacity>
-                )}
+                <View className="flex-row gap-2">
+                  {housing.contactPhone && (
+                    <TouchableOpacity
+                      onPress={() => handleContact("phone")}
+                      style={{ backgroundColor: colors.primary }}
+                      className="flex-1 rounded-2xl py-3 flex-row items-center justify-center"
+                    >
+                      <Phone size={18} color="white" />
+                      <Text className="text-white font-bold text-sm ml-2">
+                        Call
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {housing.contactEmail && (
+                    <TouchableOpacity
+                      onPress={() => handleContact("email")}
+                      style={{ backgroundColor: colors.primary }}
+                      className="flex-1 rounded-2xl py-3 flex-row items-center justify-center"
+                    >
+                      <Mail size={18} color="white" />
+                      <Text className="text-white font-bold text-sm ml-2">
+                        Email
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
             </View>
-          </View>
-
           )}
         </View>
       </ScrollView>
@@ -433,8 +430,8 @@ export default function HousingDetail() {
           onPress={() => setContactModalVisible(false)}
           className="flex-1 bg-black/60 justify-center items-center px-6"
         >
-          <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl">
-            <Text className="text-2xl font-black text-gray-900 mb-4">
+          <View style={{ backgroundColor: colors.white }} className="rounded-[40px] w-full max-w-sm p-8 shadow-2xl">
+            <Text style={{ color: colors.text }} className="text-2xl font-black mb-4">
               Contact Landlord
             </Text>
 
@@ -445,7 +442,8 @@ export default function HousingDetail() {
                     handleContact("phone");
                     setContactModalVisible(false);
                   }}
-                  className="bg-indigo-600 p-4 rounded-2xl flex-row items-center justify-between"
+                  style={{ backgroundColor: colors.primary }}
+                  className="p-4 rounded-2xl flex-row items-center justify-between"
                 >
                   <View className="flex-row items-center gap-3">
                     <Phone size={20} color="white" />
@@ -464,7 +462,8 @@ export default function HousingDetail() {
                     handleContact("email");
                     setContactModalVisible(false);
                   }}
-                  className="bg-indigo-500 p-4 rounded-2xl flex-row items-center justify-between"
+                  style={{ backgroundColor: colors.primary }}
+                  className="p-4 rounded-2xl flex-row items-center justify-between"
                 >
                   <View className="flex-row items-center gap-3">
                     <Mail size={20} color="white" />
@@ -480,9 +479,10 @@ export default function HousingDetail() {
 
             <TouchableOpacity
               onPress={() => setContactModalVisible(false)}
-              className="mt-4 bg-gray-100 p-4 rounded-2xl items-center"
+              style={{ backgroundColor: colors.bgInput }}
+              className="mt-4 p-4 rounded-2xl items-center"
             >
-              <Text className="text-gray-800 font-bold">Close</Text>
+              <Text style={{ color: colors.text }} className="font-bold">Close</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>

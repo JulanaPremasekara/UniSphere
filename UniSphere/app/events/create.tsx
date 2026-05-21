@@ -27,10 +27,9 @@ import {
 } from "lucide-react-native";
 import { Input, InputField, InputSlot } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
-import Footer from "../components/Footer";
-import apiClient from "../services/api";
-import { tags } from "react-native-svg/lib/typescript/xmlTags";
-import form from "../components/form";
+import Footer from "@/components/Footer";
+import apiClient from "@/services/api";
+import { useTheme } from "@/context/ThemeContext";
 
 const CalendarModal = ({
   visible,
@@ -39,20 +38,11 @@ const CalendarModal = ({
   currentMonth,
   setCurrentMonth,
 }: any) => {
+  const { colors } = useTheme();
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
   ];
 
   const year = currentMonth.getFullYear();
@@ -66,66 +56,51 @@ const CalendarModal = ({
     let week = [];
     for (let j = 0; j < 7; j++) {
       if ((i === 0 && j < firstDayOfMonth) || day > daysInMonth) {
-        week.push(
-          <View
-            key={`${i}-${j}`}
-            className="w-10 h-10 items-center justify-center"
-          />,
-        );
+        week.push(<View key={`${i}-${j}`} className="w-10 h-10 items-center justify-center" />);
       } else {
         const d = day;
         week.push(
           <TouchableOpacity
             key={`${i}-${j}`}
             onPress={() => onSelectDate(new Date(year, month, d))}
-            className="w-10 h-10 items-center justify-center rounded-full hover:bg-indigo-50"
+            className="w-10 h-10 items-center justify-center rounded-full"
           >
-            <Text className="text-gray-800 font-semibold">{d}</Text>
+            <Text style={{ color: colors.text }} className="font-semibold">{d}</Text>
           </TouchableOpacity>,
         );
         day++;
       }
     }
-    grid.push(
-      <View key={i} className="flex-row justify-around my-1">
-        {week}
-      </View>,
-    );
+    grid.push(<View key={i} className="flex-row justify-around my-1">{week}</View>);
     if (day > daysInMonth) break;
   }
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 bg-black/50 justify-center items-center px-6">
-        <View className="bg-white w-full max-w-sm rounded-[30px] p-6 shadow-2xl">
+        <View style={{ backgroundColor: colors.white }} className="w-full max-w-sm rounded-[30px] p-6 shadow-2xl">
           <View className="flex-row justify-between items-center mb-6">
             <TouchableOpacity
               onPress={() => setCurrentMonth(new Date(year, month - 1, 1))}
-              className="p-2 bg-gray-50 rounded-xl"
+              style={{ backgroundColor: colors.bgInput }}
+              className="p-2 rounded-xl"
             >
-              <Minus size={20} color="#4F46E5" />
+              <Minus size={20} color={colors.primary} />
             </TouchableOpacity>
-            <Text className="text-lg font-bold text-gray-900">
+            <Text style={{ color: colors.text }} className="text-lg font-bold">
               {months[month]} {year}
             </Text>
             <TouchableOpacity
               onPress={() => setCurrentMonth(new Date(year, month + 1, 1))}
-              className="p-2 bg-gray-50 rounded-xl"
+              style={{ backgroundColor: colors.bgInput }}
+              className="p-2 rounded-xl"
             >
-              <Plus size={20} color="#4F46E5" />
+              <Plus size={20} color={colors.primary} />
             </TouchableOpacity>
           </View>
           <View className="flex-row justify-around mb-2">
             {days.map((d) => (
-              <Text
-                key={d}
-                className="w-10 text-center text-gray-400 font-bold text-[10px] uppercase tracking-wider"
-              >
+              <Text key={d} style={{ color: colors.textMuted }} className="w-10 text-center font-bold text-[10px] uppercase tracking-wider">
                 {d}
               </Text>
             ))}
@@ -133,9 +108,10 @@ const CalendarModal = ({
           {grid}
           <TouchableOpacity
             onPress={onClose}
-            className="mt-6 bg-gray-100 p-4 rounded-2xl items-center"
+            style={{ backgroundColor: colors.bgInput }}
+            className="mt-6 p-4 rounded-2xl items-center"
           >
-            <Text className="text-gray-600 font-bold">Cancel</Text>
+            <Text style={{ color: colors.textSecondary }} className="font-bold">Cancel</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -295,6 +271,7 @@ const FormField = ({
   updateForm,
   error,
 }: any) => {
+  const { colors } = useTheme();
   const isNumeric = [
     "startDate",
     "endDate",
@@ -305,19 +282,20 @@ const FormField = ({
   return (
     <View className={className}>
       <View className="flex-row justify-between items-center mb-3">
-        <Text className="text-[13px] font-bold text-gray-800 uppercase tracking-[1.5px] ml-1">
+        <Text style={{ color: colors.text }} className="text-[13px] font-bold uppercase tracking-[1.5px] ml-1">
           {label}
         </Text>
       </View>
       {multiline ? (
         <View
-          className={`bg-gray-50 rounded-[22px] p-5 min-h-[120px] border ${error ? "border-red-500" : "border-transparent"}`}
+          style={{ backgroundColor: colors.bgInput, borderColor: error ? '#EF4444' : 'transparent', borderWidth: 1 }}
+          className="rounded-[22px] p-5 min-h-[120px]"
         >
           <TextInput
             multiline
             placeholder={place}
-            className="text-gray-900 font-semibold text-lg text-start"
-            placeholderTextColor="#9CA3AF"
+            style={{ color: colors.text }}
+            placeholderTextColor={colors.textMuted}
             textAlignVertical="top"
             value={val}
             onChangeText={(text) => updateForm(field, text)}
@@ -325,12 +303,14 @@ const FormField = ({
         </View>
       ) : (
         <Input
-          className={`h-16 rounded-[22px] bg-gray-50 border px-5 ${error ? "border-red-500" : "border-transparent"}`}
+          style={{ backgroundColor: colors.bgInput, borderColor: error ? '#EF4444' : 'transparent', borderWidth: 1 }}
+          className="h-16 rounded-[22px] px-5"
         >
           <InputField
             placeholder={place}
             keyboardType={isNumeric ? "number-pad" : "default"}
-            className="font-semibold text-lg text-gray-800"
+            style={{ color: colors.text }}
+            placeholderTextColor={colors.textMuted}
             value={val}
             onChangeText={(text) => updateForm(field, text)}
           />
@@ -339,7 +319,7 @@ const FormField = ({
               <TouchableOpacity onPress={onIconPress} disabled={!onIconPress}>
                 <IconComp
                   size={22}
-                  color={onIconPress ? "#4F46E5" : "#1F2937"}
+                  color={onIconPress ? colors.primary : colors.text}
                 />
               </TouchableOpacity>
             </InputSlot>
@@ -401,6 +381,7 @@ const RowField = ({
 export default function CreateEvent() {
   const router = useRouter();
   const { editId } = useLocalSearchParams();
+  const { colors } = useTheme();
   const isEditing = !!editId;
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState(["Limited Seats", "Certificate Provided"]);
@@ -617,7 +598,8 @@ export default function CreateEvent() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-white"
+      style={{ backgroundColor: colors.bg }}
+      className="flex-1"
     >
       <View className="flex-1">
         <ScrollView
@@ -630,17 +612,18 @@ export default function CreateEvent() {
           }}
         >
           <View className="flex-row justify-between items-start mb-2">
-            <Text className="text-4xl font-black text-gray-900 leading-tight flex-1">
+            <Text style={{ color: colors.text }} className="text-4xl font-black leading-tight flex-1">
               {isEditing ? "Edit Event" : "New Event"}
             </Text>
             <TouchableOpacity
               onPress={() => router.back()}
-              className="bg-gray-100 p-3 rounded-full ml-4"
+              style={{ backgroundColor: colors.bgCard }}
+              className="p-3 rounded-full ml-4"
             >
-              <X size={24} color="#1F2937" strokeWidth={2.5} />
+              <X size={24} color={colors.text} strokeWidth={2.5} />
             </TouchableOpacity>
           </View>
-          <Text className="text-gray-500 text-base mb-8">
+          <Text style={{ color: colors.textSecondary }} className="text-base mb-8">
             Fill in the details to curate your campus experience.
           </Text>
 
@@ -648,16 +631,17 @@ export default function CreateEvent() {
             activeOpacity={0.8}
             onPress={pickImage}
             disabled={isPicking}
-            className="w-full h-48 bg-gray-50 rounded-[40px] border-2 border-dashed border-gray-200 items-center justify-center mb-10 overflow-hidden"
+            style={{ backgroundColor: colors.bgCard, borderColor: colors.border }}
+            className="w-full h-48 rounded-[40px] border-2 border-dashed items-center justify-center mb-10 overflow-hidden"
           >
             {image ? (
               <Image source={{ uri: image }} className="w-full h-full" />
             ) : (
               <>
-                <View className="bg-indigo-600 p-4 rounded-2xl shadow-lg shadow-indigo-200 mb-2">
+                <View style={{ backgroundColor: colors.primary }} className="p-4 rounded-2xl mb-2">
                   <Camera size={28} color="white" />
                 </View>
-                <Text className="text-gray-500 font-bold">
+                <Text style={{ color: colors.textSecondary }} className="font-bold">
                   {isPicking ? "Loading..." : "Add a cover photo"}
                 </Text>
               </>
@@ -732,35 +716,39 @@ export default function CreateEvent() {
             />
 
             <View>
-              <Text className="text-[13px] font-bold text-gray-800 uppercase tracking-[1.5px] ml-1 mb-3">
+              <Text style={{ color: colors.text }} className="text-[13px] font-bold uppercase tracking-[1.5px] ml-1 mb-3">
                 Event Tags
               </Text>
-              <Input className="h-16 rounded-[22px] bg-gray-50 border-transparent px-5 mb-4">
+              <Input style={{ backgroundColor: colors.bgInput }} className="h-16 rounded-[22px] border-transparent px-5 mb-4">
                 <InputField
                   placeholder="Add tag (e.g. Workshop)"
+                  placeholderTextColor={colors.textMuted}
                   value={tagInput}
                   onChangeText={setTagInput}
                   onSubmitEditing={addTag}
-                  className="font-semibold text-lg text-gray-800"
+                  style={{ color: colors.text }}
+                  className="font-semibold text-lg"
                 />
                 <TouchableOpacity
                   onPress={addTag}
-                  className="bg-indigo-100 p-2 rounded-xl"
+                  style={{ backgroundColor: colors.primaryLight }}
+                  className="p-2 rounded-xl"
                 >
-                  <Plus size={20} color="#4F46E5" />
+                  <Plus size={20} color={colors.primary} />
                 </TouchableOpacity>
               </Input>
               <View className="flex-row flex-wrap gap-2">
                 {tags.map((tag, index) => (
                   <View
                     key={index}
-                    className="flex-row items-center bg-indigo-50 px-4 py-2 rounded-full border border-indigo-100"
+                    style={{ backgroundColor: colors.primaryLight, borderColor: colors.border }}
+                    className="flex-row items-center px-4 py-2 rounded-full border"
                   >
-                    <Text className="text-indigo-600 font-bold mr-2">
+                    <Text style={{ color: colors.primary }} className="font-bold mr-2">
                       {tag}
                     </Text>
                     <TouchableOpacity onPress={() => removeTag(index)}>
-                      <X size={14} color="#4F46E5" strokeWidth={3} />
+                      <X size={14} color={colors.primary} strokeWidth={3} />
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -768,14 +756,15 @@ export default function CreateEvent() {
             </View>
           </VStack>
 
-          <View className="px-0 mt-3 mb-5 bg-white">
+          <View className="px-0 mt-3 mb-5">
             <TouchableOpacity
               onPress={handlePublish}
               activeOpacity={0.8}
               disabled={isPublishing}
-              className={`${isPublishing ? "bg-indigo-300" : "bg-indigo-600"} p-5 rounded-[30px] shadow-indigo-300 shadow-xl`}
+              style={{ backgroundColor: isPublishing ? colors.primaryLight : colors.primary }}
+              className="p-5 rounded-[30px] shadow-xl"
             >
-              <Text className="text-white text-center font-bold text-xl">
+              <Text style={{ color: isPublishing ? colors.primary : 'white' }} className="text-center font-bold text-xl">
                 {isPublishing
                   ? "Publishing..."
                   : isEditing
@@ -808,19 +797,19 @@ export default function CreateEvent() {
         onRequestClose={() => router.replace("/events")}
       >
         <View className="flex-1 bg-black/60 justify-center items-center px-6">
-          <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
+          <View style={{ backgroundColor: colors.white }} className="rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
             <View className="bg-emerald-50 p-6 rounded-full mb-6">
               <CheckCircle2 size={48} color="#10B981" strokeWidth={2.5} />
             </View>
-            <Text className="text-3xl font-black text-gray-900 mb-3 text-center">
+            <Text style={{ color: colors.text }} className="text-3xl font-black mb-3 text-center">
               Excellent!
             </Text>
-            <Text className="text-gray-500 text-center text-lg mb-8 leading-relaxed">
+            <Text style={{ color: colors.textSecondary }} className="text-center text-lg mb-8 leading-relaxed">
               {successMessage}
             </Text>
             <TouchableOpacity
               onPress={() => router.replace("/events")}
-              className="w-full bg-emerald-600 p-5 rounded-3xl shadow-lg shadow-emerald-100"
+              className="w-full bg-emerald-600 p-5 rounded-3xl shadow-lg"
             >
               <Text className="text-white font-bold text-center text-xl">
                 Continue to Events

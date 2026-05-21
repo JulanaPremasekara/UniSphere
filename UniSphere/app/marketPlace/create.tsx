@@ -19,7 +19,8 @@ import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
-import apiClient from "../services/api";
+import apiClient from "@/services/api";
+import { useTheme } from "@/context/ThemeContext";
 
 const CONDITIONS = ["New", "Used", "Like New"];
 
@@ -35,6 +36,7 @@ type FormErrors = {
 
 export default function CreateListingScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -151,16 +153,16 @@ export default function CreateListingScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1, backgroundColor: "white" }}
+      style={{ flex: 1, backgroundColor: colors.bg }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <Box className="flex-1 pt-12">
+        <Box style={{ backgroundColor: colors.bg }} className="flex-1 pt-12">
           <HStack className="px-6 py-4 items-center">
             <TouchableOpacity onPress={() => router.back()}>
-              <ChevronLeft size={28} color="#1f2937" />
+              <ChevronLeft size={28} color={colors.text} />
             </TouchableOpacity>
 
-            <Text className="ml-4 text-xl font-bold text-gray-900">
+            <Text style={{ color: colors.text }} className="ml-4 text-xl font-bold">
               New Listing
             </Text>
           </HStack>
@@ -173,18 +175,17 @@ export default function CreateListingScreen() {
           >
             <VStack space="xl" className="mt-4">
               <VStack>
-                <TouchableOpacity
+              <TouchableOpacity
                   onPress={pickImage}
-                  className={`h-64 bg-gray-100 rounded-[40px] border-2 border-dashed items-center justify-center overflow-hidden ${
-                    errors.image ? "border-red-400" : "border-gray-200"
-                  }`}
+                  style={{ backgroundColor: colors.bgCard, borderColor: errors.image ? '#F87171' : colors.border }}
+                  className="h-64 rounded-[40px] border-2 border-dashed items-center justify-center overflow-hidden"
                 >
                   {image ? (
                     <Image source={{ uri: image }} className="w-full h-full" />
                   ) : (
                     <VStack className="items-center">
-                      <Camera size={40} color="#9CA3AF" />
-                      <Text className="text-gray-400 mt-2">Add Photo</Text>
+                      <Camera size={40} color={colors.textMuted} />
+                      <Text style={{ color: colors.textMuted }} className="mt-2">Add Photo</Text>
                     </VStack>
                   )}
                 </TouchableOpacity>
@@ -199,15 +200,10 @@ export default function CreateListingScreen() {
               <VStack>
                 <TextInput
                   placeholder="Title"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={colors.textMuted}
                   value={title}
-                  onChangeText={(text) => {
-                    setTitle(text);
-                    clearError("title");
-                  }}
-                  className={`${inputBase} ${
-                    errors.title ? "border-red-400" : "border-gray-100"
-                  }`}
+                  onChangeText={(text) => { setTitle(text); clearError("title"); }}
+                  style={{ backgroundColor: colors.bgInput, color: colors.text, padding: 20, borderRadius: 16, fontSize: 18, fontWeight: 'bold', borderWidth: 1, borderColor: errors.title ? '#F87171' : 'transparent' }}
                 />
 
                 {errors.title && (
@@ -220,16 +216,11 @@ export default function CreateListingScreen() {
               <VStack>
                 <TextInput
                   placeholder="Price ($)"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={colors.textMuted}
                   value={price}
-                  onChangeText={(text) => {
-                    setPrice(text);
-                    clearError("price");
-                  }}
+                  onChangeText={(text) => { setPrice(text); clearError("price"); }}
                   keyboardType="numeric"
-                  className={`${inputBase} ${
-                    errors.price ? "border-red-400" : "border-gray-100"
-                  }`}
+                  style={{ backgroundColor: colors.bgInput, color: colors.text, padding: 20, borderRadius: 16, fontSize: 18, fontWeight: 'bold', borderWidth: 1, borderColor: errors.price ? '#F87171' : 'transparent' }}
                 />
 
                 {errors.price && (
@@ -240,31 +231,18 @@ export default function CreateListingScreen() {
               </VStack>
 
               <VStack space="xs">
-                <Text className="text-[11px] font-black text-gray-400 uppercase ml-2">
+                <Text style={{ color: colors.textMuted }} className="text-[11px] font-black uppercase ml-2">
                   Condition
                 </Text>
-
                 <HStack space="sm">
                   {CONDITIONS.map((c) => (
                     <TouchableOpacity
                       key={c}
-                      onPress={() => {
-                        setCondition(c);
-                        clearError("condition");
-                      }}
-                      className={`px-5 py-3 rounded-full border ${
-                        condition === c
-                          ? "bg-indigo-600 border-indigo-600"
-                          : "bg-white border-gray-200"
-                      }`}
+                      onPress={() => { setCondition(c); clearError("condition"); }}
+                      style={{ backgroundColor: condition === c ? colors.primary : colors.bgInput, borderColor: condition === c ? colors.primary : colors.border, borderWidth: 1 }}
+                      className="px-5 py-3 rounded-full"
                     >
-                      <Text
-                        className={`font-bold ${
-                          condition === c ? "text-white" : "text-gray-500"
-                        }`}
-                      >
-                        {c}
-                      </Text>
+                      <Text style={{ color: condition === c ? 'white' : colors.textSecondary }} className="font-bold">{c}</Text>
                     </TouchableOpacity>
                   ))}
                 </HStack>
@@ -279,18 +257,11 @@ export default function CreateListingScreen() {
               <VStack>
                 <TextInput
                   placeholder="Phone Number"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={colors.textMuted}
                   value={contactNumber}
-                  onChangeText={(text) => {
-                    setContactNumber(text);
-                    clearError("contactNumber");
-                  }}
+                  onChangeText={(text) => { setContactNumber(text); clearError("contactNumber"); }}
                   keyboardType="phone-pad"
-                  className={`${inputBase} ${
-                    errors.contactNumber
-                      ? "border-red-400"
-                      : "border-gray-100"
-                  }`}
+                  style={{ backgroundColor: colors.bgInput, color: colors.text, padding: 20, borderRadius: 16, fontSize: 18, fontWeight: 'bold', borderWidth: 1, borderColor: errors.contactNumber ? '#F87171' : 'transparent' }}
                 />
 
                 {errors.contactNumber && (
@@ -303,15 +274,10 @@ export default function CreateListingScreen() {
               <VStack>
                 <TextInput
                   placeholder="Location"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={colors.textMuted}
                   value={location}
-                  onChangeText={(text) => {
-                    setLocation(text);
-                    clearError("location");
-                  }}
-                  className={`${inputBase} ${
-                    errors.location ? "border-red-400" : "border-gray-100"
-                  }`}
+                  onChangeText={(text) => { setLocation(text); clearError("location"); }}
+                  style={{ backgroundColor: colors.bgInput, color: colors.text, padding: 20, borderRadius: 16, fontSize: 18, fontWeight: 'bold', borderWidth: 1, borderColor: errors.location ? '#F87171' : 'transparent' }}
                 />
 
                 {errors.location && (
@@ -324,18 +290,13 @@ export default function CreateListingScreen() {
               <VStack>
                 <TextInput
                   placeholder="Description"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={colors.textMuted}
                   value={description}
-                  onChangeText={(text) => {
-                    setDescription(text);
-                    clearError("description");
-                  }}
+                  onChangeText={(text) => { setDescription(text); clearError("description"); }}
                   multiline
                   numberOfLines={5}
                   textAlignVertical="top"
-                  className={`bg-gray-50 p-5 rounded-3xl text-base text-gray-900 h-40 border ${
-                    errors.description ? "border-red-400" : "border-gray-100"
-                  }`}
+                  style={{ backgroundColor: colors.bgInput, color: colors.text, padding: 20, borderRadius: 24, fontSize: 16, height: 160, borderWidth: 1, borderColor: errors.description ? '#F87171' : 'transparent' }}
                 />
 
                 {errors.description && (
@@ -347,11 +308,12 @@ export default function CreateListingScreen() {
             </VStack>
           </ScrollView>
 
-          <Box className="absolute bottom-0 w-full p-6 bg-white">
+          <Box style={{ backgroundColor: colors.bg }} className="absolute bottom-0 w-full p-6">
             <Button
               onPress={handleSave}
               disabled={loading}
-              className="bg-indigo-600 rounded-full h-16 shadow-lg shadow-indigo-100"
+              style={{ backgroundColor: colors.primary }}
+              className="rounded-full h-16 shadow-lg"
             >
               {loading ? (
                 <ActivityIndicator color="white" />

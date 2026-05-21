@@ -1,5 +1,6 @@
 import React from "react";
 import { ScrollView, Text, TouchableOpacity } from "react-native";
+import { useTheme } from "@/context/ThemeContext";
 
 type FilterChipsProps<T extends string> = {
   options: T[];
@@ -12,12 +13,14 @@ const FilterChips = <T extends string>({
   selectedValue,
   onSelect,
 }: FilterChipsProps<T>) => {
+  const { colors } = useTheme();
+
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ gap: 10 }}
-      className="mb-6"
+      style={{ marginBottom: 24 }}
     >
       {options.map((option) => {
         const isActive = selectedValue === option;
@@ -27,16 +30,25 @@ const FilterChips = <T extends string>({
             key={option}
             onPress={() => onSelect(option)}
             activeOpacity={0.8}
-            className={`rounded-full px-8 h-8 border items-center justify-center ${
-              isActive 
-                ? "bg-indigo-600 border-indigo-600" 
-                : "bg-white border-gray-200"
-            }`}
+            style={{
+              borderRadius: 9999,
+              paddingHorizontal: 32,
+              height: 32,
+              borderWidth: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: isActive ? colors.primary : colors.white,
+              borderColor: isActive ? colors.primary : colors.border,
+            }}
           >
             <Text
-              className={`text-[11px] font-bold uppercase tracking-widest ${
-                isActive ? "text-white" : "text-gray-400"
-              }`}
+              style={{
+                fontSize: 11,
+                fontWeight: "bold",
+                textTransform: "uppercase",
+                letterSpacing: 1.5,
+                color: isActive ? "#ffffff" : colors.textMuted,
+              }}
             >
               {option}
             </Text>

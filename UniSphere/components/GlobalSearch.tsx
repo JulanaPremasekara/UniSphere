@@ -5,17 +5,14 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  ScrollView,
   FlatList,
   Keyboard,
-  Modal,
-  SafeAreaView,
-  Platform,
   Pressable,
 } from "react-native";
 import { Search, X } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import apiClient from "../services/api";
+import apiClient from "@/services/api";
+import { useTheme } from "@/context/ThemeContext";
 
 type GlobalSearchItem = {
   id: string;
@@ -47,6 +44,7 @@ export default function GlobalSearch({
   onSearchActiveChange,
 }: GlobalSearchProps) {
   const router = useRouter();
+  const { colors, isDark } = useTheme();
 
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<GlobalSearchItem[]>([]);
@@ -191,9 +189,9 @@ export default function GlobalSearch({
           onPress={() => {
             if (query.trim().length > 0) setShowResults(true);
           }}
-          className="flex-row items-center bg-gray-100 rounded-full px-5 h-14"
+          style={{ backgroundColor: colors.bgInput, borderRadius: 9999, paddingHorizontal: 20, height: 56, flexDirection: "row", alignItems: "center" }}
         >
-          <Search size={20} color="#9CA3AF" />
+          <Search size={20} color={colors.textMuted} />
 
           <TextInput
             value={query}
@@ -205,33 +203,33 @@ export default function GlobalSearch({
               if (query.trim().length > 0) setShowResults(true);
             }}
             placeholder="Search UniSphere..."
-            className="flex-1 ml-3 text-gray-700 text-base"
-            placeholderTextColor="#9CA3AF"
+            style={{ flex: 1, marginLeft: 12, color: colors.text, fontSize: 16 }}
+            placeholderTextColor={colors.textMuted}
             autoCorrect={false}
           />
 
           {query.length > 0 && (
             <TouchableOpacity onPress={clearSearch}>
-              <X size={18} color="#9CA3AF" />
+              <X size={18} color={colors.textMuted} />
             </TouchableOpacity>
           )}
         </Pressable>
       </View>
 
-      {/* Search Results Overlay (Absolute View instead of Modal to fix focus loss) */}
+      {/* Search Results Overlay */}
       {searchActive && (
         <View 
           style={{ 
             position: 'absolute', 
-            top: 64, // Directly under the search bar
+            top: 64, 
             left: 0, 
             right: 0, 
-            bottom: -1000, // Large enough to capture touches on Android
+            bottom: -1000, 
             zIndex: 1000,
           }}
           pointerEvents="box-none"
         >
-          {/* Backdrop Layer (Darkened background) */}
+          {/* Backdrop Layer */}
           <Pressable
             onPress={closeResults}
             style={{ 
@@ -240,7 +238,7 @@ export default function GlobalSearch({
               left: 0, 
               right: 0, 
               bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.3)'
+              backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.3)"
             }}
           />
 
@@ -250,13 +248,19 @@ export default function GlobalSearch({
             pointerEvents="box-none"
           >
             <View 
-              className="bg-white rounded-[32px] shadow-2xl border border-gray-100 overflow-hidden"
-              style={{ elevation: 10 }}
+              style={{
+                backgroundColor: colors.bgCard,
+                borderRadius: 32,
+                borderWidth: 1,
+                borderColor: colors.border,
+                overflow: 'hidden',
+                elevation: 10
+              }}
             >
               {loading ? (
                 <View className="py-10 items-center">
-                  <ActivityIndicator color="#4F46E5" />
-                  <Text className="text-gray-400 mt-2 text-sm font-medium">Searching...</Text>
+                  <ActivityIndicator color={colors.primary} />
+                  <Text style={{ color: colors.textMuted }} className="mt-2 text-sm font-medium">Searching...</Text>
                 </View>
               ) : filteredResults.length > 0 ? (
                 <View style={{ maxHeight: 400 }}>
@@ -271,16 +275,17 @@ export default function GlobalSearch({
                       <TouchableOpacity
                         activeOpacity={0.7}
                         onPress={() => handleResultPress(item.route)}
-                        className="px-6 py-4 border-b border-gray-50"
+                        style={{ borderBottomWidth: 1, borderBottomColor: colors.border, paddingHorizontal: 24, paddingVertical: 16 }}
                       >
                         <View className="flex-row justify-between items-center">
-                          <Text className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">
+                          <Text style={{ color: colors.primary }} className="text-[10px] font-black uppercase tracking-widest">
                             {item.type}
                           </Text>
                         </View>
 
                         <Text
-                          className="text-base font-bold text-gray-900 mt-0.5"
+                          style={{ color: colors.text }}
+                          className="text-base font-bold mt-0.5"
                           numberOfLines={1}
                         >
                           {item.title}
@@ -288,7 +293,8 @@ export default function GlobalSearch({
 
                         {item.subtitle ? (
                           <Text
-                            className="text-sm text-gray-500 mt-0.5 font-medium"
+                            style={{ color: colors.textSecondary }}
+                            className="text-sm mt-0.5 font-medium"
                             numberOfLines={1}
                           >
                             {item.subtitle}
@@ -300,7 +306,7 @@ export default function GlobalSearch({
                 </View>
               ) : (
                 <View className="py-12 items-center">
-                  <Text className="text-gray-400 font-bold">No results found</Text>
+                  <Text style={{ color: colors.textMuted }} className="font-bold">No results found</Text>
                 </View>
               )}
             </View>

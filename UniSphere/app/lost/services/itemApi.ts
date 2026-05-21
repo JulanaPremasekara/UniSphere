@@ -1,5 +1,5 @@
-import { getTimeAgo } from '@/app/utils/timeAgo';
-import apiClient from '../../services/api';
+import { getTimeAgo } from '@/utils/timeAgo';
+import apiClient from '@/services/api';
 
 export const getLostItemById = async (itemId: string) => {
   const response = await apiClient.get(`/lost/${itemId}`);

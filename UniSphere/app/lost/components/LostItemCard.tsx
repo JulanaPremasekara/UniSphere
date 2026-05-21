@@ -1,6 +1,7 @@
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { LostItem } from "../types/lostItem.types";
+import { useTheme } from "@/context/ThemeContext";
 
 type LostItemCardProps = {
   item: LostItem;
@@ -8,30 +9,43 @@ type LostItemCardProps = {
 };
 
 const LostItemCard = ({ item, onPress }: LostItemCardProps) => {
+  const { colors, isDark } = useTheme();
+
   return (
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={() => onPress(item.id)}
-      className="mb-6"
+      style={{ marginBottom: 24 }}
     >
-      <View className="relative mb-3 overflow-hidden rounded-[30px] bg-slate-50 p-3">
+      <View style={{ position: "relative", marginBottom: 12, overflow: "hidden", borderRadius: 30, backgroundColor: colors.bgCard, padding: 12, borderWidth: 1, borderColor: colors.border }}>
         {item.isMine && (
-          <View className="absolute left-3 top-3 z-10 rounded-full bg-indigo-600 px-3 py-1.5">
-            <Text className="text-[10px] font-extrabold text-white">
+          <View style={{ position: "absolute", left: 12, top: 12, zIndex: 10, borderRadius: 9999, backgroundColor: colors.primary, paddingHorizontal: 12, paddingVertical: 6 }}>
+            <Text style={{ fontSize: 10, fontWeight: "800", color: "#ffffff" }}>
               YOUR POST
             </Text>
           </View>
         )}
 
         <View
-          className={`absolute right-3 top-3 z-10 rounded-full px-3 py-1.5 ${
-            item.status === "lost" ? "bg-red-100" : "bg-indigo-100"
-          }`}
+          style={{
+            position: "absolute",
+            right: 12,
+            top: 12,
+            zIndex: 10,
+            borderRadius: 9999,
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            backgroundColor: item.status === "lost" 
+              ? (isDark ? "rgba(239, 68, 68, 0.2)" : "#FEE2E2") 
+              : (isDark ? "rgba(99, 102, 241, 0.2)" : "#EEF2FF"),
+          }}
         >
           <Text
-            className={`text-[10px] font-extrabold ${
-              item.status === "lost" ? "text-red-600" : "text-indigo-700"
-            }`}
+            style={{
+              fontSize: 10,
+              fontWeight: "800",
+              color: item.status === "lost" ? "#EF4444" : colors.primary,
+            }}
           >
             {item.status.toUpperCase()}
           </Text>
@@ -44,15 +58,15 @@ const LostItemCard = ({ item, onPress }: LostItemCardProps) => {
         />
       </View>
 
-      <Text className="mb-2 text-[22px] font-extrabold text-slate-900">
+      <Text style={{ marginBottom: 8, fontSize: 22, fontWeight: "800", color: colors.text }}>
         {item.title}
       </Text>
 
-      <Text className="mb-1 text-[13px] text-slate-500">
+      <Text style={{ marginBottom: 4, fontSize: 13, color: colors.textSecondary }}>
         📍 {item.location}
       </Text>
 
-      <Text className="text-[13px] text-slate-500">
+      <Text style={{ fontSize: 13, color: colors.textMuted }}>
         🕒 {item.timeAgo}
       </Text>
     </TouchableOpacity>

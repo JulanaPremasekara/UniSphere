@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import apiClient from '../app/services/api';
+import apiClient from '@/services/api';
 import { Alert } from 'react-native';
 
 export const useEventDetail = (id: string | string[]) => {

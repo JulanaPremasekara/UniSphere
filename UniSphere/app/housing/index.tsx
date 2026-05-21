@@ -12,17 +12,18 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { Plus, Trash2, Search, Calendar } from "lucide-react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Footer from "../components/Footer";
-import apiClient from "../services/api";
-import { useHousing, Housing } from "../../hooks/useHousing";
-import { useUser } from "../../hooks/useUser";
-import HousingCard from "../components/HousingCard";
+import Footer from "@/components/Footer";
+import apiClient from "@/services/api";
+import { useHousing, Housing } from "./hooks/useHousing";
+import { useUser } from "@/hooks/useUser";
+import HousingCard from "./components/HousingCard";
 
-import AppHeader from "../components/AppHeader";
-import SearchInput from "../components/SearchInput";
-import FilterChips from "../components/FilterChips";
-import SectionHeader from "../components/SectionHeader";
+import AppHeader from "@/components/AppHeader";
+import SearchInput from "@/components/SearchInput";
+import FilterChips from "@/components/FilterChips";
+import SectionHeader from "@/components/SectionHeader";
 import { Alert } from "react-native";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function HousingList() {
   const router = useRouter();
@@ -36,6 +37,7 @@ export default function HousingList() {
 
   const { housings, loading, refreshHousings } = useHousing();
   const { userId } = useUser();
+  const { colors } = useTheme();
 
   const filterOptions = ["All", "Mine", "Others"];
 
@@ -81,14 +83,14 @@ export default function HousingList() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-white">
-        <ActivityIndicator size="large" color="#4F46E5" />
+      <SafeAreaView style={{ backgroundColor: colors.bg }} className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+    <SafeAreaView edges={["top"]} style={{ backgroundColor: colors.bg }} className="flex-1">
       <View className="flex-1">
         <AppHeader title="UniSphere" />
 
@@ -125,15 +127,15 @@ export default function HousingList() {
           }
           ListEmptyComponent={
             <View className="items-center justify-center py-20">
-              <View className="bg-gray-100 p-8 rounded-full mb-4">
-                <Search size={48} color="#9CA3AF" />
+              <View style={{ backgroundColor: colors.bgInput }} className="p-8 rounded-full mb-4">
+                <Search size={48} color={colors.textMuted} />
               </View>
 
-              <Text className="text-xl font-bold text-gray-800 mb-2">
+              <Text style={{ color: colors.text }} className="text-xl font-bold mb-2">
                 No Rooms Found
               </Text>
 
-              <Text className="text-gray-500 text-center px-10">
+              <Text style={{ color: colors.textSecondary }} className="text-center px-10">
                 There are currently no rooms matching your search or criteria.
               </Text>
             </View>
@@ -154,8 +156,8 @@ export default function HousingList() {
               ? setLoginModalVisible(true)
               : router.push("/housing/create")
           }
-          className="absolute right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
-          style={{ bottom: 90 + Math.max(insets.bottom, 16) }}
+          style={{ bottom: 90 + Math.max(insets.bottom, 16), backgroundColor: colors.primary }}
+          className="absolute right-8 w-16 h-16 rounded-full items-center justify-center shadow-lg"
         >
           <Plus color="white" size={32} />
         </TouchableOpacity>
@@ -174,25 +176,26 @@ export default function HousingList() {
             onPress={() => setDeleteModalVisible(false)}
             className="flex-1 bg-black/60 justify-center items-center px-6"
           >
-            <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
-              <View className="bg-red-50 p-6 rounded-full mb-6">
+            <View style={{ backgroundColor: colors.white }} className="rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
+              <View style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)' }} className="p-6 rounded-full mb-6">
                 <Trash2 size={40} color="#EF4444" />
               </View>
 
-              <Text className="text-2xl font-black text-gray-900 mb-2">
+              <Text style={{ color: colors.text }} className="text-2xl font-black mb-2">
                 Delete Listing?
               </Text>
 
-              <Text className="text-gray-500 text-center text-lg mb-8 leading-relaxed">
+              <Text style={{ color: colors.textSecondary }} className="text-center text-lg mb-8 leading-relaxed">
                 This will permanently remove your room listing.
               </Text>
 
               <View className="flex-row gap-4 w-full">
                 <TouchableOpacity
                   onPress={() => setDeleteModalVisible(false)}
-                  className="flex-1 bg-gray-50 p-5 rounded-3xl"
+                  style={{ backgroundColor: colors.bgInput }}
+                  className="flex-1 p-5 rounded-3xl"
                 >
-                  <Text className="text-gray-900 font-bold text-center text-lg">
+                  <Text style={{ color: colors.text }} className="font-bold text-center text-lg">
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -222,32 +225,37 @@ export default function HousingList() {
             onPress={() => setLoginModalVisible(false)}
             className="flex-1 bg-black/60 justify-center items-center px-6"
           >
-            <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
-              <View className="bg-indigo-50 p-6 rounded-full mb-6">
-                <Calendar size={40} color="#4F46E5" />
+            <View style={{ backgroundColor: colors.white }} className="rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
+              <View style={{ backgroundColor: colors.primaryLight }} className="p-6 rounded-full mb-6">
+                <Calendar size={40} color={colors.primary} />
               </View>
 
-              <Text className="text-2xl font-black text-gray-900 mb-2">
+              <Text style={{ color: colors.text }} className="text-2xl font-black mb-2">
                 Login Required
               </Text>
 
-              <Text className="text-gray-500 text-center text-lg mb-8">
+              <Text style={{ color: colors.textSecondary }} className="text-center text-lg mb-8">
                 Please sign in to post a room listing.
               </Text>
 
               <View className="flex-row gap-4 w-full">
                 <TouchableOpacity
                   onPress={() => setLoginModalVisible(false)}
-                  className="flex-1 bg-gray-50 p-5 rounded-3xl"
+                  style={{ backgroundColor: colors.bgInput }}
+                  className="flex-1 p-5 rounded-3xl"
                 >
-                  <Text className="text-gray-900 font-bold text-center">
+                  <Text style={{ color: colors.text }} className="font-bold text-center">
                     Cancel
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => router.push("/login")}
-                  className="flex-1 bg-indigo-600 p-5 rounded-3xl"
+                  onPress={() => {
+                    setLoginModalVisible(false);
+                    router.push("/login");
+                  }}
+                  style={{ backgroundColor: colors.primary }}
+                  className="flex-1 p-5 rounded-3xl"
                 >
                   <Text className="text-white font-bold text-center">
                     Sign In

@@ -1,6 +1,7 @@
 import { useUser } from "@/hooks/useUser";
 import React, { useEffect, useState } from "react";
 import { Alert, Image, Linking, Text, TouchableOpacity, View } from "react-native";
+import { useTheme } from "@/context/ThemeContext";
 
 type Props = {
   itemId: string;
@@ -17,6 +18,7 @@ type User = {
 
 export default function LostUserActions({ itemId, category, ownerid }: Props) {
   const { getuserById } = useUser();
+  const { colors } = useTheme();
 
   const [createdUser, setCreatedUser] = useState<User | null>(null);
   const [loadingOwner, setLoadingOwner] = useState(false);
@@ -60,45 +62,46 @@ export default function LostUserActions({ itemId, category, ownerid }: Props) {
 
   return (
     <View className="mx-5 mb-10">
-      <View className="bg-white p-6 rounded-[40px] border border-gray-100 shadow-xl shadow-black/5">
+      <View style={{ backgroundColor: colors.bgCard, borderColor: colors.border }} className="p-6 rounded-[40px] border shadow-xl">
         <View className="flex-row items-center mb-6">
-          <View className="w-12 h-12 rounded-full bg-indigo-50 mr-4 overflow-hidden">
+          <View style={{ backgroundColor: colors.bgInput }} className="w-12 h-12 rounded-full mr-4 overflow-hidden">
             {createdUser?.image ? (
               <Image
                 source={{ uri: createdUser.image }}
                 className="w-full h-full"
               />
             ) : (
-              <View className="w-full h-full bg-gray-200" />
+              <View style={{ backgroundColor: colors.border }} className="w-full h-full" />
             )}
           </View>
 
           <View>
-            <Text className="text-[10px] text-gray-400 font-medium">
+            <Text style={{ color: colors.textMuted }} className="text-[10px] font-medium">
               Found by
             </Text>
 
-            <Text className="text-base font-bold text-gray-800">
+            <Text style={{ color: colors.text }} className="text-base font-bold">
               {loadingOwner ? "Loading..." : createdUser?.name || "Unknown User"}
             </Text>
           </View>
         </View>
 
-        <View className="flex-row justify-between py-3 border-b border-gray-50">
-          <Text className="text-xs text-gray-400">Item ID</Text>
-          <Text className="text-xs font-bold text-gray-800">{itemId}</Text>
+        <View style={{ borderColor: colors.border }} className="flex-row justify-between py-3 border-b">
+          <Text style={{ color: colors.textMuted }} className="text-xs">Item ID</Text>
+          <Text style={{ color: colors.text }} className="text-xs font-bold">{itemId}</Text>
         </View>
 
         <View className="flex-row justify-between py-3 mb-4">
-          <Text className="text-xs text-gray-400">Category</Text>
-          <Text className="text-xs font-bold text-indigo-600">
+          <Text style={{ color: colors.textMuted }} className="text-xs">Category</Text>
+          <Text style={{ color: colors.primary }} className="text-xs font-bold">
             {category}
           </Text>
         </View>
 
         <TouchableOpacity
           onPress={handleCall}
-          className="w-full bg-indigo-600 py-5 rounded-3xl items-center shadow-lg shadow-indigo-300"
+          style={{ backgroundColor: colors.primary }}
+          className="w-full py-5 rounded-3xl items-center shadow-lg"
         >
           <Text className="text-white font-bold text-base">
             Claim / Contact Finder
@@ -106,11 +109,11 @@ export default function LostUserActions({ itemId, category, ownerid }: Props) {
         </TouchableOpacity>
       </View>
 
-      <View className="bg-indigo-50/50 p-6 rounded-[30px] mt-4">
-        <Text className="text-[10px] font-black text-indigo-400 uppercase tracking-wider mb-1">
+      <View style={{ backgroundColor: colors.primaryLight }} className="p-6 rounded-[30px] mt-4">
+        <Text style={{ color: colors.primary }} className="text-[10px] font-black uppercase tracking-wider mb-1">
           Security Note
         </Text>
-        <Text className="text-[11px] text-indigo-900/60 leading-4 font-medium">
+        <Text style={{ color: colors.textSecondary }} className="text-[11px] leading-4 font-medium">
           To prevent fraudulent claims, all high-value items require a formal
           identity check and specific descriptive verification.
         </Text>

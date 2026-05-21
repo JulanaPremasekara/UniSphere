@@ -16,7 +16,8 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { X, Camera, MapPin, CheckCircle2, Calendar } from "lucide-react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Input, InputField, InputSlot } from "@/components/ui/input";
-import apiClient from "../services/api";
+import apiClient from "@/services/api";
+import { useTheme } from "@/context/ThemeContext";
 
 const blurActiveElement = () => {
   if (Platform.OS === "web" && typeof document !== "undefined") {
@@ -59,23 +60,23 @@ const FormField = ({
   keyboardType = "default",
   error,
 }: any) => {
+  const { colors } = useTheme();
   return (
     <View className={className}>
-      <Text className="text-[13px] font-bold text-gray-800 uppercase tracking-[1.5px] ml-1 mb-3">
+      <Text style={{ color: colors.text }} className="text-[13px] font-bold uppercase tracking-[1.5px] ml-1 mb-3">
         {label}
       </Text>
 
       {multiline ? (
         <View
-          className={`bg-gray-50 rounded-[22px] p-5 min-h-[120px] border ${
-            error ? "border-red-400" : "border-transparent"
-          }`}
+          style={{ backgroundColor: colors.bgInput, borderColor: error ? '#EF4444' : 'transparent', borderWidth: 1 }}
+          className="rounded-[22px] p-5 min-h-[120px]"
         >
           <TextInput
             multiline
             placeholder={place}
-            className="text-gray-900 font-semibold text-lg text-start"
-            placeholderTextColor="#9CA3AF"
+            style={{ color: colors.text }}
+            placeholderTextColor={colors.textMuted}
             textAlignVertical="top"
             value={val}
             onChangeText={(text) => updateForm(field, text)}
@@ -83,22 +84,21 @@ const FormField = ({
         </View>
       ) : (
         <Input
-          className={`h-16 rounded-[22px] bg-gray-50 px-5 border ${
-            error ? "border-red-400" : "border-transparent"
-          }`}
+          style={{ backgroundColor: colors.bgInput, borderColor: error ? '#EF4444' : 'transparent', borderWidth: 1 }}
+          className="h-16 rounded-[22px] px-5"
         >
           <InputField
             placeholder={place}
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.textMuted}
             keyboardType={keyboardType}
-            className="font-semibold text-lg text-gray-800"
+            style={{ color: colors.text }}
             value={val}
             onChangeText={(text) => updateForm(field, text)}
           />
 
           {IconComp && (
             <InputSlot className="pr-2">
-              <IconComp size={22} color="#4F46E5" />
+              <IconComp size={22} color={colors.primary} />
             </InputSlot>
           )}
         </Input>
@@ -147,28 +147,28 @@ const DatePickerField = ({
     return isNaN(parsed) ? new Date() : new Date(parsed);
   };
 
+  const { colors } = useTheme();
   return (
     <View className={className}>
-      <Text className="text-[13px] font-bold text-gray-800 uppercase tracking-[1.5px] ml-1 mb-3">
+      <Text style={{ color: colors.text }} className="text-[13px] font-bold uppercase tracking-[1.5px] ml-1 mb-3">
         {label}
       </Text>
 
       <Input
-        className={`h-16 rounded-[22px] bg-gray-50 px-5 border ${
-          error ? "border-red-400" : "border-transparent"
-        }`}
+        style={{ backgroundColor: colors.bgInput, borderColor: error ? '#EF4444' : 'transparent', borderWidth: 1 }}
+        className="h-16 rounded-[22px] px-5"
       >
         <InputField
           placeholder={place}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.textMuted}
           keyboardType="numeric"
-          className="font-semibold text-lg text-gray-800"
+          style={{ color: colors.text }}
           value={val}
           onChangeText={handleTextChange}
           maxLength={10}
         />
         <TouchableOpacity onPress={() => setShow(true)} className="justify-center px-2">
-          <Calendar size={22} color="#4F46E5" />
+          <Calendar size={22} color={colors.primary} />
         </TouchableOpacity>
       </Input>
 
@@ -196,9 +196,11 @@ const ToggleField = ({
   onSelect,
   className = "",
   error,
-}: any) => (
+}: any) => {
+  const { colors } = useTheme();
+  return (
   <View className={className}>
-    <Text className="text-[13px] font-bold text-gray-800 uppercase tracking-[1.5px] ml-1 mb-3">
+    <Text style={{ color: colors.text }} className="text-[13px] font-bold uppercase tracking-[1.5px] ml-1 mb-3">
       {label}
     </Text>
 
@@ -207,14 +209,12 @@ const ToggleField = ({
         <TouchableOpacity
           key={opt}
           onPress={() => onSelect(opt)}
-          className={`flex-1 p-3 rounded-[18px] items-center justify-center ${
-            selected === opt ? "bg-indigo-600" : "bg-gray-100"
-          }`}
+          style={{ backgroundColor: selected === opt ? colors.primary : colors.bgInput }}
+          className="flex-1 p-3 rounded-[18px] items-center justify-center"
         >
           <Text
-            className={`font-bold ${
-              selected === opt ? "text-white" : "text-gray-600"
-            }`}
+            style={{ color: selected === opt ? 'white' : colors.textSecondary }}
+            className="font-bold"
           >
             {opt}
           </Text>
@@ -228,26 +228,28 @@ const ToggleField = ({
       </Text>
     )}
   </View>
-);
+  );
+};
 
-const CheckboxField = ({ label, value, onChange, className = "" }: any) => (
+const CheckboxField = ({ label, value, onChange, className = "" }: any) => {
+  const { colors } = useTheme();
+  return (
   <TouchableOpacity
-    className={`flex-row items-center p-3 rounded-[18px] ${className} ${
-      value ? "bg-indigo-50" : "bg-gray-50"
-    }`}
+    style={{ backgroundColor: value ? colors.primaryLight : colors.bgInput }}
+    className={`flex-row items-center p-3 rounded-[18px] ${className}`}
     onPress={() => onChange(!value)}
   >
     <View
-      className={`w-6 h-6 rounded-lg mr-3 items-center justify-center ${
-        value ? "bg-indigo-600" : "bg-gray-200"
-      }`}
+      style={{ backgroundColor: value ? colors.primary : colors.border }}
+      className="w-6 h-6 rounded-lg mr-3 items-center justify-center"
     >
       {value && <Text className="text-white font-bold">✓</Text>}
     </View>
 
-    <Text className="text-gray-800 font-semibold">{label}</Text>
+    <Text style={{ color: colors.text }} className="font-semibold">{label}</Text>
   </TouchableOpacity>
-);
+  );
+};
 
 const RowField = ({
   label1,
@@ -294,6 +296,7 @@ const RowField = ({
 export default function CreateHousing() {
   const router = useRouter();
   const { editId } = useLocalSearchParams();
+  const { colors } = useTheme();
 
   const isEditing = !!editId;
 
@@ -553,27 +556,29 @@ export default function CreateHousing() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-white"
+      style={{ backgroundColor: colors.bg }}
+      className="flex-1"
     >
       <View
-        className="px-6 pb-4 bg-white"
-        style={{ paddingTop: Platform.OS === "ios" ? 60 : 50 }}
+        style={{ backgroundColor: colors.bg, paddingTop: Platform.OS === "ios" ? 60 : 50 }}
+        className="px-6 pb-4"
       >
         <View className="flex-row justify-between items-center">
           <View>
-            <Text className="text-[10px] font-extrabold uppercase tracking-[2px] text-indigo-300 mb-1">
+            <Text style={{ color: colors.primary }} className="text-[10px] font-extrabold uppercase tracking-[2px] mb-1">
               {isEditing ? "Edit Listing" : "Housing Submission"}
             </Text>
-            <Text className="text-4xl font-extrabold text-slate-900">
+            <Text style={{ color: colors.text }} className="text-4xl font-extrabold">
               {isEditing ? "Edit Room" : "Post a Room"}
             </Text>
           </View>
 
           <TouchableOpacity
             onPress={() => router.back()}
-            className="bg-gray-100 p-3 rounded-full"
+            style={{ backgroundColor: colors.bgCard }}
+            className="p-3 rounded-full"
           >
-            <X size={24} color="#6B7280" />
+            <X size={24} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -583,7 +588,7 @@ export default function CreateHousing() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        <Text className="text-lg font-bold text-gray-900 mt-8 mb-5">
+        <Text style={{ color: colors.text }} className="text-lg font-bold mt-8 mb-5">
           Basic Information
         </Text>
 
@@ -628,7 +633,7 @@ export default function CreateHousing() {
           error={errors.roomType}
         />
 
-        <Text className="text-lg font-bold text-gray-900 mt-8 mb-5">
+        <Text style={{ color: colors.text }} className="text-lg font-bold mt-8 mb-5">
           Pricing
         </Text>
 
@@ -648,7 +653,7 @@ export default function CreateHousing() {
           error2={errors.deposit}
         />
 
-        <Text className="text-lg font-bold text-gray-900 mt-8 mb-5">
+        <Text style={{ color: colors.text }} className="text-lg font-bold mt-8 mb-5">
           Availability
         </Text>
 
@@ -671,7 +676,7 @@ export default function CreateHousing() {
           error={errors.availabilityStatus}
         />
 
-        <Text className="text-lg font-bold text-gray-900 mt-8 mb-5">
+        <Text style={{ color: colors.text }} className="text-lg font-bold mt-8 mb-5">
           Features
         </Text>
 
@@ -696,24 +701,23 @@ export default function CreateHousing() {
           className="mb-4"
         />
 
-        <Text className="text-lg font-bold text-gray-900 mt-8 mb-5">
+        <Text style={{ color: colors.text }} className="text-lg font-bold mt-8 mb-5">
           Room Photos
         </Text>
 
         <TouchableOpacity
           onPress={pickImage}
           disabled={isPicking}
-          className={`bg-indigo-50 border-2 border-dashed rounded-[24px] p-8 items-center justify-center mb-2 ${
-            errors.images ? "border-red-400" : "border-indigo-300"
-          }`}
+          style={{ backgroundColor: colors.primaryLight, borderColor: errors.images ? '#EF4444' : colors.primary }}
+          className="border-2 border-dashed rounded-[24px] p-8 items-center justify-center mb-2"
         >
-          <Camera size={40} color="#4F46E5" />
+          <Camera size={40} color={colors.primary} />
 
-          <Text className="text-indigo-700 font-bold text-lg mt-2">
+          <Text style={{ color: colors.primary }} className="font-bold text-lg mt-2">
             {isPicking ? "Picking..." : "Tap to Upload Photos"}
           </Text>
 
-          <Text className="text-gray-500 text-sm mt-1">
+          <Text style={{ color: colors.textSecondary }} className="text-sm mt-1">
             Select one or multiple images
           </Text>
         </TouchableOpacity>
@@ -726,7 +730,7 @@ export default function CreateHousing() {
 
         {images.length > 0 && (
           <View className="mb-6">
-            <Text className="text-sm font-bold text-gray-600 mb-3">
+            <Text style={{ color: colors.textSecondary }} className="text-sm font-bold mb-3">
               Uploaded Photos ({images.length})
             </Text>
 
@@ -750,7 +754,7 @@ export default function CreateHousing() {
           </View>
         )}
 
-        <Text className="text-lg font-bold text-gray-900 mt-8 mb-5">
+        <Text style={{ color: colors.text }} className="text-lg font-bold mt-8 mb-5">
           Contact Information
         </Text>
 
@@ -787,15 +791,14 @@ export default function CreateHousing() {
         />
       </ScrollView>
 
-      <View className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-4">
+      <View style={{ backgroundColor: colors.bg, borderTopColor: colors.border, borderTopWidth: 1 }} className="absolute bottom-0 left-0 right-0 px-6 py-4">
         <TouchableOpacity
           onPress={handlePublish}
           disabled={isPublishing}
-          className={`p-4 rounded-[24px] items-center justify-center ${
-            isPublishing ? "bg-gray-300" : "bg-indigo-600"
-          }`}
+          style={{ backgroundColor: isPublishing ? colors.bgCard : colors.primary }}
+          className="p-4 rounded-[24px] items-center justify-center"
         >
-          <Text className="text-white font-bold text-lg">
+          <Text style={{ color: isPublishing ? colors.textMuted : 'white' }} className="font-bold text-lg">
             {isPublishing
               ? "Publishing..."
               : isEditing
@@ -816,22 +819,23 @@ export default function CreateHousing() {
           onPress={closeSuccessModal}
           className="flex-1 bg-black/60 justify-center items-center px-6"
         >
-          <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
-            <View className="bg-indigo-50 p-6 rounded-full mb-6">
-              <CheckCircle2 size={50} color="#4F46E5" />
+          <View style={{ backgroundColor: colors.white }} className="rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
+            <View style={{ backgroundColor: colors.primaryLight }} className="p-6 rounded-full mb-6">
+              <CheckCircle2 size={50} color={colors.primary} />
             </View>
 
-            <Text className="text-2xl font-black text-gray-900 mb-2">
+            <Text style={{ color: colors.text }} className="text-2xl font-black mb-2">
               Success!
             </Text>
 
-            <Text className="text-gray-500 text-center text-lg mb-8">
+            <Text style={{ color: colors.textSecondary }} className="text-center text-lg mb-8">
               {successMessage}
             </Text>
 
             <TouchableOpacity
               onPress={closeSuccessModal}
-              className="bg-indigo-600 px-8 py-4 rounded-[20px]"
+              style={{ backgroundColor: colors.primary }}
+              className="px-8 py-4 rounded-[20px]"
             >
               <Text className="text-white font-bold">Done</Text>
             </TouchableOpacity>

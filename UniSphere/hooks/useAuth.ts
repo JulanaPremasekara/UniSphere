@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import apiClient from '../app/services/api';
-import { AppStorage } from '../app/services/storage';
+import apiClient from '@/services/api';
+import { AppStorage } from '@/services/storage';
 
 export const useAuth = () => {
   const router = useRouter();

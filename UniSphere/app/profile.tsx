@@ -3,15 +3,17 @@ import { VStack } from '@/components/ui/vstack';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Camera, Bell, Calendar, ChevronLeft, ChevronRight, CircleUserRound, GraduationCap, LogOut, Mail, Settings, ShieldCheck, Users } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ActivityIndicator, Platform, ScrollView, Text, TouchableOpacity, View, Image, Alert } from 'react-native';
+import { ActivityIndicator, Platform, ScrollView, Text, TouchableOpacity, View, Image, Alert, Switch } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
-import Footer from './components/Footer';
-import { useProfile } from '../hooks/useProfile';
+import Footer from '@/components/Footer';
+import { useProfile } from '@/hooks/useProfile';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function Profile() {
   const router = useRouter();
   const { user, loading, isUpdating, logout, refreshProfile, updateProfile, deleteProfileImage } = useProfile();
+  const { isDark, colors, toggleTheme } = useTheme();
 
   const handleImagePick = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -33,7 +35,7 @@ export default function Profile() {
         phone: user.phone,
         year: user.year,
         major: user.major
-      }, result.assets[0], false); // Pass false to stay on the page
+      }, result.assets[0], false);
       
       if (success) {
         refreshProfile();
@@ -53,129 +55,144 @@ export default function Profile() {
 
   useFocusEffect(React.useCallback(() => { refreshProfile(); }, [refreshProfile]));
 
-  if (loading) return <View className="flex-1 justify-center items-center bg-white"><ActivityIndicator size="large" color="#4F46E5" /></View>;
+  if (loading) return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg }}>
+      <ActivityIndicator size="large" color={colors.primary} />
+    </View>
+  );
 
   if (!user) return (
-    <View style={{ flex: 1, backgroundColor: 'white' }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 }}>
-        <View className="bg-indigo-50 p-10 rounded-[50px] mb-8"><CircleUserRound size={100} color="#4F46E5" strokeWidth={1} /></View>
-        <Text className="text-3xl font-black text-gray-900 text-center mb-3">Hello there!</Text>
-        <Text className="text-gray-500 text-center text-lg leading-6 mb-10">Please sign in to your UniSphere account to view and manage your profile details.</Text>
-        <TouchableOpacity onPress={() => router.push('/login')} className="bg-indigo-600 w-full h-16 rounded-[25px] items-center justify-center shadow-lg shadow-indigo-200">
-          <Text className="text-white font-bold text-lg">Sign In Now</Text>
+        <View style={{ backgroundColor: colors.primaryLight, padding: 40, borderRadius: 50, marginBottom: 32 }}>
+          <CircleUserRound size={100} color={colors.primary} strokeWidth={1} />
+        </View>
+        <Text style={{ fontSize: 28, fontWeight: '900', color: colors.text, textAlign: 'center', marginBottom: 12 }}>Hello there!</Text>
+        <Text style={{ color: colors.textMuted, textAlign: 'center', fontSize: 18, lineHeight: 24, marginBottom: 40 }}>
+          Please sign in to your UniSphere account to view and manage your profile details.
+        </Text>
+        <TouchableOpacity
+          onPress={() => router.push('/login')}
+          style={{ backgroundColor: colors.primary, width: '100%', height: 64, borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18 }}>Sign In Now</Text>
         </TouchableOpacity>
       </View>
       <Footer />
     </View>
   );
 
+  const avatarUri = user.image
+    ? user.image.startsWith('http') ? user.image : `${process.env.EXPO_PUBLIC_API_URL}${user.image}`
+    : null;
+
   return (
-    <View className="flex-1 bg-white">
-      <View className="flex-row justify-between items-center px-6 pb-4 bg-white" style={{ paddingTop: Platform.OS === 'ios' ? 70 : 60 }}>
-        <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 w-12 h-12 justify-center items-start"><ChevronLeft size={28} color="#1E1B4B" /></TouchableOpacity>
-        <Text className="text-xl font-bold text-indigo-900">My Profile</Text>
-        <TouchableOpacity onPress={() => router.push('/update-profile')} className="bg-gray-100 p-2 rounded-full"><Settings size={22} color="#1E1B4B" /></TouchableOpacity>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      {/* Header */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingBottom: 16, backgroundColor: colors.navBg, paddingTop: Platform.OS === 'ios' ? 70 : 60, borderBottomWidth: 1, borderBottomColor: colors.navBorder }}>
+        <TouchableOpacity onPress={() => router.back()} style={{ padding: 8, marginLeft: -8, width: 48, height: 48, justifyContent: 'center', alignItems: 'flex-start' }}>
+          <ChevronLeft size={28} color={colors.text} />
+        </TouchableOpacity>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary }}>My Profile</Text>
+        <TouchableOpacity onPress={() => router.push('/update-profile')} style={{ backgroundColor: colors.bgInput, padding: 8, borderRadius: 999 }}>
+          <Settings size={22} color={colors.text} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
-        <View className="items-center mt-6">
-          <View className="relative">
+        {/* Avatar */}
+        <View style={{ alignItems: 'center', marginTop: 24 }}>
+          <View style={{ position: 'relative' }}>
             <TouchableOpacity onPress={handleImagePick} onLongPress={user.image ? handleDeleteImage : undefined} activeOpacity={0.9}>
-              <View className="bg-indigo-50 p-1 rounded-[45px] border-2 border-indigo-100">
-                <View className="bg-white w-32 h-32 rounded-[40px] items-center justify-center shadow-sm overflow-hidden">
-                  {user.image ? (
-                    <Image 
-                      source={{ 
-                        uri: user.image.startsWith('http') 
-                          ? `${user.image}?t=${new Date().getTime()}` 
-                          : `${process.env.EXPO_PUBLIC_API_URL}${user.image}?t=${new Date().getTime()}` 
-                      }} 
-                      className="w-full h-full" 
-                    />
+              <View style={{ backgroundColor: colors.primaryLight, padding: 4, borderRadius: 45, borderWidth: 2, borderColor: colors.border }}>
+                <View style={{ backgroundColor: colors.white, width: 128, height: 128, borderRadius: 40, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  {avatarUri ? (
+                    <Image source={{ uri: avatarUri }} style={{ width: '100%', height: '100%' }} />
                   ) : (
-                    <CircleUserRound size={80} color="#4F46E5" strokeWidth={1.5} />
+                    <CircleUserRound size={80} color={colors.primary} strokeWidth={1.5} />
                   )}
                   {isUpdating && (
-                    <View className="absolute inset-0 bg-black/30 items-center justify-center">
+                    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.3)', alignItems: 'center', justifyContent: 'center' }}>
                       <ActivityIndicator color="white" />
                     </View>
                   )}
                 </View>
               </View>
-              <View className="absolute bottom-2 right-2 bg-indigo-600 p-2.5 rounded-2xl border-2 border-white shadow-md">
+              <View style={{ position: 'absolute', bottom: 8, right: 8, backgroundColor: colors.primary, padding: 10, borderRadius: 16, borderWidth: 2, borderColor: colors.navBg }}>
                 <Camera size={18} color="white" />
               </View>
             </TouchableOpacity>
           </View>
-          <Text className="text-3xl font-extrabold text-gray-900 mt-5">{user?.name || 'User'}</Text>
-          <View className="flex-row items-center mt-2 bg-gray-50 px-4 py-1.5 rounded-full border border-gray-100">
-            <GraduationCap size={16} color="#6366F1" />
-            <Text className="text-gray-500 font-bold ml-2 text-[12px] uppercase tracking-widest">{user?.major || 'Student'} • Year {user?.year || 'N/A'}</Text>
+          <Text style={{ fontSize: 28, fontWeight: '900', color: colors.text, marginTop: 20 }}>{user?.name || 'User'}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, backgroundColor: colors.bgInput, paddingHorizontal: 16, paddingVertical: 6, borderRadius: 999, borderWidth: 1, borderColor: colors.border }}>
+            <GraduationCap size={16} color={colors.primary} />
+            <Text style={{ color: colors.textMuted, fontWeight: 'bold', marginLeft: 8, fontSize: 12, textTransform: 'uppercase', letterSpacing: 2 }}>{user?.major || 'Student'} • Year {user?.year || 'N/A'}</Text>
           </View>
         </View>
 
-        <View className="px-6 mt-10">
-          <Box className="flex-row justify-between items-center bg-white p-6 rounded-[32px] shadow-xl shadow-indigo-100/50 border border-indigo-50">
-            <View className="items-center flex-1">
-              <Text className="text-2xl font-black text-indigo-600">
-                {user?.groupCount || 0}
-              </Text>
-              <Text className="text-gray-400 text-[10px] font-bold tracking-widest uppercase mt-1">
-                Groups
-              </Text>
+        {/* Stats */}
+        <View style={{ paddingHorizontal: 24, marginTop: 40 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.bgCard, padding: 24, borderRadius: 32, borderWidth: 1, borderColor: colors.border }}>
+            <View style={{ alignItems: 'center', flex: 1 }}>
+              <Text style={{ fontSize: 24, fontWeight: '900', color: colors.primary }}>{user?.groupCount || 0}</Text>
+              <Text style={{ color: colors.textMuted, fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2, marginTop: 4 }}>Groups</Text>
             </View>
-            <View className="w-[1px] h-10 bg-gray-100" />
-            <View className="items-center flex-1">
-              <Text className="text-2xl font-black text-indigo-600">
-                {user?.eventCount || 0}
-              </Text>
-              <Text className="text-gray-400 text-[10px] font-bold tracking-widest uppercase mt-1">
-                Events
-              </Text>
+            <View style={{ width: 1, height: 40, backgroundColor: colors.border }} />
+            <View style={{ alignItems: 'center', flex: 1 }}>
+              <Text style={{ fontSize: 24, fontWeight: '900', color: colors.primary }}>{user?.eventCount || 0}</Text>
+              <Text style={{ color: colors.textMuted, fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2, marginTop: 4 }}>Events</Text>
             </View>
-            <View className="w-[1px] h-10 bg-gray-100" />
-            <View className="items-center flex-1">
-              <Text className="text-2xl font-black text-indigo-600">
+            <View style={{ width: 1, height: 40, backgroundColor: colors.border }} />
+            <View style={{ alignItems: 'center', flex: 1 }}>
+              <Text style={{ fontSize: 24, fontWeight: '900', color: colors.primary }}>
                 {user?.year ? new Date().getFullYear() + (4 - parseInt(user.year.match(/\d+/)?.[0] || "0")) : "N/A"}
               </Text>
-              <Text className="text-gray-400 text-[10px] font-bold tracking-widest uppercase mt-1">
-                Graduation
-              </Text>
+              <Text style={{ color: colors.textMuted, fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2, marginTop: 4 }}>Graduation</Text>
             </View>
-          </Box>
+          </View>
         </View>
 
-        <View className="px-6 mt-12">
-          <Text className="text-gray-400 font-bold text-[11px] uppercase tracking-[2px] ml-4 mb-5">
-            Activity & Security
+        {/* Activity & Security */}
+        <View style={{ paddingHorizontal: 24, marginTop: 48 }}>
+          <Text style={{ color: colors.textMuted, fontWeight: 'bold', fontSize: 11, textTransform: 'uppercase', letterSpacing: 2, marginLeft: 16, marginBottom: 20 }}>
+            Activity &amp; Security
           </Text>
           <VStack space="md">
-            <ProfileMenuItem
-              icon={Users}
-              label="Joined Study Groups"
-              onPress={() => router.push("/studyGroup/joined")}
-            />
-            <ProfileMenuItem
-              icon={Calendar}
-              label="Registered Events"
-              onPress={() => router.push("/events/registrations")}
-            />
-            <ProfileMenuItem
-              icon={ShieldCheck}
-              label="Privacy & Security"
-              onPress={() => router.push("./privacy")}
-            />
-            <ProfileMenuItem
-              icon={Mail}
-              label="Email Address"
-              value={user?.email || "No email provided"}
-            />
+            <ProfileMenuItem icon={Users} label="Joined Study Groups" onPress={() => router.push("/studyGroup/joined")} colors={colors} />
+            <ProfileMenuItem icon={Calendar} label="Registered Events" onPress={() => router.push("/events/registrations")} colors={colors} />
+            <ProfileMenuItem icon={ShieldCheck} label="Privacy & Security" onPress={() => router.push("./privacy")} colors={colors} />
+
+            {/* Dark Mode Toggle */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.bgCard, padding: 20, borderRadius: 28, borderWidth: 1, borderColor: colors.border, marginBottom: 8 }}
+            >
+              <View style={{ backgroundColor: colors.white, padding: 12, borderRadius: 16 }}>
+                <Bell size={22} color={colors.primary} />
+              </View>
+              <View style={{ flex: 1, marginLeft: 16 }}>
+                <Text style={{ fontWeight: 'bold', color: colors.text, fontSize: 16 }}>Dark Mode</Text>
+                <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 4, fontWeight: '500' }}>
+                  {isDark ? 'Dark theme enabled' : 'Light theme enabled'}
+                </Text>
+              </View>
+              <Switch
+                value={isDark}
+                onValueChange={toggleTheme}
+                trackColor={{ false: '#E5E7EB', true: '#6366F1' }}
+                thumbColor={isDark ? '#ffffff' : '#f3f4f6'}
+                ios_backgroundColor="#E5E7EB"
+              />
+            </TouchableOpacity>
+
+            <ProfileMenuItem icon={Mail} label="Email Address" value={user?.email || "No email provided"} colors={colors} />
+
             <TouchableOpacity
               onPress={logout}
-              className="flex-row items-center bg-red-50 p-5 rounded-[28px] mt-8 border border-red-100"
+              style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: isDark ? 'rgba(239,68,68,0.15)' : '#FEF2F2', padding: 20, borderRadius: 28, marginTop: 32, borderWidth: 1, borderColor: isDark ? 'rgba(239,68,68,0.3)' : '#FEE2E2' }}
             >
               <LogOut size={22} color="#EF4444" />
-              <Text className="ml-4 font-bold text-red-600 text-lg">Log Out</Text>
+              <Text style={{ marginLeft: 16, fontWeight: 'bold', color: '#EF4444', fontSize: 18 }}>Log Out</Text>
             </TouchableOpacity>
           </VStack>
         </View>
@@ -185,15 +202,20 @@ export default function Profile() {
   );
 }
 
-function ProfileMenuItem({ icon: IconComp, label, value, onPress }: { icon: any, label: string, value?: string, onPress?: () => void }) {
+function ProfileMenuItem({ icon: IconComp, label, value, onPress, colors }: { icon: any; label: string; value?: string; onPress?: () => void; colors: any }) {
   return (
-    <TouchableOpacity onPress={onPress} className="flex-row items-center bg-gray-50/50 p-5 rounded-[28px] border border-gray-100 mb-2">
-      <View className="bg-white p-3 rounded-2xl shadow-sm"><IconComp size={22} color="#4F46E5" /></View>
-      <View className="flex-1 ml-4">
-        <Text className="font-bold text-gray-800 text-base">{label}</Text>
-        {value && <Text className="text-gray-400 text-xs mt-1 font-medium">{value}</Text>}
+    <TouchableOpacity
+      onPress={onPress}
+      style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.bgCard, padding: 20, borderRadius: 28, borderWidth: 1, borderColor: colors.border, marginBottom: 8 }}
+    >
+      <View style={{ backgroundColor: colors.white, padding: 12, borderRadius: 16 }}>
+        <IconComp size={22} color={colors.primary} />
       </View>
-      {label !== "Email Address" && <ChevronRight size={20} color="#9CA3AF" />}
+      <View style={{ flex: 1, marginLeft: 16 }}>
+        <Text style={{ fontWeight: 'bold', color: colors.text, fontSize: 16 }}>{label}</Text>
+        {value && <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 4, fontWeight: '500' }}>{value}</Text>}
+      </View>
+      {label !== "Email Address" && <ChevronRight size={20} color={colors.textMuted} />}
     </TouchableOpacity>
   );
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { TextInput, View } from "react-native";
+import { useTheme } from "@/context/ThemeContext";
 
 type SearchInputProps = {
   value: string;
@@ -12,14 +13,15 @@ const SearchInput = ({
   onChangeText,
   placeholder = "Search...",
 }: SearchInputProps) => {
+  const { colors } = useTheme();
   return (
-    <View className="mb-4 rounded-full bg-slate-100 px-4 mt-2">
+    <View style={{ marginBottom: 16, borderRadius: 9999, backgroundColor: colors.bgInput, paddingHorizontal: 16, marginTop: 8 }}>
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#94A3B8"
-        className="h-12 text-sm text-slate-900"
+        placeholderTextColor={colors.textMuted}
+        style={{ height: 48, fontSize: 14, color: colors.text }}
       />
     </View>
   );

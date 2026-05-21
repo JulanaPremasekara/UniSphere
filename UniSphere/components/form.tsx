@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { FormControl, FormControlLabel, FormControlLabelText, FormControlHelper, FormControlHelperText, FormControlError, FormControlErrorIcon, FormControlErrorText } from '@/components/ui/form-control';
+import { View, Text } from 'react-native';
+import { FormControl, FormControlLabel, FormControlError, FormControlErrorIcon, FormControlErrorText, FormControlHelper, FormControlHelperText } from '@/components/ui/form-control';
 import { AlertCircleIcon } from '@/components/ui/icon';
-import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
+import { Input, InputField, InputSlot, InputIcon } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 import { Eye, EyeOff } from 'lucide-react-native';
+import { useTheme } from '@/context/ThemeContext';
 
 interface LoginFormProps {
   email: string;
@@ -26,23 +28,25 @@ interface FieldProps {
 
 const Field = ({ label, place, val, setVal, type = 'text', isPass, isInvalid, errorMessage }: FieldProps) => {
   const [showPassword, setShowPassword] = useState(false);
+  const { colors } = useTheme();
 
   return (
     <FormControl isInvalid={isInvalid} size="md">
       <FormControlLabel>
-        <FormControlLabelText className="text-gray-700 font-semibold mb-1">{label}</FormControlLabelText>
+        <Text style={{ color: colors.text, fontWeight: '600', marginBottom: 4 }}>{label}</Text>
       </FormControlLabel>
-      <Input className="h-14 rounded-[20px] bg-gray-50 border-transparent px-2">
+      <Input style={{ height: 56, borderRadius: 20, backgroundColor: colors.bgInput, borderColor: colors.border, borderWidth: 1, paddingHorizontal: 8 }}>
         <InputField 
           type={isPass ? (showPassword ? 'text' : 'password') : type} 
           placeholder={place} 
           value={val} 
           onChangeText={setVal} 
-          className="text-gray-800" 
+          style={{ color: colors.text }} 
+          placeholderTextColor={colors.textMuted}
         />
         {isPass && (
           <InputSlot className="pr-3" onPress={() => setShowPassword(!showPassword)}>
-            <InputIcon as={showPassword ? Eye : EyeOff} size="lg" className="text-gray-400" />
+            <InputIcon as={showPassword ? Eye : EyeOff} size="lg" style={{ color: colors.textMuted }} />
           </InputSlot>
         )}
       </Input>
@@ -53,7 +57,7 @@ const Field = ({ label, place, val, setVal, type = 'text', isPass, isInvalid, er
         </FormControlError>
       ) : isPass ? (
         <FormControlHelper>
-          <FormControlHelperText className="text-right mt-2 text-indigo-600 font-medium">Forgot Password?</FormControlHelperText>
+          <FormControlHelperText style={{ color: colors.primary, fontWeight: '500' }} className="text-right mt-2">Forgot Password?</FormControlHelperText>
         </FormControlHelper>
       ) : null}
     </FormControl>

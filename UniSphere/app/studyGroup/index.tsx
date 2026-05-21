@@ -11,13 +11,14 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Footer from "../components/Footer";
-import AppHeader from "../components/AppHeader";
-import SearchInput from "../components/SearchInput";
-import SectionHeader from "../components/SectionHeader";
-import FilterChips from "../components/FilterChips";
+import Footer from "@/components/Footer";
+import AppHeader from "@/components/AppHeader";
+import SearchInput from "@/components/SearchInput";
+import SectionHeader from "@/components/SectionHeader";
+import FilterChips from "@/components/FilterChips";
 import { useUser } from "@/hooks/useUser";
-import apiClient from "../services/api";
+import { useStudyGroups } from "./hooks/useStudyGroups";
+import { useTheme } from "@/context/ThemeContext";
 
 type StudyFilter = "ALL" | "GENERAL" | "MATHEMATICS" | "COMPUTER SCIENCE";
 
@@ -34,36 +35,13 @@ export default function StudyGroupFeed() {
 
   const { userId } = useUser();
 
-  const [groups, setGroups] = useState<any[]>([]);
+  const { groups, loading } = useStudyGroups();
   const [filteredGroups, setFilteredGroups] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const [loginModalVisible, setLoginModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<StudyFilter>("ALL");
-
-  useEffect(() => {
-    const fetchStudyGroups = async () => {
-      try {
-        setLoading(true);
-
-        const response = await apiClient.get("/studyGroups");
-
-        const data = response.data.data || response.data;
-
-        if (Array.isArray(data)) {
-          setGroups(data);
-          setFilteredGroups(data);
-        }
-      } catch (error) {
-        console.error("Error fetching study groups:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStudyGroups();
-  }, []);
+  const { colors } = useTheme();
 
   useEffect(() => {
     let filtered = [...groups];
@@ -110,9 +88,9 @@ export default function StudyGroupFeed() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#4F46E5" />
-        <Text className="text-center text-gray-400 mt-4">
+      <SafeAreaView style={{ backgroundColor: colors.bg }} className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={{ color: colors.textMuted }} className="text-center mt-4">
           Finding study groups...
         </Text>
       </SafeAreaView>
@@ -120,7 +98,7 @@ export default function StudyGroupFeed() {
   }
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+    <SafeAreaView edges={["top"]} style={{ backgroundColor: colors.bg }} className="flex-1">
       <View className="flex-1">
         <AppHeader title="UniSphere" />
 
@@ -157,29 +135,38 @@ export default function StudyGroupFeed() {
                 <TouchableOpacity
                   key={group._id || group.id}
                   onPress={() => handlePressGroup(group._id || group.id)}
-                  className="bg-white rounded-[35px] mb-8 overflow-hidden border border-gray-100 shadow-sm p-6"
+                  style={{
+                    backgroundColor: colors.bgCard,
+                    borderRadius: 35,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    padding: 24,
+                    marginBottom: 32,
+                    overflow: "hidden",
+                  }}
+                  className="shadow-sm"
                 >
-                  <View className="bg-indigo-100 self-start px-4 py-2 rounded-full mb-4">
-                    <Text className="text-indigo-700 font-black text-[10px] uppercase">
+                  <View style={{ backgroundColor: colors.primaryLight }} className="self-start px-4 py-2 rounded-full mb-4">
+                    <Text style={{ color: colors.primary }} className="font-black text-[10px] uppercase">
                       {group.tag || "GENERAL"}
                     </Text>
                   </View>
 
-                  <Text className="text-2xl font-black text-gray-900 mb-5">
+                  <Text style={{ color: colors.text }} className="text-2xl font-black mb-5">
                     {group.subject}
                   </Text>
 
                   <View className="gap-y-3">
-                    <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
-                      <Clock size={16} color="#4F46E5" />
-                      <Text className="ml-2 text-sm text-gray-600 font-medium">
+                    <View style={{ backgroundColor: colors.bgInput }} className="flex-row items-center p-3 rounded-2xl self-start">
+                      <Clock size={16} color={colors.primary} />
+                      <Text style={{ color: colors.textSecondary }} className="ml-2 text-sm font-medium">
                         {group.time}
                       </Text>
                     </View>
 
-                    <View className="flex-row items-center bg-gray-50 p-3 rounded-2xl self-start">
-                      <MapPin size={16} color="#4F46E5" />
-                      <Text className="ml-2 text-sm text-gray-600 font-medium">
+                    <View style={{ backgroundColor: colors.bgInput }} className="flex-row items-center p-3 rounded-2xl self-start">
+                      <MapPin size={16} color={colors.primary} />
+                      <Text style={{ color: colors.textSecondary }} className="ml-2 text-sm font-medium">
                         {group.location}
                       </Text>
                     </View>
@@ -189,11 +176,11 @@ export default function StudyGroupFeed() {
             </View>
           ) : (
             <View className="w-full py-20 items-center">
-              <Text className="text-lg font-bold text-gray-700">
+              <Text style={{ color: colors.text }} className="text-lg font-bold">
                 No study groups found
               </Text>
 
-              <Text className="text-sm text-gray-400 mt-2 text-center px-10">
+              <Text style={{ color: colors.textMuted }} className="text-sm mt-2 text-center px-10">
                 Try adjusting your search or filter.
               </Text>
             </View>
@@ -202,8 +189,8 @@ export default function StudyGroupFeed() {
 
         <TouchableOpacity
           onPress={handleCreateGroup}
-          className="absolute right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
-          style={{ bottom: 90 + Math.max(insets.bottom, 16) }}
+          style={{ bottom: 90 + Math.max(insets.bottom, 16), backgroundColor: colors.primary }}
+          className="absolute right-8 w-16 h-16 rounded-full items-center justify-center shadow-lg"
         >
           <Plus color="white" size={32} />
         </TouchableOpacity>
@@ -221,16 +208,16 @@ export default function StudyGroupFeed() {
             onPress={() => setLoginModalVisible(false)}
             className="flex-1 bg-black/60 justify-center items-center px-6"
           >
-            <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
-              <View className="bg-indigo-50 p-6 rounded-full mb-6">
-                <Calendar size={40} color="#4F46E5" />
+            <View style={{ backgroundColor: colors.white }} className="rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
+              <View style={{ backgroundColor: colors.primaryLight }} className="p-6 rounded-full mb-6">
+                <Calendar size={40} color={colors.primary} />
               </View>
 
-              <Text className="text-2xl font-black text-gray-900 mb-2">
+              <Text style={{ color: colors.text }} className="text-2xl font-black mb-2">
                 Login Required
               </Text>
 
-              <Text className="text-gray-500 text-center text-lg mb-8 leading-relaxed">
+              <Text style={{ color: colors.textSecondary }} className="text-center text-lg mb-8 leading-relaxed">
                 Please sign in to view study group details or create a new
                 study group.
               </Text>
@@ -238,9 +225,10 @@ export default function StudyGroupFeed() {
               <View className="flex-row gap-4 w-full">
                 <TouchableOpacity
                   onPress={() => setLoginModalVisible(false)}
-                  className="flex-1 bg-gray-50 p-5 rounded-3xl"
+                  style={{ backgroundColor: colors.bgInput }}
+                  className="flex-1 p-5 rounded-3xl"
                 >
-                  <Text className="text-gray-900 font-bold text-center text-lg">
+                  <Text style={{ color: colors.text }} className="font-bold text-center text-lg">
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -250,7 +238,8 @@ export default function StudyGroupFeed() {
                     setLoginModalVisible(false);
                     router.push("/login" as any);
                   }}
-                  className="flex-1 bg-indigo-600 p-5 rounded-3xl shadow-lg shadow-indigo-200"
+                  style={{ backgroundColor: colors.primary }}
+                  className="flex-1 p-5 rounded-3xl shadow-lg"
                 >
                   <Text className="text-white font-bold text-center text-lg">
                     Sign In

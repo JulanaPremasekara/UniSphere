@@ -18,13 +18,14 @@ import { Icon } from "@/components/ui/icon";
 import { VStack } from "@/components/ui/vstack";
 
 import { useUser } from "@/hooks/useUser";
-import apiClient from "../services/api";
+import { useTutors } from "./hooks/useTutors";
 
-import AppHeader from "../components/AppHeader";
-import SearchInput from "../components/SearchInput";
-import SectionHeader from "../components/SectionHeader";
-import Footer from "../components/Footer";
-import FilterChips from "../components/FilterChips";
+import AppHeader from "@/components/AppHeader";
+import SearchInput from "@/components/SearchInput";
+import SectionHeader from "@/components/SectionHeader";
+import Footer from "@/components/Footer";
+import FilterChips from "@/components/FilterChips";
+import { useTheme } from "@/context/ThemeContext";
 
 type TutorFilter =
   | "ALL"
@@ -46,35 +47,14 @@ const filterOptions: TutorFilter[] = [
 export default function FindTutor() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
-  const [tutorList, setTutorList] = useState<any[]>([]);
+  const { tutorList, loading } = useTutors();
+  const { userId } = useUser();
   const [filteredTutors, setFilteredTutors] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<TutorFilter>("ALL");
-  const [loading, setLoading] = useState(true);
   const [loginModalVisible, setLoginModalVisible] = useState(false);
-
-  const { userId } = useUser();
-
-  useEffect(() => {
-    const fetchAllTutors = async () => {
-      try {
-        setLoading(true);
-        const response = await apiClient.get(`/tutors`);
-
-        if (response.data && response.data.data) {
-          setTutorList(response.data.data);
-          setFilteredTutors(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching tutors:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAllTutors();
-  }, []);
 
   useEffect(() => {
     let filtered = [...tutorList];
@@ -134,11 +114,19 @@ export default function FindTutor() {
   const renderItem = ({ item: tutor }: { item: any }) => (
     <TouchableOpacity
       onPress={() => handlePressTutor(tutor)}
-      className="bg-white rounded-[25px] shadow-sm border border-gray-100 p-4 mb-4"
+      style={{
+        backgroundColor: colors.bgCard,
+        borderRadius: 25,
+        borderWidth: 1,
+        borderColor: colors.border,
+        padding: 16,
+        marginBottom: 16,
+      }}
+      className="shadow-sm"
     >
       <HStack space="md" className="items-center">
         <View className="relative">
-          <Avatar className="bg-indigo-600 w-16 h-16">
+          <Avatar style={{ backgroundColor: colors.primary }} className="w-16 h-16">
             {tutor.image ? (
               <AvatarImage
                 source={{ uri: tutor.image }}
@@ -150,20 +138,21 @@ export default function FindTutor() {
           </Avatar>
 
           <Box
-            className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${
+            style={{ borderColor: colors.bgCard }}
+            className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 ${
               tutor.isOnline !== false ? "bg-green-500" : "bg-gray-300"
             }`}
           />
         </View>
 
         <VStack className="flex-1" space="xs">
-          <Text className="font-bold text-xl text-black">{tutor.name}</Text>
-          <Text className="text-gray-400 text-sm">{tutor.subject}</Text>
+          <Text style={{ color: colors.text }} className="font-bold text-xl">{tutor.name}</Text>
+          <Text style={{ color: colors.textMuted }} className="text-sm">{tutor.subject}</Text>
 
           <HStack className="justify-between items-center mt-1">
-            <Text className="font-bold text-[#4338CA] text-lg">
+            <Text style={{ color: colors.primary }} className="font-bold text-lg">
               {tutor.price}
-              <Text className="text-gray-400 text-sm font-normal">/hr</Text>
+              <Text style={{ color: colors.textMuted }} className="text-sm font-normal">/hr</Text>
             </Text>
           </HStack>
         </VStack>
@@ -173,9 +162,9 @@ export default function FindTutor() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#4338CA" />
-        <Text className="text-center text-gray-400 mt-4">
+      <SafeAreaView style={{ backgroundColor: colors.bg }} className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={{ color: colors.textMuted }} className="text-center mt-4">
           Finding tutors...
         </Text>
       </SafeAreaView>
@@ -183,7 +172,7 @@ export default function FindTutor() {
   }
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+    <SafeAreaView edges={["top"]} style={{ backgroundColor: colors.bg }} className="flex-1">
       <View className="flex-1">
         <AppHeader title="UniSphere" />
 
@@ -215,7 +204,7 @@ export default function FindTutor() {
           }
           ListEmptyComponent={
             <View className="mt-10 items-center">
-              <Text className="text-gray-400">No tutors found.</Text>
+              <Text style={{ color: colors.textMuted }}>No tutors found.</Text>
             </View>
           }
           contentContainerStyle={{
@@ -229,8 +218,8 @@ export default function FindTutor() {
         <TouchableOpacity
           onPress={handleCreateTutor}
           activeOpacity={0.8}
-          className="absolute right-8 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
-          style={{ bottom: 90 + Math.max(insets.bottom, 16), elevation: 5 }}
+          style={{ bottom: 90 + Math.max(insets.bottom, 16), backgroundColor: colors.primary, elevation: 5 }}
+          className="absolute right-8 w-16 h-16 rounded-full items-center justify-center shadow-lg"
         >
           <Plus color="white" size={32} />
         </TouchableOpacity>
@@ -248,16 +237,16 @@ export default function FindTutor() {
             onPress={() => setLoginModalVisible(false)}
             className="flex-1 bg-black/60 justify-center items-center px-6"
           >
-            <View className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
-              <View className="bg-indigo-50 p-6 rounded-full mb-6">
-                <Calendar size={40} color="#4F46E5" />
+            <View style={{ backgroundColor: colors.white }} className="rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
+              <View style={{ backgroundColor: colors.primaryLight }} className="p-6 rounded-full mb-6">
+                <Calendar size={40} color={colors.primary} />
               </View>
 
-              <Text className="text-2xl font-black text-gray-900 mb-2">
+              <Text style={{ color: colors.text }} className="text-2xl font-black mb-2">
                 Login Required
               </Text>
 
-              <Text className="text-gray-500 text-center text-lg mb-8 leading-relaxed">
+              <Text style={{ color: colors.textSecondary }} className="text-center text-lg mb-8 leading-relaxed">
                 Please sign in to your UniSphere account to view tutor details
                 or create your tutor profile.
               </Text>
@@ -265,9 +254,10 @@ export default function FindTutor() {
               <View className="flex-row gap-4 w-full">
                 <TouchableOpacity
                   onPress={() => setLoginModalVisible(false)}
-                  className="flex-1 bg-gray-50 p-5 rounded-3xl"
+                  style={{ backgroundColor: colors.bgInput }}
+                  className="flex-1 p-5 rounded-3xl"
                 >
-                  <Text className="text-gray-900 font-bold text-center text-lg">
+                  <Text style={{ color: colors.text }} className="font-bold text-center text-lg">
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -277,7 +267,8 @@ export default function FindTutor() {
                     setLoginModalVisible(false);
                     router.push("/login" as any);
                   }}
-                  className="flex-1 bg-indigo-600 p-5 rounded-3xl shadow-lg shadow-indigo-200"
+                  style={{ backgroundColor: colors.primary }}
+                  className="flex-1 p-5 rounded-3xl shadow-lg"
                 >
                   <Text className="text-white font-bold text-center text-lg">
                     Sign In
