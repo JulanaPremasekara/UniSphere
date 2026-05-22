@@ -34,6 +34,7 @@ export default function HousingList() {
   const [housingToDelete, setHousingToDelete] = useState<string | null>(null);
   const [loginModalVisible, setLoginModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const totalFooterHeight = 70 + Math.max(insets.bottom, 16);
 
   const { housings, loading, refreshHousings } = useHousing();
   const { userId } = useUser();
@@ -143,8 +144,8 @@ export default function HousingList() {
           contentContainerStyle={{
             paddingHorizontal: 20,
             paddingTop: 8,
-            paddingBottom: 20,
             flexGrow: 1,
+            paddingBottom: totalFooterHeight + 24
           }}
           showsVerticalScrollIndicator={false}
         />

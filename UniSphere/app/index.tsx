@@ -83,6 +83,7 @@ export default function Home() {
   const [searchActive, setSearchActive] = useState(false);
   const footerPadding = Math.max(insets.bottom, 16);
   const footerHeight = 70 + Math.max(insets.bottom, 16);
+  const totalFooterHeight = 70 + Math.max(insets.bottom, 16);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -172,7 +173,7 @@ export default function Home() {
             flexGrow: 1,
             paddingTop: 8,
             // Add the height of the footer PLUS extra padding (e.g., 40) so content clears it completely
-            paddingBottom: footerHeight + 40, 
+            paddingBottom: totalFooterHeight + 24, 
           }}
         >
           <View className="flex-row flex-wrap justify-between px-5 mt-2">
