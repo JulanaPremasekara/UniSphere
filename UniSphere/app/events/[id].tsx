@@ -26,13 +26,17 @@ import { useEventDetail } from "./hooks/useEventDetail";
 import { useUser } from "@/hooks/useUser";
 import apiClient from "@/services/api";
 import { useTheme } from "@/context/ThemeContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function EventDetail() {
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams();
   const router = useRouter();
 
   const { userId } = useUser();
   const { colors, isDark } = useTheme();
+  const paddingBottomCalculated = Math.max(insets.bottom, 16);
+  const totalFooterHeight = 70 + paddingBottomCalculated;
 
   const { event, loading, isRegistered, registering, register } =
     useEventDetail(id);
@@ -103,7 +107,7 @@ export default function EventDetail() {
       <ScrollView 
         showsVerticalScrollIndicator={false} 
         style={{ backgroundColor: colors.bg }}
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: totalFooterHeight + 24 }}
       >
         <View style={{ backgroundColor: colors.bg }} className="flex-row justify-between items-center px-5 pt-14 pb-4">
           <View className="flex-row items-center gap-4">
