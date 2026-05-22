@@ -52,6 +52,7 @@ export default function MarketplaceIndex() {
   const { userId } = useUser();
   const [loginModalVisible, setLoginModalVisible] = useState(false);
   const { colors } = useTheme();
+  const totalFooterHeight = 70 + Math.max(insets.bottom, 16);
 
   const { products, loading, refreshProducts } = useMarketplace();
 
@@ -162,7 +163,8 @@ export default function MarketplaceIndex() {
             style={{
               paddingHorizontal: 20,
               paddingTop: 8,
-              paddingBottom: 20,
+              flexGrow: 1,
+              paddingBottom: totalFooterHeight + 24
             }}
           >
             <FilterChips

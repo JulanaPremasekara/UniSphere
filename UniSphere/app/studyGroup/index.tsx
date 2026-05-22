@@ -42,6 +42,7 @@ export default function StudyGroupFeed() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<StudyFilter>("ALL");
   const { colors } = useTheme();
+  const totalFooterHeight = 70 + Math.max(insets.bottom, 16);
 
   useEffect(() => {
     let filtered = [...groups];
@@ -115,7 +116,8 @@ export default function StudyGroupFeed() {
           contentContainerStyle={{
             paddingHorizontal: 20,
             paddingTop: 8,
-            paddingBottom: 20,
+            flexGrow: 1,
+            paddingBottom: totalFooterHeight + 24
           }}
         >
           <FilterChips

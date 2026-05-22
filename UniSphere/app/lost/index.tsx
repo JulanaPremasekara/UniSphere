@@ -41,6 +41,7 @@ export default function LostIndexScreen() {
   const { userId, user } = useUser();
   const [loginModalVisible, setLoginModalVisible] = useState(false);
   const { colors } = useTheme();
+  const totalFooterHeight = 70 + Math.max(insets.bottom, 16);
 
   const {
     data: items = [],
@@ -156,7 +157,8 @@ export default function LostIndexScreen() {
           contentContainerStyle={{
             paddingHorizontal: 20,
             paddingTop: 16,
-            paddingBottom: 20,
+            flexGrow: 1,
+            paddingBottom: totalFooterHeight + 24
           }}
           showsVerticalScrollIndicator={false}
         />

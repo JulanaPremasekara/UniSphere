@@ -7,6 +7,7 @@ import {
   Verified,
   CheckCheck,
   CheckCircle2,
+  UserCheck,
 } from "lucide-react-native";
 import {
   Modal,
@@ -42,6 +43,7 @@ export default function EventDetail() {
     useEventDetail(id);
 
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [loginModalVisible, setLoginModalVisible] = useState(false);
 
   if (loading) {
     return (
@@ -100,6 +102,17 @@ export default function EventDetail() {
         },
       },
     ]);
+  };
+
+  // Logic gate to check authentication credentials
+  const handleRegisterPress = () => {
+    if (!userId) {
+      setLoginModalVisible(true);
+      return;
+    }
+    if (!isRegistered && !registering) {
+      setConfirmModalVisible(true);
+    }
   };
 
   return (
@@ -209,14 +222,11 @@ export default function EventDetail() {
           )}
         </View>
 
-        {/* Spacer to push the button to the bottom if content is short */}
         <View className="flex-1" />
 
         <View className="mt-10 mb-4 px-5">
           <TouchableOpacity
-            onPress={() =>
-              !isRegistered && !registering && setConfirmModalVisible(true)
-            }
+            onPress={handleRegisterPress} // FIXED: Attached the validation handler here
             disabled={isRegistered || registering}
             style={{ backgroundColor: isRegistered ? colors.primaryLight : colors.primary }}
             className="py-5 rounded-3xl flex-row items-center justify-center"
@@ -236,6 +246,7 @@ export default function EventDetail() {
 
       <Footer />
 
+      {/* Confirmation Modal */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -282,6 +293,59 @@ export default function EventDetail() {
               >
                 <Text className="text-white font-bold text-center text-lg">
                   Register
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Login Requirement Gate Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={loginModalVisible}
+        onRequestClose={() => setLoginModalVisible(false)}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setLoginModalVisible(false)}
+          className="flex-1 bg-black/60 justify-center items-center px-6"
+        >
+          <View style={{ backgroundColor: colors.white }} className="rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
+            <View style={{ backgroundColor: colors.primaryLight }} className="p-6 rounded-full mb-6">
+              <UserCheck size={40} color={colors.primary} />
+            </View>
+
+            <Text style={{ color: colors.text }} className="text-2xl font-black mb-2">
+              Login Required
+            </Text>
+
+            <Text style={{ color: colors.textSecondary }} className="text-center text-lg mb-8 leading-relaxed">
+              Please sign in to register for events and manage your event schedule.
+            </Text>
+
+            <View className="flex-row gap-4 w-full">
+              <TouchableOpacity
+                onPress={() => setLoginModalVisible(false)}
+                style={{ backgroundColor: colors.bgInput }}
+                className="flex-1 p-5 rounded-3xl"
+              >
+                <Text style={{ color: colors.text }} className="font-bold text-center text-lg">
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setLoginModalVisible(false);
+                  router.push("/login" as any);
+                }}
+                style={{ backgroundColor: colors.primary }}
+                className="flex-1 p-5 rounded-3xl shadow-lg"
+              >
+                <Text className="text-white font-bold text-center text-lg">
+                  Sign In
                 </Text>
               </TouchableOpacity>
             </View>
