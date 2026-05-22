@@ -196,7 +196,7 @@ export default function EventDetail() {
                   style={{ backgroundColor: colors.primaryLight }}
                   className="px-5 py-2 rounded-full mr-2 mb-2"
                 >
-                  <Text style={{ color: colors.primary }} className="text-xs font-bold">
+                  <Text style={{ color: isDark ? colors.textSecondary : colors.primary }} className="text-xs font-bold">
                     {tag}
                   </Text>
                 </View>
@@ -217,7 +217,7 @@ export default function EventDetail() {
             style={{ backgroundColor: isRegistered ? colors.primaryLight : colors.primary }}
             className="py-5 rounded-3xl flex-row items-center justify-center"
           >
-            {isRegistered && <CheckCheck color={isDark ? colors.primary : "white"} size={20} />}
+            {isRegistered && <CheckCheck color={!isDark ? colors.primary : "white"} size={20} />}
 
             <Text style={{ color: isRegistered ? colors.primary : "white" }} className="font-bold text-lg ml-2">
               {registering
