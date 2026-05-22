@@ -9,6 +9,11 @@ import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import "../global.css";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import "@/global.css";
+import { checkForAppUpdates } from "@/utils/updateChecker";
+
+useEffect(() => {
+  checkForAppUpdates();
+}, []);
 
 SplashScreen.preventAutoHideAsync();
 

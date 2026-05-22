@@ -1,0 +1,70 @@
+import * as Updates from 'expo-updates';
+import * as SecureStore from 'expo-secure-store';
+import { Alert } from 'react-native';
+import Constants from 'expo-constants';
+
+const LAST_UPDATE_CHECK = 'lastUpdateCheck';
+const currentVersion = Constants.expoConfig?.version;
+
+function isMoreThan24HoursAgo(timestamp) {
+  const now = Date.now();
+  const last = Number(timestamp);
+
+  return now - last > 24 * 60 * 60 * 1000;
+}
+
+export async function checkForAppUpdates() {
+  try {
+    const lastCheck =
+      await SecureStore.getItemAsync(LAST_UPDATE_CHECK);
+
+    if (
+      lastCheck &&
+      !isMoreThan24HoursAgo(lastCheck)
+    ) {
+      return;
+    }
+
+    await SecureStore.setItemAsync(
+      LAST_UPDATE_CHECK,
+      Date.now().toString()
+    );
+
+    const update =
+      await Updates.checkForUpdateAsync();
+
+    if (update.isAvailable) {
+      Alert.alert(
+        'Update Available',
+        `Current Version: ${currentVersion}`,
+        [
+          {
+            text: 'Later',
+            style: 'cancel'
+          },
+          {
+            text: 'Download Now',
+            onPress: async () => {
+              await Updates.fetchUpdateAsync();
+
+              Alert.alert(
+                'Update Ready',
+                'Restart app to apply update.',
+                [
+                  {
+                    text: 'Restart Now',
+                    onPress: async () => {
+                      await Updates.reloadAsync();
+                    }
+                  }
+                ]
+              );
+            }
+          }
+        ]
+      );
+    }
+  } catch (e) {
+    console.log('Update check failed:', e);
+  }
+}

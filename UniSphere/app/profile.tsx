@@ -1,7 +1,7 @@
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Camera, Bell, Calendar, ChevronLeft, ChevronRight, CircleUserRound, GraduationCap, LogOut, Mail, Settings, ShieldCheck, Users } from 'lucide-react-native';
+import { Camera, Bell, Calendar, ChevronLeft, ChevronRight, CircleUserRound, GraduationCap, LogOut, Mail, Settings, ShieldCheck, Users, RefreshCw } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { ActivityIndicator, Platform, ScrollView, Text, TouchableOpacity, View, Image, Alert, Switch } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -9,6 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import Footer from '@/components/Footer';
 import { useProfile } from '@/hooks/useProfile';
 import { useTheme } from '@/context/ThemeContext';
+import { checkForAppUpdates } from '@/utils/updateChecker';
 
 export default function Profile() {
   const router = useRouter();
@@ -186,6 +187,7 @@ export default function Profile() {
             </TouchableOpacity>
 
             <ProfileMenuItem icon={Mail} label="Email Address" value={user?.email || "No email provided"} colors={colors} />
+            <ProfileMenuItem icon={RefreshCw} label="Check for Updates" onPress={() => checkForAppUpdates()} colors={colors} />
 
             <TouchableOpacity
               onPress={logout}
