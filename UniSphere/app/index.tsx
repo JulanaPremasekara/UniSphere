@@ -19,7 +19,7 @@ import {
   HelpCircle,
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Footer from "@/components/Footer";
 import AppHeader from "@/components/AppHeader";
@@ -74,12 +74,15 @@ const categories = [
 ];
 
 export default function Home() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { events, loading } = useEvents();
   const { isDark, colors } = useTheme();
 
   const [showWelcome, setShowWelcome] = useState(false);
   const [searchActive, setSearchActive] = useState(false);
+  const footerPadding = Math.max(insets.bottom, 16);
+  const totalFooterHeight = 70 + footerPadding;
 
   useEffect(() => {
     const checkUser = async () => {
@@ -167,7 +170,8 @@ export default function Home() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             paddingTop: 8,
-            paddingBottom: 20,
+            // Add the total footer height + some breathing room (e.g., 20px)
+            paddingBottom: totalFooterHeight + 20, 
           }}
         >
           <View className="flex-row flex-wrap justify-between px-5 mt-2">

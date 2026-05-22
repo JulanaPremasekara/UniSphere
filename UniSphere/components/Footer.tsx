@@ -26,27 +26,31 @@ export default function Footer() {
   const paddingBottom = Math.max(insets.bottom, 16);
 
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "center",
-        backgroundColor: colors.navBg,
-        borderTopWidth: 1,
-        borderTopColor: colors.navBorder,
-        paddingTop: 8,
-        paddingHorizontal: 8,
-        borderTopLeftRadius: 35,
-        borderTopRightRadius: 35,
-        elevation: 20,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        paddingBottom,
-        height: 70 + paddingBottom,
-      }}
-    >
+        <View
+        style={{
+          position: "absolute", // <--- CRITICAL: Float over content
+          bottom: 0,            // <--- Pin to bottom
+          left: 0,              // <--- Stretch full width
+          right: 0,             // <--- Stretch full width
+          flexDirection: "row",
+          justifyContent: "space-around",
+          alignItems: "center",
+          backgroundColor: colors.navBg,
+          borderTopWidth: 1,
+          borderTopColor: colors.navBorder,
+          paddingTop: 8,
+          paddingHorizontal: 8,
+          borderTopLeftRadius: 35,
+          borderTopRightRadius: 35,
+          elevation: 20,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.06,
+          shadowRadius: 12,
+          paddingBottom,
+          height: 70 + paddingBottom,
+        }}
+      >
       {tabs.map((tab) => {
         const active = isActive(tab.path);
         return (
