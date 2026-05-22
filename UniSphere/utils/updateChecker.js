@@ -13,12 +13,13 @@ function isMoreThan24HoursAgo(timestamp) {
   return now - last > 24 * 60 * 60 * 1000;
 }
 
-export async function checkForAppUpdates() {
+export async function checkForAppUpdates(showNoUpdateMessage = false) {
   try {
     const lastCheck =
       await SecureStore.getItemAsync(LAST_UPDATE_CHECK);
 
     if (
+      !showNoUpdateMessage &&
       lastCheck &&
       !isMoreThan24HoursAgo(lastCheck)
     ) {
@@ -30,8 +31,7 @@ export async function checkForAppUpdates() {
       Date.now().toString()
     );
 
-    const update =
-      await Updates.checkForUpdateAsync();
+    const update = await Updates.checkForUpdateAsync();
 
     if (update.isAvailable) {
       Alert.alert(
@@ -48,22 +48,27 @@ export async function checkForAppUpdates() {
               await Updates.fetchUpdateAsync();
 
               Alert.alert(
-                'Update Ready',
-                'Restart app to apply update.',
-                [
-                  {
-                    text: 'Restart Now',
-                    onPress: async () => {
-                      await Updates.reloadAsync();
-                    }
+              'Update Ready',
+              'Restart app to apply update.',
+              [
+                {
+                  text: 'Restart Now',
+                  onPress: async () => {
+                    await Updates.reloadAsync();
                   }
-                ]
-              );
-            }
+                }
+              ]
+            );
           }
-        ]
-      );
-    }
+        }
+      ]
+    );
+  } else if (showNoUpdateMessage) {
+    Alert.alert(
+      'No Updates Available',
+      `You are using the latest version (${currentVersion}).`
+    );
+  }
   } catch (e) {
     console.log('Update check failed:', e);
   }
