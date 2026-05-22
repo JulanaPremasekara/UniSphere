@@ -187,7 +187,7 @@ export default function Profile() {
             </TouchableOpacity>
 
             <ProfileMenuItem icon={Mail} label="Email Address" value={user?.email || "No email provided"} colors={colors} />
-            <ProfileMenuItem icon={RefreshCw} label="Check for Updates" onPress={() => checkForAppUpdates()} colors={colors} />
+            <ProfileMenuItem icon={RefreshCw} label="Check for Updates" onPress={() => checkForAppUpdates(true)} colors={colors} />
 
             <TouchableOpacity
               onPress={logout}

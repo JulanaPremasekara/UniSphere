@@ -12,7 +12,7 @@ import "@/global.css";
 import { checkForAppUpdates } from "@/utils/updateChecker";
 
 useEffect(() => {
-  checkForAppUpdates();
+  checkForAppUpdates(false);
 }, []);
 
 SplashScreen.preventAutoHideAsync();
