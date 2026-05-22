@@ -82,7 +82,7 @@ export default function Home() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [searchActive, setSearchActive] = useState(false);
   const footerPadding = Math.max(insets.bottom, 16);
-  const totalFooterHeight = 70 + footerPadding;
+  const footerHeight = 70 + Math.max(insets.bottom, 16);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -169,9 +169,10 @@ export default function Home() {
           scrollEnabled={!searchActive}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
+            flexGrow: 1,
             paddingTop: 8,
-            // Add the total footer height + some breathing room (e.g., 20px)
-            paddingBottom: totalFooterHeight + 20, 
+            // Add the height of the footer PLUS extra padding (e.g., 40) so content clears it completely
+            paddingBottom: footerHeight + 40, 
           }}
         >
           <View className="flex-row flex-wrap justify-between px-5 mt-2">
