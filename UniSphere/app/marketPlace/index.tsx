@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Calendar, Plus } from "lucide-react-native";
+import { Calendar, Plus, UserCheck } from "lucide-react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Box } from "@/components/ui/box";
@@ -255,7 +255,7 @@ export default function MarketplaceIndex() {
           >
             <View style={{ backgroundColor: colors.white }} className="rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
               <View style={{ backgroundColor: colors.primaryLight }} className="p-6 rounded-full mb-6">
-                <Calendar size={40} color={colors.primary} />
+                <UserCheck size={40} color={colors.primary} />
               </View>
 
               <Text style={{ color: colors.text }} className="text-2xl font-black mb-2">

@@ -20,7 +20,7 @@ import { useLostItemsListQuery } from "./hooks/useLostItems";
 import { LostItem } from "./types/lostItem.types";
 import { useFilteredList } from "@/hooks/useFilteredList";
 import Footer from "@/components/Footer";
-import { Calendar, Plus } from "lucide-react-native";
+import { Calendar, Plus, UserCheck } from "lucide-react-native";
 import { useUser } from "@/hooks/useUser";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -195,7 +195,7 @@ export default function LostIndexScreen() {
           >
             <View style={{ backgroundColor: colors.white }} className="rounded-[40px] w-full max-w-sm p-8 shadow-2xl items-center">
               <View style={{ backgroundColor: colors.primaryLight }} className="p-6 rounded-full mb-6">
-                <Calendar size={40} color={colors.primary} />
+                <UserCheck size={40} color={colors.primary} />
               </View>
               <Text style={{ color: colors.text }} className="text-2xl font-black mb-2">
                 Login Required
