@@ -219,7 +219,7 @@ export default function EventDetail() {
           >
             {isRegistered && <CheckCheck color={!isDark ? colors.primary : "white"} size={20} />}
 
-            <Text style={{ color: isRegistered ? colors.primary : "white" }} className="font-bold text-lg ml-2">
+            <Text style={{ color: !isDark && isRegistered ? colors.primary : "white" }} className="font-bold text-lg ml-2">
               {registering
                 ? "Registering..."
                 : isRegistered
