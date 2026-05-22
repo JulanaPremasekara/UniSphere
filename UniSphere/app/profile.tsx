@@ -217,8 +217,11 @@ function ProfileMenuItem({ icon: IconComp, label, value, onPress, colors }: { ic
         <Text style={{ fontWeight: 'bold', color: colors.text, fontSize: 16 }}>{label}</Text>
         {value && <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 4, fontWeight: '500' }}>{value}</Text>}
       </View>
-      {label !== "Email Address" && <ChevronRight size={20} color={colors.textMuted} />}
-      {label !== "Check for Updates" && <ChevronRight size={20} color={colors.textMuted} />}
+      
+      {/* Combined Condition: Checks both at the same time */}
+      {label !== "Email Address" && label !== "Check for Updates" && (
+        <ChevronRight size={20} color={colors.textMuted} />
+      )}
     </TouchableOpacity>
   );
 }
